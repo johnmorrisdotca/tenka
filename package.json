@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Tenka 天下: the classic world-conquest game for two to six on a map of the modern world. Pure, seeded rules with a computer player, a replayable record, a plain-DOM table and a React map. No dependencies.",
   "license": "MIT",
-  "author": "John Morris",
+  "author": "John Morris <john@johnmorris.ca>",
   "homepage": "https://johnmorrisdotca.github.io/tenka/",
   "repository": {
     "type": "git",
