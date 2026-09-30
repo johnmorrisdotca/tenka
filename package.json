@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/tenka",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tenka 天下: the classic world-conquest game for two to six on a map of the modern world. Pure, seeded rules with a computer player, a replayable record, a plain-DOM table and a React map. No dependencies.",
   "license": "MIT",
   "author": "John Morris <john@johnmorris.ca>",
@@ -30,19 +30,19 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "default": "./dist/index.js"
     },
     "./shapes": {
       "types": "./dist/shapes.d.ts",
-      "import": "./dist/shapes.js"
+      "default": "./dist/shapes.js"
     },
     "./ui": {
       "types": "./dist/ui.d.ts",
-      "import": "./dist/ui.js"
+      "default": "./dist/ui.js"
     },
     "./react": {
       "types": "./dist/react.d.ts",
-      "import": "./dist/react.js"
+      "default": "./dist/react.js"
     }
   },
   "files": [

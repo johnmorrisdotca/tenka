@@ -6,6 +6,14 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-30
+
+### Fixed
+
+- The package loads through `require()` as well as `import` (Node 22 and
+  later, and test runners that compile to CommonJS): each export's condition is
+  `default` rather than `import`.
+
 ## [1.0.0] - 2026-09-30
 
 The first stable release: the API as documented in the README is now kept stable
@@ -48,6 +56,7 @@ The first release.
   `@johnmorrisdotca/tenka/react`.
 - A static demo for GitHub Pages.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.0.1
 [1.0.0]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.0.0
 [0.1.0]: https://github.com/johnmorrisdotca/tenka/commits/v1.0.0

@@ -53,7 +53,7 @@ pnpm add @johnmorrisdotca/tenka   # or: npm install @johnmorrisdotca/tenka
 Or straight from a GitHub release, pinned to its version:
 
 ```sh
-pnpm add https://github.com/johnmorrisdotca/tenka/releases/download/v1.0.0/johnmorrisdotca-tenka-1.0.0.tgz
+pnpm add https://github.com/johnmorrisdotca/tenka/releases/download/v1.0.1/johnmorrisdotca-tenka-1.0.1.tgz
 ```
 
 ES modules with types. The rules have no dependencies; the React component needs
