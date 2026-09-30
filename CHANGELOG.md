@@ -6,6 +6,15 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The world wraps round: Alaska and the Russian Far East are neighbours across
+  the Bering Strait, drawn off one edge of the map and on at the other.
+- Two more sea links, Britain to Central Europe and Southern Europe to Egypt,
+  and every sea crossing is drawn long enough to read at a whole-world view.
+- Every continent frames on screen at one tap: the far northern islands are
+  drawn but no longer framed, and an island past the seam is left off.
+
 ## [0.1.0] - 2026-09-30
 
 The first release.
