@@ -19,10 +19,12 @@ import { TENKA_TERRITORY_COUNT } from "./tenkaMap.ts";
 /** Every card in the game: the territories' cards, then the wild cards. */
 export const TENKA_DECK: readonly TenkaCard[] = Array.from({ length: TENKA_TERRITORY_COUNT + TENKA_WILD_CARDS }, (_, card) => card);
 
+/** Whether a card is one of the two wild cards. */
 export function isWild(card: TenkaCard): boolean {
   return card >= TENKA_TERRITORY_COUNT;
 }
 
+/** What a card shows: land, sea or air for a territory's card, in turn round the map; wild for a wild card. */
 export function cardKind(card: TenkaCard): TenkaCardKind {
   return isWild(card) ? TENKA_WILD : TENKA_CARD_KINDS[card % TENKA_CARD_KINDS.length];
 }

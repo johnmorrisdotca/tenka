@@ -9,6 +9,7 @@
  * `TENKA_NEUTRAL`, which is nobody's seat.
  */
 
+/** The six continents, by key. */
 export type TenkaContinentKey = "northAmerica" | "southAmerica" | "europe" | "africa" | "asia" | "oceania";
 
 /** One territory as the map script writes it: neighbours by land and by sea are indices into the same list. */
@@ -47,6 +48,7 @@ export type TenkaShapes = {
   outlines: readonly string[];
 };
 
+/** A player's place round the table: 0 for the first name given, up to 5. */
 export type TenkaSeat = number;
 
 /** Who holds a territory: a seat, or `TENKA_NEUTRAL`. */
@@ -55,6 +57,7 @@ export type TenkaOwner = number;
 /** A territory's card (0–41) or a wild card (42, 43). */
 export type TenkaCard = number;
 
+/** What a card shows: one of three kinds, or a wild card that stands for any of them. */
 export type TenkaCardKind = "land" | "sea" | "air" | "wild";
 
 /**
@@ -70,6 +73,13 @@ export type TenkaPhase = "setUp" | "reinforce" | "attack" | "occupy" | "fortify"
 /** Starting armies placed at random, or by hand in turn. */
 export type TenkaPlacing = "auto" | "hand";
 
+/**
+ * A move, as `playTenka` takes it. Which kinds may be made depends on the
+ * phase: `place` and `trade` while reinforcing (`place` alone while setting
+ * up), `attack`, `blitz` and `endAttack` while attacking, `occupy` after
+ * taking a territory, `fortify` and `endTurn` while fortifying, and `shift`
+ * once a fortifying move is chosen. `tenkaMoves(game)` lists the ones open.
+ */
 export type TenkaMove =
   | { kind: "place"; territory: number; armies: number }
   | { kind: "trade"; cards: readonly TenkaCard[] }
@@ -82,6 +92,7 @@ export type TenkaMove =
   | { kind: "shift"; armies: number }
   | { kind: "endTurn" };
 
+/** The kinds of move, by name. */
 export type TenkaMoveKind = TenkaMove["kind"];
 
 /** One roll of the dice — or the last of a run of them (`blitz`) — what each side threw, highest first, and what each lost in all. */

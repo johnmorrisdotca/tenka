@@ -38,6 +38,11 @@ export function attacksOpen(game: TenkaGame): TenkaMove[] {
   );
 }
 
+/**
+ * Every move the player to move may make now, each one `playTenka` accepts.
+ * Placing is listed as one army or all still waiting, on each territory held,
+ * since any spread is a run of those. None once the game is over.
+ */
 export function tenkaMoves(game: TenkaGame): TenkaMove[] {
   switch (game.phase) {
     case TENKA_PHASES.setUp:

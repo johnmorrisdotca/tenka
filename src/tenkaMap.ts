@@ -22,6 +22,7 @@ import { TENKA_TERRITORY_DATA } from "./tenkaWorld.data.ts";
  */
 export const TENKA_TERRITORIES = TENKA_TERRITORY_DATA;
 
+/** How many territories the world has: forty-two. */
 export const TENKA_TERRITORY_COUNT = TENKA_TERRITORIES.length;
 
 const CONTINENT_ROWS: readonly Omit<TenkaContinent, "territories">[] = [
@@ -33,6 +34,7 @@ const CONTINENT_ROWS: readonly Omit<TenkaContinent, "territories">[] = [
   { key: "oceania", name: "Oceania", kanji: "大洋州", bonus: 2 },
 ];
 
+/** The six continents, each with its name, its bonus and the numbers of its territories. */
 export const TENKA_CONTINENTS: readonly TenkaContinent[] = CONTINENT_ROWS.map((row) => ({
   ...row,
   territories: TENKA_TERRITORIES.flatMap((territory, at) => (territory.continent === row.key ? [at] : [])),
@@ -45,17 +47,19 @@ export function tenkaContinent(key: TenkaContinentKey): TenkaContinent {
   return CONTINENT_BY_KEY.get(key)!;
 }
 
-/** Every territory an army may move to from this one: its neighbours by land, then by sea. */
 const NEIGHBOURS: readonly (readonly number[])[] = TENKA_TERRITORIES.map((territory) => [...territory.land, ...territory.sea]);
 
+/** Every territory an army may move to from this one: its neighbours by land, then by sea. None for a number that is no territory's. */
 export function tenkaNeighbours(territory: number): readonly number[] {
   return NEIGHBOURS[territory] ?? [];
 }
 
+/** Whether two territories are joined, by land or by sea. */
 export function areNeighbours(a: number, b: number): boolean {
   return tenkaNeighbours(a).includes(b);
 }
 
+/** Whether a number is a territory's: a whole number from 0 to 41. */
 export function isTerritory(territory: number): boolean {
   return Number.isInteger(territory) && territory >= 0 && territory < TENKA_TERRITORY_COUNT;
 }

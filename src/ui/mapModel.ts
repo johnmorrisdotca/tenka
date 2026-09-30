@@ -6,20 +6,29 @@ import { ownerColour } from "./colours.ts";
 /** How a territory is ringed: the one chosen, one it can reach, or the target. */
 export type TenkaRing = "chosen" | "reach" | "target" | null;
 
+/** One territory as a drawing needs it. */
 export type TenkaLand = {
+  /** Its number. */
   territory: number;
+  /** Its key, such as `"alaska"`. */
   key: string;
+  /** Its name in English. */
   name: string;
   /** Its outline, one SVG path in map units. */
   outline: string;
+  /** The colour of whoever holds it. */
   fill: string;
+  /** How it is ringed, if it is. */
   ring: TenkaRing;
   /** Where its counter stands, in map units. */
   at: readonly [number, number];
+  /** The armies standing on it. */
   armies: number;
+  /** The seat that holds it, or `TENKA_NEUTRAL`. */
   owner: number;
 };
 
+/** The whole world as a drawing needs it, in map units: `tenkaMapModel` makes one, `tenkaMapSvg` and `TenkaMap` draw it. */
 export type TenkaMapModel = {
   width: number;
   height: number;
@@ -28,6 +37,7 @@ export type TenkaMapModel = {
   continentBorders: string;
 };
 
+/** Nothing lit up. */
 export const NO_MARKS: TenkaMapMarks = { chosen: null, reach: [], target: null };
 
 /**

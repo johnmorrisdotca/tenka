@@ -16,6 +16,7 @@ import { areNeighbours, connectedOwn, tenkaNeighbours } from "./tenkaMap.ts";
  *            land lit up as where the armies may go.
  */
 
+/** Nothing chosen: where a turn, and a table, start. */
 export const NO_CHOICE: TenkaChoice = { from: null, to: null, armies: 0, placedOn: null };
 
 function isOwn(game: TenkaGame, territory: number): boolean {

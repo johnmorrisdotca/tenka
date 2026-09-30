@@ -3,16 +3,19 @@ import type { TenkaChoice, TenkaContinentKey, TenkaGame, TenkaMove } from "../te
 import { mustTrade, playTenka } from "../tenka.ts";
 import { cardKind, cardTerritory, setsIn } from "../tenkaCards.ts";
 import { mostAttackDice } from "../tenkaDice.ts";
+import { tenkaFromJSON, tenkaToCSV, tenkaToJSON, tenkaToText } from "../tenkaExport.ts";
 import { TENKA_CONTINENTS, TENKA_TERRITORIES } from "../tenkaMap.ts";
 import { sensibleTenkaMove } from "../tenkaPolicy.ts";
 import { startTenka } from "../tenkaStart.ts";
 import { NO_CHOICE, choiceNow, marksFor, tapTerritory } from "../tenkaTaps.ts";
-import { armiesHeld, territoriesHeld, tenkaPlayerName } from "../tenkaTurn.ts";
+import { armiesHeld, territoriesHeld } from "../tenkaTurn.ts";
+import { continentNameIn, tenkaSay, tenkaStrings, territoryNameIn, type TenkaLocale, type TenkaStrings } from "../strings.ts";
 import { ownerColour } from "./colours.ts";
 import { continentView, nearestLand, tenkaMapModel } from "./mapModel.ts";
 import { TENKA_STYLE } from "./style.ts";
 import { tenkaMapSvg } from "./svg.ts";
 
+/** What `mountTenka` may be given. Everything is optional: with nothing, it is a game of three against two computer players, to the last player standing. */
 export type TenkaTableOptions = {
   /** The names round the table, in seat order: two to six. */
   players?: readonly string[];
@@ -28,16 +31,31 @@ export type TenkaTableOptions = {
   computerDelayMs?: number;
   /** Told of every game after a move. */
   onChange?: (game: TenkaGame) => void;
+  /** The language of the table: `"en"` or `"ja"`. By default the page's own (`<html lang>`), and English for any other. */
+  locale?: TenkaLocale;
+  /** Words of your own, laid over the locale's: any of `TenkaStrings`. */
+  strings?: Partial<TenkaStrings>;
+  /** CSS variables set on the table itself, which win in light and dark alike: `{ "--tk-sea": "#23405a" }`. */
+  theme?: Readonly<Record<string, string>>;
+  /** Whether the table shows the record of the game, with saving and loading. True by default. */
+  record?: boolean;
 };
 
+/** What `mountTenka` hands back: the game being played, and the ways to change it from outside. */
 export type TenkaTableHandle = {
+  /** The game as it stands. */
   game: () => TenkaGame;
   /** A new game at the same table, with any options changed. */
   newGame: (options?: Pick<TenkaTableOptions, "players" | "computers" | "rounds" | "seed">) => void;
+  /** Put a game on the table: one read back by `tenkaFromJSON` or `decodeTenka`. Seats keep who plays them when the number of players is the same; otherwise every seat but the first is the computer's, unless `computers` says. */
+  setGame: (game: TenkaGame, computers?: readonly boolean[]) => void;
+  /** Change the table's language, and with it any words of your own. */
+  setLocale: (locale: TenkaLocale, strings?: Partial<TenkaStrings>) => void;
+  /** Take the table off the page and stop its timers. */
   destroy: () => void;
 };
 
-const DEFAULT_PLAYERS = ["You", "Kaze", "Yama"];
+const COMPUTER_NAMES = ["Kaze", "Yama"];
 
 function freshSeed(): number {
   return Math.floor(Math.random() * 0xffffffff) >>> 0;
@@ -50,15 +68,22 @@ function node<K extends keyof HTMLElementTagNameMap>(name: K, className?: string
   return made;
 }
 
-function button(text: string, onClick: () => void, primary = false): HTMLButtonElement {
+function button(text: string, onClick: () => void, primary = false, testId?: string): HTMLButtonElement {
   const made = node("button", primary ? "tk-button tk-primary" : "tk-button", text);
   made.type = "button";
+  if (testId !== undefined) made.dataset.testid = testId;
   made.addEventListener("click", onClick);
   return made;
 }
 
-function territoryName(territory: number): string {
-  return TENKA_TERRITORIES[territory]!.name;
+/** Hand a string to the person as a file of that name. */
+function save(name: string, type: string, text: string): void {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const link = node("a");
+  link.href = url;
+  link.download = name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /**
@@ -68,14 +93,23 @@ function territoryName(territory: number): string {
  * false). No framework and no server; everything is in the element given.
  *
  * Tap your own territory to place an army; to attack or move, tap where
- * from, then where to, and choose from the buttons under the map.
+ * from, then where to, and choose from the buttons under the map. Under the
+ * players is the record of the game, which saves as JSON, text or CSV and
+ * loads a saved game back.
  */
 export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {}): TenkaTableHandle {
-  let players = options.players ?? DEFAULT_PLAYERS;
+  const pageLocale = (): TenkaLocale => (typeof document !== "undefined" && document.documentElement.lang.toLowerCase().startsWith("ja") ? "ja" : "en");
+  let locale: TenkaLocale = options.locale ?? pageLocale();
+  let own = options.strings ?? {};
+  let words = tenkaStrings(locale, own);
+  // Names nobody gave are the table's own: "You" in the table's language, then the computer's.
+  const named = options.players !== undefined;
+  let players = options.players ?? [words.you, ...COMPUTER_NAMES];
   let computers = options.computers ?? players.map((_, seat) => seat !== 0);
   let rounds = options.rounds ?? TENKA_WORLD_ROUNDS;
   const colours = options.colours;
   const delay = options.computerDelayMs ?? 450;
+  const showRecord = options.record !== false;
 
   const begin = (seed: number): TenkaGame => {
     const game = startTenka(rounds, players, seed);
@@ -87,29 +121,50 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   let choice: TenkaChoice = NO_CHOICE;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let focus: TenkaContinentKey | null = null;
+  let note = "";
 
   const root = node("div", "tk-root");
+  root.dataset.testid = "tk-root";
+  for (const [name, value] of Object.entries(options.theme ?? {})) root.style.setProperty(name, value);
   const style = node("style");
   style.textContent = TENKA_STYLE;
   const status = node("p", "tk-status");
+  status.dataset.testid = "tk-status";
   status.setAttribute("aria-live", "polite");
   const zoom = node("div", "tk-zoom");
   zoom.setAttribute("role", "group");
-  zoom.setAttribute("aria-label", "Look at");
   const board = node("div", "tk-board");
+  board.dataset.testid = "tk-board";
   const controls = node("div", "tk-controls");
+  controls.dataset.testid = "tk-controls";
   const dice = node("div", "tk-dice");
+  dice.dataset.testid = "tk-dice";
   const side = node("div", "tk-side");
+  const seats = node("div", "tk-seats");
+  const record = node("details", "tk-record");
+  record.dataset.testid = "tk-record";
   const main = node("div", "tk-main");
   main.append(status, zoom, board, controls, dice);
+  side.append(seats);
+  if (showRecord) side.append(record);
   root.append(style, main, side);
   target.append(root);
+
+  const landName = (territory: number) => {
+    const data = TENKA_TERRITORIES[territory]!;
+    return territoryNameIn(words, data.key) || data.name;
+  };
+  const who = (seat: number) => {
+    const given = game.players[seat]?.trim() ?? "";
+    return given === "" ? tenkaSay(words.player, { n: seat + 1 }) : given;
+  };
 
   const make = (move: TenkaMove) => {
     const next = playTenka(game, move);
     if (next === null) return;
     game = next;
     choice = choiceNow(game, choice);
+    note = "";
     options.onChange?.(game);
     render();
   };
@@ -138,19 +193,17 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     if (near !== null) tap(near);
   });
 
-  const who = (seat: number) => tenkaPlayerName(game, seat);
-
   const armiesPicker = (least: number, most: number, start: number, act: (armies: number) => void, label: (armies: number) => string) => {
     let armies = Math.min(most, Math.max(least, start));
     const row = node("div", "tk-row");
-    const slider = node("input");
+    const slider = node("input", "tk-slider");
     slider.type = "range";
     slider.min = String(least);
     slider.max = String(most);
     slider.value = String(armies);
     slider.disabled = least === most;
-    slider.setAttribute("aria-label", "Armies");
-    const go = button(label(armies), () => act(armies), true);
+    slider.setAttribute("aria-label", words.armiesLabel);
+    const go = button(label(armies), () => act(armies), true, "tk-go");
     slider.addEventListener("input", () => {
       armies = Number(slider.value);
       go.textContent = label(armies);
@@ -162,7 +215,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   function renderControls() {
     controls.replaceChildren();
     if (game.phase === TENKA_PHASES.over) {
-      controls.append(button("New game", () => handle.newGame(), true));
+      controls.append(button(words.newGame, () => handle.newGame(), true, "tk-new"));
       return;
     }
     if (computers[game.toPlay]) return;
@@ -171,9 +224,9 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     switch (game.phase) {
       case TENKA_PHASES.reinforce: {
         const sets = setsIn(hand);
-        if (sets.length > 0) controls.append(button(mustTrade(game) ? "Trade cards (you must)" : "Trade cards", () => make({ kind: TENKA_MOVES.trade, cards: sets[0]! }), mustTrade(game)));
+        if (sets.length > 0) controls.append(button(mustTrade(game) ? words.tradeMust : words.trade, () => make({ kind: TENKA_MOVES.trade, cards: sets[0]! }), mustTrade(game), "tk-trade"));
         if (!mustTrade(game) && now.placedOn !== null && game.reserve > 1) {
-          controls.append(button(`All ${game.reserve} on ${territoryName(now.placedOn)}`, () => make({ kind: TENKA_MOVES.place, territory: now.placedOn!, armies: game.reserve })));
+          controls.append(button(tenkaSay(words.allOn, { n: game.reserve, land: landName(now.placedOn) }), () => make({ kind: TENKA_MOVES.place, territory: now.placedOn!, armies: game.reserve }), false, "tk-all"));
         }
         break;
       }
@@ -181,17 +234,17 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
         if (now.from !== null && now.to !== null) {
           const most = mostAttackDice(game.armies[now.from]!);
           controls.append(
-            button(`Attack with ${most} ${most === 1 ? "die" : "dice"}`, () => make({ kind: TENKA_MOVES.attack, from: now.from!, to: now.to!, dice: most }), true),
-            button("Blitz", () => make({ kind: TENKA_MOVES.blitz, from: now.from!, to: now.to! })),
+            button(most === 1 ? words.attackWithOne : tenkaSay(words.attackWith, { n: most }), () => make({ kind: TENKA_MOVES.attack, from: now.from!, to: now.to!, dice: most }), true, "tk-attack"),
+            button(words.blitz, () => make({ kind: TENKA_MOVES.blitz, from: now.from!, to: now.to! }), false, "tk-blitz"),
           );
         }
-        controls.append(button("Stop attacking", () => make({ kind: TENKA_MOVES.endAttack })));
+        controls.append(button(words.stopAttacking, () => make({ kind: TENKA_MOVES.endAttack }), false, "tk-stop"));
         break;
       }
       case TENKA_PHASES.occupy: {
         const taking = game.occupying!;
         const most = game.armies[taking.from]! - 1;
-        controls.append(armiesPicker(taking.least, most, most, (armies) => make({ kind: TENKA_MOVES.occupy, armies }), (armies) => `Move ${armies} in`));
+        controls.append(armiesPicker(taking.least, most, most, (armies) => make({ kind: TENKA_MOVES.occupy, armies }), (armies) => tenkaSay(words.moveIn, { n: armies })));
         break;
       }
       case TENKA_PHASES.fortify: {
@@ -205,10 +258,10 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
               if (chosen === null) return;
               game = chosen;
               make({ kind: TENKA_MOVES.shift, armies });
-            }, (armies) => `Move ${armies} to ${territoryName(now.to!)}`),
+            }, (armies) => tenkaSay(words.moveTo, { n: armies, land: landName(now.to!) })),
           );
         }
-        controls.append(button("End turn", () => make({ kind: TENKA_MOVES.endTurn })));
+        controls.append(button(words.endTurn, () => make({ kind: TENKA_MOVES.endTurn }), false, "tk-end"));
         break;
       }
       default:
@@ -219,27 +272,28 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   function statusLine(): string {
     if (game.phase === TENKA_PHASES.over) {
       const names = game.winners.map(who);
-      return names.length === 1 ? `${names[0]} takes the world.` : `A tie between ${names.join(" and ")}.`;
+      return names.length === 1 ? tenkaSay(words.wins, { name: names[0]! }) : tenkaSay(words.tie, { names: names.join(words.and) });
     }
     const name = who(game.toPlay);
-    const round = `Round ${game.round} of ${game.rounds}. `;
-    if (computers[game.toPlay]) return `${round}${name} is playing…`;
+    const round = `${tenkaSay(words.round, { n: game.round, of: game.rounds })} `;
+    if (computers[game.toPlay]) return round + tenkaSay(words.thinking, { name });
     const now = choiceNow(game, choice);
     switch (game.phase) {
       case TENKA_PHASES.setUp:
-        return `${round}${name}: place an army on one of your territories (${game.setUpLeft[game.toPlay]} left).`;
+        return round + tenkaSay(words.setUpSay, { name, n: game.setUpLeft[game.toPlay]! });
       case TENKA_PHASES.reinforce:
-        return mustTrade(game) ? `${round}${name}: five cards or more, so trade a set first.` : `${round}${name}: place ${game.reserve} ${game.reserve === 1 ? "army" : "armies"} on your territories.`;
+        if (mustTrade(game)) return round + tenkaSay(words.mustTradeSay, { name });
+        return round + (game.reserve === 1 ? tenkaSay(words.placeOne, { name }) : tenkaSay(words.placeSay, { name, n: game.reserve }));
       case TENKA_PHASES.attack:
-        if (now.from === null) return `${round}${name}: tap a territory of yours with two armies or more to attack from, or stop attacking.`;
-        if (now.to === null) return `${round}${name}: attacking from ${territoryName(now.from)}. Tap a neighbour to attack.`;
-        return `${round}${name}: ${territoryName(now.from)} attacks ${territoryName(now.to)}.`;
+        if (now.from === null) return round + tenkaSay(words.attackFrom, { name });
+        if (now.to === null) return round + tenkaSay(words.attackTo, { name, land: landName(now.from) });
+        return round + tenkaSay(words.attackReady, { name, from: landName(now.from), to: landName(now.to) });
       case TENKA_PHASES.occupy:
-        return `${round}${name}: ${territoryName(game.occupying!.to)} is taken. How many move in?`;
+        return round + tenkaSay(words.occupySay, { name, land: landName(game.occupying!.to) });
       case TENKA_PHASES.fortify:
-        if (now.from === null) return `${round}${name}: move armies once between two of your joined territories, or end your turn.`;
-        if (now.to === null) return `${round}${name}: moving from ${territoryName(now.from)}. Tap where to.`;
-        return `${round}${name}: from ${territoryName(now.from)} to ${territoryName(now.to)}.`;
+        if (now.from === null) return round + tenkaSay(words.fortifyFrom, { name });
+        if (now.to === null) return round + tenkaSay(words.fortifyTo, { name, land: landName(now.from) });
+        return round + tenkaSay(words.fortifyReady, { name, from: landName(now.from), to: landName(now.to) });
       default:
         return round + name;
     }
@@ -255,63 +309,133 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       for (const value of values) group.append(node("span", "tk-die", String(value)));
       return group;
     };
-    line.append(
-      node("span", undefined, `${territoryName(roll.from)} `),
-      faces(roll.attackDice, "attack"),
-      node("span", undefined, " against "),
-      faces(roll.defendDice, "defend"),
-      node("span", undefined, ` ${territoryName(roll.to)}${roll.throws > 1 ? `, ${roll.throws} throws` : ""}: lost ${roll.attackerLost} and ${roll.defenderLost}${roll.took ? ", taken" : ""}.`),
-    );
+    const after = `${roll.throws > 1 ? tenkaSay(words.rollThrows, { n: roll.throws }) : ""}${tenkaSay(words.rollLost, { a: roll.attackerLost, d: roll.defenderLost })}${roll.took ? words.rollTook : ""}`;
+    line.append(node("span", undefined, landName(roll.from)), faces(roll.attackDice, "attack"), node("span", undefined, words.against), faces(roll.defendDice, "defend"), node("span", undefined, `${landName(roll.to)}${after}`));
     dice.append(line);
   }
 
-  function renderSide() {
-    side.replaceChildren();
+  function renderSeats() {
+    seats.replaceChildren();
     const list = node("ol", "tk-players");
     game.players.forEach((_, seat) => {
       const item = node("li", seat === game.toPlay && game.phase !== TENKA_PHASES.over ? "tk-player tk-to-play" : "tk-player");
+      item.dataset.testid = "tk-player";
       if (game.out[seat]) item.classList.add("tk-out");
       const marble = node("span", "tk-marble");
       marble.style.background = ownerColour(seat, colours);
-      item.append(marble, node("span", "tk-name", who(seat)), node("span", "tk-count", `${territoriesHeld(game.owners, seat)} lands, ${armiesHeld(game, seat)} armies, ${game.hands[seat]!.length} cards`));
+      item.append(marble, node("span", "tk-name", who(seat)), node("span", "tk-count", tenkaSay(words.counts, { lands: territoriesHeld(game.owners, seat), armies: armiesHeld(game, seat), cards: game.hands[seat]!.length })));
       list.append(item);
     });
-    side.append(list);
+    seats.append(list);
     const human = game.players.findIndex((_, seat) => !computers[seat]);
     const shown = !computers[game.toPlay] ? game.toPlay : human;
     if (shown >= 0) {
       const hand = game.hands[shown]!;
       const cards = node("div", "tk-hand");
-      cards.append(node("p", "tk-hand-title", hand.length === 0 ? `No cards in hand (${who(shown)}).` : `Cards in hand (${who(shown)})`));
+      cards.append(node("p", "tk-hand-title", tenkaSay(hand.length === 0 ? words.noCards : words.cardsInHand, { name: who(shown) })));
+      const kinds = { land: words.kindLand, sea: words.kindSea, air: words.kindAir, wild: words.wild };
       for (const card of hand) {
         const territory = cardTerritory(card);
-        cards.append(node("span", `tk-card tk-${cardKind(card)}`, territory === null ? "Wild" : `${cardKind(card)}: ${territoryName(territory)}`));
+        cards.append(node("span", `tk-card tk-${cardKind(card)}`, territory === null ? words.wild : tenkaSay(words.card, { kind: kinds[cardKind(card)], land: landName(territory) })));
       }
-      side.append(cards);
+      seats.append(cards);
     }
   }
 
-  function renderZoom() {
-    zoom.replaceChildren();
-    const places: { key: TenkaContinentKey | null; name: string }[] = [{ key: null, name: "World" }, ...TENKA_CONTINENTS.map((one) => ({ key: one.key, name: one.name }))];
-    for (const place of places) {
-      const pick = button(place.name, () => {
-        focus = place.key;
-        render();
-      });
-      pick.setAttribute("aria-pressed", String(focus === place.key));
-      zoom.append(pick);
+  // The record's shell is made once, so that it stays open or shut as the person left it; only its words and lines are drawn again.
+  const recordTitle = node("summary", "tk-record-title");
+  const recordLines = node("pre", "tk-log");
+  recordLines.dataset.testid = "tk-log";
+  recordLines.tabIndex = 0;
+  const recordButtons = node("div", "tk-row");
+  const recordNote = node("p", "tk-note");
+  recordNote.dataset.testid = "tk-note";
+  recordNote.setAttribute("aria-live", "polite");
+  const picker = node("input");
+  picker.type = "file";
+  picker.accept = ".json,application/json";
+  picker.hidden = true;
+  picker.dataset.testid = "tk-file";
+  const read = (text: string) => {
+    const loaded = tenkaFromJSON(text);
+    if (loaded === null) {
+      note = words.loadBad;
+      render();
+      return;
     }
+    handle.setGame(loaded);
+    note = tenkaSay(words.loaded, { n: loaded.moves.length });
+    render();
+  };
+  picker.addEventListener("change", () => {
+    const file = picker.files?.[0];
+    picker.value = "";
+    if (file === undefined) return;
+    void file.text().then(read, () => read(""));
+  });
+  // Made once, like the views' buttons: only their words change.
+  const saveJson = button("", () => save(`tenka-${game.seed}.json`, "application/json", tenkaToJSON(game)), false, "tk-save-json");
+  const saveText = button("", () => save(`tenka-${game.seed}.txt`, "text/plain", tenkaToText(game, words)), false, "tk-save-text");
+  const saveCsv = button("", () => save(`tenka-${game.seed}.csv`, "text/csv", tenkaToCSV(game)), false, "tk-save-csv");
+  const load = button("", () => picker.click(), false, "tk-load");
+  recordButtons.append(saveJson, saveText, saveCsv, load);
+  record.append(recordTitle, recordLines, recordButtons, recordNote, picker);
+  record.addEventListener("toggle", () => {
+    if (record.open) renderRecord();
+  });
+
+  function renderRecord() {
+    if (!showRecord) return;
+    recordTitle.textContent = words.record;
+    recordNote.textContent = note;
+    saveJson.textContent = words.saveJson;
+    saveText.textContent = words.saveText;
+    saveCsv.textContent = words.saveCsv;
+    load.textContent = words.load;
+    // Written only while it is open: a long game's record is played again from its seed to be written.
+    if (!record.open) return;
+    recordLines.textContent = game.moves.length === 0 ? `${tenkaToText(game, words)}${words.recordEmpty}\n` : tenkaToText(game, words);
+    recordLines.scrollTop = recordLines.scrollHeight;
+  }
+
+  // The views' buttons are made once and only told their words and which is pressed, so a button being pressed is never replaced under the finger.
+  const views: { key: TenkaContinentKey | null; pick: HTMLButtonElement }[] = [null, ...TENKA_CONTINENTS.map((one) => one.key)].map((key) => {
+    const pick = button("", () => {
+      focus = key;
+      render();
+    });
+    pick.dataset.view = key ?? "world";
+    zoom.append(pick);
+    return { key, pick };
+  });
+
+  function renderZoom() {
+    zoom.setAttribute("aria-label", words.lookAt);
+    for (const { key, pick } of views) {
+      pick.textContent = key === null ? words.world : continentNameIn(words, key) || key;
+      pick.setAttribute("aria-pressed", String(focus === key));
+    }
+  }
+
+  function drawMap() {
+    const marks = computers[game.toPlay] ? marksFor(game, NO_CHOICE) : marksFor(game, choice);
+    const model = tenkaMapModel(game, marks, colours);
+    const drawn = { ...model, lands: model.lands.map((land) => ({ ...land, name: landName(land.territory) })) };
+    board.replaceChildren(tenkaMapSvg(drawn, { view: continentView(focus), pixels: board.clientWidth || undefined, label: words.mapLabel }));
   }
 
   function render() {
+    root.lang = locale;
     status.textContent = statusLine();
-    const marks = computers[game.toPlay] ? marksFor(game, NO_CHOICE) : marksFor(game, choice);
-    board.replaceChildren(tenkaMapSvg(tenkaMapModel(game, marks, colours), { view: continentView(focus), pixels: board.clientWidth || undefined }));
+    drawMap();
+    root.dataset.phase = game.phase;
+    root.dataset.toPlay = String(game.toPlay);
+    root.dataset.waiting = String(game.phase !== TENKA_PHASES.over && !computers[game.toPlay]);
     renderZoom();
     renderControls();
     renderDice();
-    renderSide();
+    renderSeats();
+    renderRecord();
     schedule();
   }
 
@@ -333,7 +457,31 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       rounds = changed.rounds ?? rounds;
       game = begin(changed.seed ?? freshSeed());
       choice = NO_CHOICE;
+      note = "";
       options.onChange?.(game);
+      render();
+    },
+    setGame: (loaded, playedBy) => {
+      if (playedBy !== undefined) computers = playedBy;
+      else if (loaded.players.length !== players.length) computers = loaded.players.map((_, seat) => seat !== 0);
+      players = loaded.players;
+      rounds = loaded.rounds;
+      game = loaded;
+      choice = NO_CHOICE;
+      note = "";
+      options.onChange?.(game);
+      render();
+    },
+    setLocale: (next, strings) => {
+      const before = words.you;
+      locale = next;
+      if (strings !== undefined) own = strings;
+      words = tenkaStrings(locale, own);
+      // A first seat nobody named is "You" in whichever language the table now speaks; a game under way keeps its names.
+      if (!named && players[0] === before && game.moves.length === 0) {
+        players = [words.you, ...players.slice(1)];
+        game = { ...game, players };
+      }
       render();
     },
     destroy: () => {
@@ -343,12 +491,12 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     },
   };
 
-  // Counters are sized for the map's width on the screen, so a change of width draws it again.
+  // Counters are sized for the map's width on the screen, so a change of width draws the map again, and only the map.
   let drawnWidth = 0;
   const resized = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
     if (board.clientWidth === drawnWidth) return;
     drawnWidth = board.clientWidth;
-    render();
+    drawMap();
   });
   resized?.observe(board);
 

@@ -6,6 +6,55 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-30
+
+Nothing that was exported has changed, and a game kept by 1.0 replays move for
+move.
+
+### Added
+
+- **Export and import.** `tenkaToJSON` writes a game as versioned JSON
+  (`"format": 1`), its table and its moves, and `tenkaFromJSON` reads it back
+  by dealing the game again and playing every move through the rules, so
+  nothing in a file is trusted. `tenkaToText` is a game as plain text, a line
+  to a move, with every throw of the dice; `tenkaToCSV` is a row to a move for
+  a spreadsheet; `tenkaRecord` is the same record as data. `tenkaExported`,
+  `TENKA_EXPORT_FORMAT`, `TENKA_CSV_COLUMNS`, `TenkaExported` and
+  `TenkaRecordEntry` with them.
+- **English and Japanese.** Every word the table shows, the names of the
+  forty-two territories and six continents, and the lines of the written
+  record are in one table, `TENKA_STRINGS`, in both languages, listed side by
+  side in `docs/strings-ja.md`. `mountTenka` takes `locale` and `strings`,
+  follows the page's `lang`, and its handle has `setLocale`. `tenkaStrings`,
+  `tenkaSay`, `territoryNameIn`, `continentNameIn`, `TenkaStrings` and
+  `TenkaLocale`. The Japanese has not yet been reviewed by a native reader.
+- **The record of the game on the table**: the moves as text as the game goes,
+  buttons to save it as JSON, text or CSV, and to load a saved game back.
+  `record: false` leaves it off, and the handle has `setGame`.
+- **Theming.** The rings, the counters, the dice, the map's corners and the
+  typeface are CSS variables as the other colours were (`--tk-ring`,
+  `--tk-ring-target`, `--tk-counter-edge`, `--tk-counter-ink`, `--tk-attack`,
+  `--tk-attack-ink`, `--tk-defend`, `--tk-defend-ink`, `--tk-radius`,
+  `--tk-font`), and `mountTenka` takes a `theme`.
+- `TENKA_VERSION`.
+- `tenkaMapSvg` writes `data-owner` and `data-armies` on each territory, and a
+  class on each ring.
+- A doc comment on every export, held by a test.
+- The demo in English and Japanese, with the record, saving and loading.
+- Checks: the package packed by npm, installed in an empty project, and every
+  entry imported and required, on Linux, macOS and Windows; every example in
+  the README run; the table tapped in Chromium and WebKit; and the table
+  built and played in React, Vue, Svelte, Angular and a plain page.
+
+### Changed
+
+- Everything to be tapped on the table is at least 44px: the buttons, the
+  views of the continents, the slider.
+- The line under the dice says which side lost what: "attacker lost 1,
+  defender lost 2".
+- `package.json` has `main`, `module` and `types` beside `exports`, for tools
+  that read those.
+
 ## [1.0.1] - 2026-09-30
 
 ### Fixed
@@ -56,7 +105,8 @@ The first release.
   `@johnmorrisdotca/tenka/react`.
 - A static demo for GitHub Pages.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.1.0
 [1.0.1]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.0.1
 [1.0.0]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.0.0
 [0.1.0]: https://github.com/johnmorrisdotca/tenka/commits/v1.0.0

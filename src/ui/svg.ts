@@ -8,7 +8,7 @@ function el<K extends keyof SVGElementTagNameMap>(name: K, attributes: Record<st
   return node;
 }
 
-/** The ring drawn round a territory, by kind. */
+/** The ring drawn round a territory, by kind. The colours here are what a page without the table's styles sees; with them, `--tk-ring` and `--tk-ring-target` decide. */
 const RING = { chosen: { stroke: "#111", width: 3 }, target: { stroke: "#fff", width: 3 }, reach: { stroke: "#111", width: 1.5 } } as const;
 
 /**
@@ -16,7 +16,12 @@ const RING = { chosen: { stroke: "#111", width: 3 }, target: { stroke: "#fff", w
  * sea, each territory in its owner's colour, the continents' borders and the
  * sea links, the rings of a choice, and a counter of armies on each. Every
  * territory's shape and counter carries `data-territory` with its number, so
- * one listener on the element can tell which was pressed.
+ * one listener on the element can tell which was pressed, and each shape
+ * `data-owner` and `data-armies` as well.
+ *
+ * `label` is the drawing's accessible name; `view` the part of the map to
+ * show (`continentView`); `pixels` the drawing's width on the screen, so
+ * that counters and rings are one size whatever is shown.
  */
 export function tenkaMapSvg(model: TenkaMapModel, options: { label?: string; view?: TenkaView; pixels?: number } = {}): SVGSVGElement {
   const [vx, vy, vw, vh] = options.view ?? [0, 0, model.width, model.height];
@@ -26,7 +31,7 @@ export function tenkaMapSvg(model: TenkaMapModel, options: { label?: string; vie
   const svg = el("svg", { viewBox: `${vx} ${vy} ${vw} ${vh}`, role: "group", "aria-label": options.label ?? "Map of the world", class: "tk-map" });
   svg.append(el("rect", { x: -model.width, y: -model.height, width: model.width * 3, height: model.height * 3, class: "tk-sea" }));
   for (const land of model.lands) {
-    const path = el("path", { d: land.outline, fill: land.fill, class: "tk-land", "data-territory": land.territory, "stroke-linejoin": "round" });
+    const path = el("path", { d: land.outline, fill: land.fill, class: "tk-land", "data-territory": land.territory, "data-owner": land.owner, "data-armies": land.armies, "stroke-linejoin": "round" });
     const title = el("title", {});
     title.textContent = `${land.name}: ${land.armies}`;
     path.append(title);
@@ -37,7 +42,7 @@ export function tenkaMapSvg(model: TenkaMapModel, options: { label?: string; vie
   for (const land of model.lands) {
     if (land.ring === null) continue;
     const ring = RING[land.ring];
-    svg.append(el("path", { d: land.outline, fill: "none", stroke: ring.stroke, "stroke-width": ring.width * unit, "pointer-events": "none", "stroke-linejoin": "round" }));
+    svg.append(el("path", { d: land.outline, fill: "none", stroke: ring.stroke, "stroke-width": ring.width * unit, "pointer-events": "none", "stroke-linejoin": "round", class: `tk-ring tk-ring-${land.ring}` }));
   }
   for (const land of model.lands) {
     const [x, y] = land.at;

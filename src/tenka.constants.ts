@@ -6,6 +6,7 @@ import type { TenkaCardKind, TenkaMoveKind, TenkaPhase, TenkaPlacing } from "./t
  * its art and its wording are, and none of those is used here.
  */
 
+/** The phases of a turn, by name: compare `game.phase` with these rather than with text typed out. */
 export const TENKA_PHASES = {
   setUp: "setUp",
   reinforce: "reinforce",
@@ -16,6 +17,7 @@ export const TENKA_PHASES = {
   over: "over",
 } as const satisfies Record<TenkaPhase, TenkaPhase>;
 
+/** The kinds of move, by name: what goes in a move's `kind`. */
 export const TENKA_MOVES = {
   place: "place",
   trade: "trade",
@@ -28,6 +30,7 @@ export const TENKA_MOVES = {
   endTurn: "endTurn",
 } as const satisfies Record<TenkaMoveKind, TenkaMoveKind>;
 
+/** How the starting armies are placed: scattered at random (`auto`), or by the players in turn (`hand`). */
 export const TENKA_PLACING = { auto: "auto", hand: "hand" } as const satisfies Record<TenkaPlacing, TenkaPlacing>;
 
 /** The owner of the territories nobody at a table of two holds: the neutral army, which never takes a turn. */
@@ -40,12 +43,14 @@ export const TENKA_NEUTRAL = -1;
  */
 export const TENKA_STARTING_ARMIES: Readonly<Record<number, number>> = { 2: 40, 3: 35, 4: 30, 5: 25, 6: 20 };
 
-/** The fewest armies a turn brings, however little is held; otherwise one for every three territories. */
+/** The fewest armies a turn brings, however little is held. */
 export const TENKA_LEAST_REINFORCEMENT = 3;
+/** How many territories held bring one army each turn: three. */
 export const TENKA_TERRITORIES_PER_ARMY = 3;
 
-/** The most dice each side throws. */
+/** The most dice an attacker throws. */
 export const TENKA_ATTACK_DICE = 3;
+/** The most dice a defender throws. */
 export const TENKA_DEFEND_DICE = 2;
 
 /**
@@ -55,7 +60,9 @@ export const TENKA_DEFEND_DICE = 2;
  * onto it, when a card in the set shows a territory the trader holds.
  */
 export const TENKA_TRADE_VALUES: readonly number[] = [4, 6, 8, 10, 12, 15];
+/** How much more each set is worth than the last, once `TENKA_TRADE_VALUES` runs out: 20, 25, 30… */
 export const TENKA_TRADE_STEP = 5;
+/** The armies placed straight onto a territory the trader holds, when a card of the set shows it. */
 export const TENKA_TERRITORY_CARD_BONUS = 2;
 
 /** With this many cards in hand a player must trade before placing; after knocking somebody out, down to fewer than this. */
@@ -63,7 +70,9 @@ export const TENKA_MUST_TRADE_AT = 5;
 
 /** The three kinds a territory's card shows, in turn round the map, and the wild card that is any of them. */
 export const TENKA_CARD_KINDS: readonly TenkaCardKind[] = ["land", "sea", "air"];
+/** The kind of a wild card, which stands for whatever a set needs. */
 export const TENKA_WILD: TenkaCardKind = "wild";
+/** How many wild cards are in the deck. */
 export const TENKA_WILD_CARDS = 2;
 
 /**
@@ -74,13 +83,18 @@ export const TENKA_WILD_CARDS = 2;
  * round sixty, so that a stalemate between two players who will not attack
  * still ends.
  */
+/** The short game: ten rounds, then the count. */
 export const TENKA_SHORT_ROUNDS = 10;
+/** The medium game: twenty rounds, then the count. */
 export const TENKA_MEDIUM_ROUNDS = 20;
+/** The whole world: played to the last player standing, and counted after sixty rounds if nobody is. */
 export const TENKA_WORLD_ROUNDS = 60;
+/** The lengths of game `startTenka` takes, in rounds: 10, 20 and 60. */
 export const TENKA_LENGTHS: readonly number[] = [TENKA_SHORT_ROUNDS, TENKA_MEDIUM_ROUNDS, TENKA_WORLD_ROUNDS];
 
-/** How many sit at a table: two (with the neutral army) to six. */
+/** The fewest at a table: two, joined by the neutral army. */
 export const TENKA_FEWEST_PLAYERS = 2;
+/** The most at a table: six. */
 export const TENKA_MOST_PLAYERS = 6;
 
 /** The longest name a seat keeps. */

@@ -13,6 +13,7 @@ export function isTenkaTable(rounds: number, count: number): boolean {
   return TENKA_LENGTHS.includes(rounds) && Number.isInteger(count) && count >= TENKA_FEWEST_PLAYERS && count <= TENKA_MOST_PLAYERS;
 }
 
+/** Whether a number is a seed a game can be dealt from: a whole number from 0 to `TENKA_SEED_MOST`. */
 export function isTenkaSeed(seed: number): boolean {
   return Number.isInteger(seed) && seed >= 0 && seed <= TENKA_SEED_MOST;
 }

@@ -32,6 +32,12 @@ function onTheFront(game: TenkaGame, territory: number): boolean {
   return tenkaNeighbours(territory).some((next) => game.owners[next] !== game.owners[territory]);
 }
 
+/**
+ * The computer player's move: one the rules accept, chosen as a person might.
+ * `random` is any function returning a number from 0 up to 1, such as
+ * `Math.random`; give it a seeded one and the computer plays the same game
+ * every time.
+ */
 export function sensibleTenkaMove(game: TenkaGame, random: () => number): TenkaMove {
   const own = game.owners.flatMap((owner, territory) => (owner === game.toPlay ? [territory] : []));
   switch (game.phase) {

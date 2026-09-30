@@ -24,3 +24,6 @@ export * from "./tenkaMoves.ts";
 export * from "./tenkaPolicy.ts";
 export * from "./tenkaKeep.ts";
 export * from "./tenkaTaps.ts";
+export * from "./tenkaExport.ts";
+export * from "./strings.ts";
+export { TENKA_VERSION } from "./version.ts";

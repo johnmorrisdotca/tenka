@@ -5,6 +5,7 @@
  */
 export const TENKA_SEAT_COLOURS: readonly string[] = ["#c8463d", "#3a6fb5", "#e0b23a", "#4d9a5b", "#8a55a8", "#e07b39"];
 
+/** The grey of the neutral army. */
 export const TENKA_NEUTRAL_COLOUR = "#9a9a92";
 
 /** The colour a territory's owner is drawn in. */

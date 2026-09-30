@@ -8,3 +8,4 @@ export { NO_MARKS, continentView, nearestLand, tenkaMapModel, type TenkaLand, ty
 export { TENKA_NEUTRAL_COLOUR, TENKA_SEAT_COLOURS, ownerColour } from "./ui/colours.ts";
 export { tenkaMapSvg } from "./ui/svg.ts";
 export { TENKA_STYLE } from "./ui/style.ts";
+export { TENKA_STRINGS, continentNameIn, tenkaSay, tenkaStrings, territoryNameIn, type TenkaLocale, type TenkaStrings } from "./strings.ts";

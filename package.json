@@ -1,32 +1,87 @@
 {
   "name": "@johnmorrisdotca/tenka",
-  "version": "1.0.1",
-  "description": "Tenka 天下: the classic world-conquest game for two to six on a map of the modern world. Pure, seeded rules with a computer player, a replayable record, a plain-DOM table and a React map. No dependencies.",
-  "license": "MIT",
-  "author": "John Morris <john@johnmorris.ca>",
+  "version": "1.1.0",
+  "description": "World conquest board game engine for two to six, in the manner of Risk: pure, seeded TypeScript rules on a map of the real world, dice battles, cards, a computer player, and a game saved and replayed as JSON, text or CSV. An SVG world map and a playable table for React, Vue, Svelte, Angular or plain HTML, in English and Japanese. Zero dependencies.",
+  "keywords": [
+    "world-conquest",
+    "risk",
+    "risk-game",
+    "risk-like",
+    "board-game",
+    "boardgame",
+    "strategy",
+    "strategy-game",
+    "turn-based",
+    "wargame",
+    "war-game",
+    "conquest",
+    "world-domination",
+    "territory",
+    "territory-control",
+    "world-map",
+    "map",
+    "svg-map",
+    "natural-earth",
+    "dice",
+    "dice-battle",
+    "cards",
+    "game",
+    "game-engine",
+    "rules-engine",
+    "game-logic",
+    "ai",
+    "computer-player",
+    "bot",
+    "seeded",
+    "deterministic",
+    "prng",
+    "replay",
+    "save-game",
+    "json",
+    "csv",
+    "export",
+    "import",
+    "hotseat",
+    "pass-and-play",
+    "multiplayer",
+    "tabletop",
+    "browser-game",
+    "html5-game",
+    "typescript",
+    "javascript",
+    "esm",
+    "react",
+    "react-component",
+    "vue",
+    "svelte",
+    "angular",
+    "vanilla-js",
+    "dom",
+    "svg",
+    "i18n",
+    "japanese",
+    "theming",
+    "dark-mode",
+    "zero-dependencies"
+  ],
   "homepage": "https://johnmorrisdotca.github.io/tenka/",
+  "bugs": {
+    "url": "https://github.com/johnmorrisdotca/tenka/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/johnmorrisdotca/tenka.git"
   },
-  "bugs": {
-    "url": "https://github.com/johnmorrisdotca/tenka/issues"
+  "license": "MIT",
+  "author": {
+    "name": "John Morris",
+    "email": "john@johnmorris.ca",
+    "url": "https://johnmorris.ca"
   },
   "type": "module",
-  "sideEffects": false,
-  "engines": {
-    "node": ">=20"
-  },
-  "keywords": [
-    "board-game",
-    "strategy",
-    "world-conquest",
-    "map",
-    "dice",
-    "game-engine",
-    "seeded",
-    "react"
-  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -52,18 +107,35 @@
     "CHANGELOG.md",
     "CONTRIBUTING.md"
   ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "check": "pnpm run lint && pnpm run typecheck && pnpm test",
-    "site": "pnpm run build && node scripts/site.mjs",
+    "test": "vitest run",
+    "test:table": "pnpm site && playwright test",
+    "test:package": "pnpm build && node scripts/check-package.mjs",
+    "test:frameworks": "pnpm build && node scripts/check-frameworks.mjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "site": "pnpm build && node scripts/site.mjs",
+    "docs:make": "node scripts/docs.mjs",
     "map": "node scripts/map.mjs",
-    "prepublishOnly": "pnpm run check && pnpm run build"
+    "prepublishOnly": "pnpm check && pnpm build"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@playwright/test": "^1.63.0",
     "@types/react": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-plugin-react-hooks": "^5.0.0",
@@ -73,13 +145,8 @@
     "typescript-eslint": "^8.0.0",
     "vitest": "^5.0.0"
   },
-  "peerDependencies": {
-    "react": ">=18"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    }
+  "publishConfig": {
+    "access": "public"
   },
   "packageManager": "pnpm@10.11.0"
 }

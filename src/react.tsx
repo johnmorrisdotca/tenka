@@ -6,7 +6,9 @@ import { mountTenka, type TenkaTableOptions } from "./ui/mount.ts";
 
 const RING = { chosen: { stroke: "#111", width: 5 }, target: { stroke: "#fff", width: 5 }, reach: { stroke: "#111", width: 2.5 } } as const;
 
+/** What `TenkaMap` takes: a game to draw, and any attribute of its `<svg>`. */
 export type TenkaMapProps = {
+  /** The game to draw: only who holds each territory and with how many armies is read. */
   game: Pick<TenkaGame, "owners" | "armies">;
   /** What to light up: from `marksFor(game, choice)`. */
   marks?: TenkaMapMarks;
@@ -14,6 +16,7 @@ export type TenkaMapProps = {
   colours?: readonly string[];
   /** A territory pressed. Without it the map is only a picture. */
   onTerritory?: (territory: number) => void;
+  /** The map's accessible name. "Map of the world" by default; `TENKA_STRINGS.ja.mapLabel` for Japanese. */
   label?: string;
 } & Omit<SVGAttributes<SVGSVGElement>, "onClick">;
 
@@ -54,6 +57,7 @@ export function TenkaMap({ game, marks = NO_MARKS, colours, onTerritory, label =
   );
 }
 
+/** What `TenkaTable` takes: the options of `mountTenka`, and any attribute of its `<div>`. */
 export type TenkaTableProps = TenkaTableOptions & Omit<HTMLAttributes<HTMLDivElement>, keyof TenkaTableOptions>;
 
 /**
@@ -62,7 +66,7 @@ export type TenkaTableProps = TenkaTableOptions & Omit<HTMLAttributes<HTMLDivEle
  * browser has it. Options are read when it mounts; give it a new `key` to
  * start over with different ones.
  */
-export function TenkaTable({ players, computers, rounds, seed, colours, computerDelayMs, onChange, ...element }: TenkaTableProps) {
+export function TenkaTable({ players, computers, rounds, seed, colours, computerDelayMs, onChange, locale, strings, theme, record, ...element }: TenkaTableProps) {
   const host = useRef<HTMLDivElement>(null);
   const latest = useRef(onChange);
   useEffect(() => {
@@ -71,7 +75,7 @@ export function TenkaTable({ players, computers, rounds, seed, colours, computer
   useEffect(() => {
     const target = host.current;
     if (target === null) return;
-    const table = mountTenka(target, { players, computers, rounds, seed, colours, computerDelayMs, onChange: (game) => latest.current?.(game) });
+    const table = mountTenka(target, { players, computers, rounds, seed, colours, computerDelayMs, locale, strings, theme, record, onChange: (game) => latest.current?.(game) });
     return () => table.destroy();
     // Mounted once per key, as documented above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
