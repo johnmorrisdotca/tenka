@@ -6,6 +6,11 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-30
+
+The first stable release: the API as documented in the README is now kept stable
+until a 2.0.0.
+
 ### Changed
 
 - The world wraps round: Alaska and the Russian Far East are neighbours across
@@ -43,5 +48,6 @@ The first release.
   `@johnmorrisdotca/tenka/react`.
 - A static demo for GitHub Pages.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/johnmorrisdotca/tenka/releases/tag/v0.1.0
+[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.0.0
+[0.1.0]: https://github.com/johnmorrisdotca/tenka/commits/v1.0.0
