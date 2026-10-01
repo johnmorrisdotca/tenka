@@ -14,8 +14,8 @@ The rules as pure, seeded TypeScript, a computer player, a game that saves and r
 <p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><strong>Play a game →</strong></a> · <a href="https://johnmorrisdotca.github.io/tenka/api.html">API reference</a></p>
 
 <p align="center">
-  <img src="docs/desktop.jpg" alt="A game of three on the map of the world, with the players, a hand of cards and the record of the game beside it" width="720">
-  <img src="docs/phone.jpg" alt="Europe close up on a phone in dark mode, with its sea routes dashed" width="220">
+  <img src="docs/desktop.jpg" alt="A game of three on the map of the world, under the demo's header with its language chooser and five cloth patches: the set-up choices, an attack from Brazil begun, the players with their lands and armies, and the record of the game beside the map" width="720">
+  <img src="docs/phone.jpg" alt="Europe close up on a phone in dark mode, in Japanese: the zoom buttons with Europe chosen, the map with its sea routes dashed, and under it the players and the record of the game" width="220">
 </p>
 
 A strategy board game engine for the game of world conquest: place armies,
