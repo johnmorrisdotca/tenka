@@ -35,18 +35,24 @@ const page = `<!doctype html>
     <main>
       ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }] })}
       <div class="setup fam-row">
-        <span class="fam-label" data-say="players"></span>
-        <div class="fam-seg" role="group" data-say-label="players">
-          ${[2, 3, 4, 5, 6].map((count) => `<button type="button" data-players="${count}">${count}</button>`).join("")}
+        <div class="fam-row" data-help-en="How many sit at the table: you and the computers. It takes effect when you press New game." data-help-ja="卓につく人数です（あなたとコンピューター）。「新しいゲーム」を押すと反映されます。">
+          <span class="fam-label" data-say="players"></span>
+          <div class="fam-seg" role="group" data-say-label="players">
+            ${[2, 3, 4, 5, 6].map((count) => `<button type="button" data-players="${count}">${count}</button>`).join("")}
+          </div>
         </div>
-        <span class="fam-label" data-say="length"></span>
-        <div class="fam-seg" role="group" data-say-label="length">
-          ${[10, 20, 60].map((rounds) => `<button type="button" data-rounds="${rounds}" data-say="rounds${rounds}"></button>`).join("")}
+        <div class="fam-row" data-help-en="How long a game runs: 10 rounds, 20 rounds, or until somebody takes the whole map. It takes effect when you press New game." data-help-ja="ゲームの長さです（10ラウンド、20ラウンド、または地図全体を取るまで）。「新しいゲーム」を押すと反映されます。">
+          <span class="fam-label" data-say="length"></span>
+          <div class="fam-seg" role="group" data-say-label="length">
+            ${[10, 20, 60].map((rounds) => `<button type="button" data-rounds="${rounds}" data-say="rounds${rounds}"></button>`).join("")}
+          </div>
         </div>
-        <span class="fam-label" data-say="map"></span>
-        <div class="fam-seg" role="group" data-say-label="map">
-          <button type="button" data-map="world" data-say="mapWorld"></button>
-          <button type="button" data-map="europe" data-say="mapEurope"></button>
+        <div class="fam-row" data-help-en="Play on the map of the whole world, or on a map of Europe. It takes effect when you press New game." data-help-ja="世界地図か、ヨーロッパの地図で遊びます。「新しいゲーム」を押すと反映されます。">
+          <span class="fam-label" data-say="map"></span>
+          <div class="fam-seg" role="group" data-say-label="map">
+            <button type="button" data-map="world" data-say="mapWorld"></button>
+            <button type="button" data-map="europe" data-say="mapEurope"></button>
+          </div>
         </div>
         <button type="button" class="fam-button" data-accent="true" id="new" data-say="newGame"></button>
       </div>

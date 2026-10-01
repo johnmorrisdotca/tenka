@@ -1,6 +1,6 @@
 // The demo page's own script: a table of Tenka against the computer, set up from the row above it,
 // kept on this device between visits, and spoken in the language the header's chooser picks.
-/* global familyLanguage */
+/* global familyHelp, familyLanguage */
 import { tenkaFromJSON, tenkaToJSON } from "./dist/index.js";
 import { mountTenka } from "./dist/ui.js";
 
@@ -111,6 +111,15 @@ const table = mountTenka(document.getElementById("table"), {
   theme: { "--tk-ink": "var(--ink)", "--tk-panel": "var(--surface)", "--tk-font": "var(--font)", "--tk-accent": "var(--felt)", "--tk-accent-ink": "var(--felt-ink)" },
   onChange: keep,
 });
+
+// The table's view chooser (the world, or one continent) is the package's own; the page words it for the Help switch.
+const looks = document.querySelector(".tk-zoom");
+if (looks !== null) {
+  looks.setAttribute("data-help-en", "Look at the whole map, or zoom in on one continent. It changes only what you see.");
+  looks.setAttribute("data-help-ja", "地図全体を見るか、ひとつの大陸に拡大します。見え方だけが変わります。");
+  looks.setAttribute("data-help-after", "");
+  familyHelp.refresh();
+}
 
 /** The row above the table shows the table's own numbers. */
 function show() {
