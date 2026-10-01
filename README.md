@@ -11,7 +11,7 @@ The rules as pure, seeded TypeScript, a computer player, a game that saves and r
   <img alt="TypeScript" src="https://img.shields.io/badge/types-TypeScript-3178c6">
 </p>
 
-<p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><strong>Play a game →</strong></a></p>
+<p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><strong>Play a game →</strong></a> · <a href="https://johnmorrisdotca.github.io/tenka/api.html">API reference</a></p>
 
 <p align="center">
   <img src="docs/desktop.jpg" alt="A game of three on the map of the world, with the players, a hand of cards and the record of the game beside it" width="720">
@@ -244,6 +244,51 @@ it.
 - **Where it runs.** Current Chrome, Edge, Firefox and Safari, on a desk or a
   phone. The rules have no DOM in them and run in Node 20 and later, Deno,
   Bun and web workers.
+
+## Architecture
+
+The rules, the map and the computer player are plain functions over plain data
+with no DOM: a game is a value, and every move returns the next one. Drawing
+the map is its own entry (`/ui` for plain DOM, `/react` for React, `/shapes`
+for the outlines), so a page that only wants the rules loads none of it.
+
+```text
+src/
+├── index.ts                   the main entry: the rules, the map, saving and the computer player, with no DOM
+├── react.tsx                  the "/react" entry: a map to draw in React
+├── shapes.ts                  the "/shapes" entry: how the world and Europe are drawn, as outlines
+├── strings.ts                 every word Tenka shows a person, in English and Japanese
+├── tenka.constants.ts         the numbers Tenka is played by: armies, trades, lengths of a game
+├── tenka.ts                   the rules, nothing else: the classic world-conquest game for two to six players
+├── tenka.types.ts             the game, its moves and its map, as the rules speak of them
+├── tenkaCards.ts              the cards won by a conquest, and the sets that trade for armies
+├── tenkaDice.ts               the dice and the seeded random they are thrown with
+├── tenkaEurope.data.ts        Europe's thirty-seven territories and neighbours, written by scripts/map.mjs europe
+├── tenkaEuropeShapes.data.ts  Europe's outlines, written by scripts/map.mjs europe
+├── tenkaExport.ts             a game written out as JSON, plain text or CSV
+├── tenkaKeep.ts               a game as short text to keep, and read back by playing its moves again
+├── tenkaMap.ts                the world as the rules read it: territories, neighbours, continents and their bonuses
+├── tenkaMoves.ts              every move the player to move may make now
+├── tenkaPolicy.ts             the computer player: a sensible random one, which a test plays whole games with
+├── tenkaShapes.data.ts        the world's outlines, written by scripts/map.mjs
+├── tenkaStart.ts              dealing a new game from a seed, and which tables are offered
+├── tenkaTaps.ts               what a tap on the map means in each part of a turn, and what it lights up
+├── tenkaTurn.ts               how a turn begins and ends, and how a game is counted
+├── tenkaWorld.data.ts         the world's territories and neighbours, written by scripts/map.mjs from public-domain map data
+├── ui.ts                      the "/ui" entry: Tenka drawn and played in the browser, in plain DOM
+├── version.ts                 the version of this package, as package.json has it
+└── ui/  the table that draws and plays a game
+    ├── colours.ts   the colours a table is drawn in
+    ├── mapModel.ts  which outlines draw which map
+    ├── mount.ts     the table itself: mounting it on a page, and the options it takes
+    ├── style.ts     the table's own styles, every colour a CSS variable so a page can re-colour it
+    └── svg.ts       small helpers that build the map's SVG
+```
+
+Tests sit beside the code they test (`*.test.ts`). `scripts/` makes the map
+data from public-domain outlines, builds the demo and checks the package as
+npm packs it, `demo/` is the page published on GitHub Pages, and `table/`
+taps it in real browsers.
 
 ## The name
 
@@ -506,7 +551,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 1,
   "game": "tenka",
-  "generator": "tenka 1.2.0",
+  "generator": "tenka 1.2.1",
   "seed": 2026,
   "players": [
     "Ann",
@@ -593,6 +638,8 @@ links that go off one edge and on at the other (`wraps`), and the
 `continentBorders`, one path drawn heavier.
 
 ## API
+
+The [API reference](https://johnmorrisdotca.github.io/tenka/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
 
 Every function, type and constant has a doc comment, so an editor shows this
 as you type. The entries:

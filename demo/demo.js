@@ -7,6 +7,7 @@ import { mountTenka } from "./dist/ui.js";
 // The page's own words, in the two languages the table speaks. Set as text, never as HTML.
 const WORDS = {
   en: {
+    pageApi: "API reference",
     pitch: "World conquest for two to six, on a map of the real world. Tap your territories to place armies; to attack or to move, tap where from, then where to.",
     name: "Tenka (天下) is Japanese for all under heaven: the whole realm.",
     nameLink: "About the name",
@@ -31,6 +32,7 @@ const WORDS = {
     people: ["Ann", "Ben", "Cho"],
   },
   ja: {
+    pageApi: "API（英語）",
     pitch: "実在の世界地図で遊ぶ、2〜6人用の世界征服ゲームです。自分の領土をタップして部隊を置きます。攻撃や移動は、出発する領土、目的の領土の順にタップします。",
     name: "「天下」は、天の下のすべて、つまり世の中全体を表す言葉です。",
     nameLink: "名前について（英語）",
