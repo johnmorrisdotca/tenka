@@ -6,3 +6,6 @@
 /* The table's record is a <pre>: it keeps the table's own small print inside the family's box. */
 .tk-root .tk-log { padding: 8px 10px; border-radius: 8px; }
 .more li > button code { overflow-wrap: anywhere; }
+.tag tenka-table { display: block; margin-top: 10px; }
+.tag .tk-root { --tk-ink: var(--ink); --tk-panel: var(--surface); --tk-font: var(--font); --tk-accent: var(--felt); --tk-accent-ink: var(--felt-ink); }
+.fam-button[data-said="true"] { opacity: .8; }

@@ -29,6 +29,8 @@ export const TENKA_STYLE = `
 .tk-sea { fill: var(--tk-sea); }
 .tk-land { fill-opacity: .82; stroke: var(--tk-line); stroke-width: 1.2; }
 .tk-land:hover { fill-opacity: 1; }
+.tk-land:focus { outline: none; }
+.tk-land:focus-visible { fill-opacity: 1; stroke: var(--tk-accent); stroke-width: 4; }
 .tk-borders { stroke: var(--tk-border); stroke-width: 3; stroke-linecap: round; pointer-events: none; }
 .tk-sea-link { stroke: var(--tk-link); stroke-width: 2; stroke-dasharray: 8 6; pointer-events: none; }
 .tk-ring { stroke: var(--tk-ring); }

@@ -21,6 +21,7 @@ pnpm test:table       # the demo in real browsers: builds it, then taps it
 pnpm test:package     # npm pack, install the tarball, import and require every entry
 pnpm test:frameworks  # the README's examples built in React, Vue, Svelte, Angular and a plain page
 pnpm site             # builds the demo into ./site
+pnpm pictures         # re-takes the README's two pictures from the built demo
 pnpm dlx serve site   # or any static server
 ```
 
@@ -60,6 +61,16 @@ pnpm dlx serve site   # or any static server
   nobody's property; its name, its map and its words are.
 - One change per pull request, with a line in `CHANGELOG.md` under
   *Unreleased*.
+
+## House rules, shared by every package of the family
+
+- Open an issue first for anything bigger than a typo, so that we can agree on the shape before you spend time on it.
+- No runtime dependencies. Every function that plays or checks a game is pure: it returns new values and never changes what it was given.
+- Tests sit beside the code they test. A rule you change has a test that would have caught it.
+- Words a player reads come in English and Japanese. If you cannot write the Japanese, say so in the pull request and someone will.
+- Option values and names are kebab case.
+- Art and sound are CC0 or public domain only, checked at the source, and credited in the README. No GPL or LGPL code.
+- Needs Node 22 or later. A change a user would notice gets a line in `CHANGELOG.md`.
 
 ## Releasing
 

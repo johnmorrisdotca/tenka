@@ -55,6 +55,8 @@ const page = `<!doctype html>
           </div>
         </div>
         <button type="button" class="fam-button" data-accent="true" id="new" data-say="newGame"></button>
+        <button type="button" class="fam-button" id="daily" data-say="daily" data-help-after data-help-en="Start a game from today's seed, the same for everybody in the world today, with the players, length and map chosen above." data-help-ja="今日のシードでゲームを始めます。今日は世界中の誰でも同じシードです。人数・長さ・地図は上で選んだものになります。"></button>
+        <button type="button" class="fam-button" id="share" data-say="share" data-help-after data-help-en="Copy a link that deals this game's seed, with its players, length and map, to whoever opens it." data-help-ja="このゲームのシード、人数、長さ、地図で配るリンクをコピーします。開いた人にも同じ配置が配られます。"></button>
       </div>
       <div id="table"></div>
       ${familyUnreviewed({ id })}
@@ -65,9 +67,15 @@ const page = `<!doctype html>
           ${tries.map(([name, code]) => `<li><button type="button" data-try="${name}"><code>${code.replace(/"/g, "&quot;")}</code><span data-say="try${name[0].toUpperCase()}${name.slice(1)}"></span></button></li>`).join("\n          ")}
         </ul>
       </section>
+      <section class="more tag" aria-labelledby="tag-title">
+        <h2 id="tag-title" data-say="tagTitle"></h2>
+        <p data-say="tagText"></p>
+        <tenka-table id="tag" data-testid="tag" players="You, Kaze" rounds="10" map="europe" seed="2026" record="off"></tenka-table>
+      </section>
       ${familyFooter({ id })}
     </main>
     <script>${FAMILY_SCRIPT}</script>
+    <script type="module" src="dist/element-define.js"></script>
     <script type="module" src="demo.js"></script>
   </body>
 </html>

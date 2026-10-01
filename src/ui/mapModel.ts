@@ -95,6 +95,37 @@ export function nearestLand(x: number, y: number, reach: number, map: TenkaMapKe
 /** A part of the map to show, in map units: left, top, width, height (an SVG viewBox). */
 export type TenkaView = readonly [number, number, number, number];
 
+/** A way to move between territories from a keyboard. */
+export type TenkaArrow = "left" | "right" | "up" | "down";
+
+/**
+ * The territory a key moves to from another: the nearest counter in that
+ * direction, a little straighter being better than a little nearer, and only
+ * among those inside `view` (the whole map when none is given), so that the
+ * focus never leaves what is on the screen. Null when nothing lies that way.
+ */
+export function landInDirection(from: number, arrow: TenkaArrow, map: TenkaMapKey = "world", view?: TenkaView): number | null {
+  const labels = tenkaShapesOf(map).labels;
+  const start = labels[from];
+  if (start === undefined) return null;
+  const [dx, dy] = arrow === "left" ? [-1, 0] : arrow === "right" ? [1, 0] : arrow === "up" ? [0, -1] : [0, 1];
+  let best: number | null = null;
+  let bestScore = Infinity;
+  labels.forEach(([x, y], territory) => {
+    if (territory === from) return;
+    if (view !== undefined && (x! < view[0] || x! > view[0] + view[2] || y! < view[1] || y! > view[1] + view[3])) return;
+    const along = (x! - start[0]!) * dx! + (y! - start[1]!) * dy!;
+    if (along <= 0) return;
+    const across = Math.abs((x! - start[0]!) * dy! - (y! - start[1]!) * dx!);
+    const score = along + 2 * across;
+    if (score < bestScore) {
+      best = territory;
+      bestScore = score;
+    }
+  });
+  return best;
+}
+
 /**
  * The part of the map that frames a continent, with a margin, widened to the
  * map's own shape so it fills the same box; the whole world for null.

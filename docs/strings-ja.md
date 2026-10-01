@@ -11,6 +11,9 @@ shown. ␠ marks a space at the start or end of a string.
 | `you` | You | あなた |
 | `player` | Player {n} | プレイヤー{n} |
 | `mapLabel` | Map of the world | 世界地図 |
+| `mapKeys` | Arrow keys move between territories; Enter or Space taps one. | 矢印キーで領土を移動し、Enterキーかスペースキーでタップします。 |
+| `landSay` | {land}, {owner}, armies {n} | {land}、{owner}、部隊{n} |
+| `neutral` | Neutral | 中立 |
 | `lookAt` | Look at | 表示する地域 |
 | `world` | World | 世界 |
 | `europe` | Europe | ヨーロッパ |

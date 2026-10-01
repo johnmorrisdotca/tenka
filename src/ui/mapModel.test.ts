@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { TENKA_CONTINENTS, TENKA_TERRITORY_COUNT } from "../tenkaMap.ts";
 import { startTenka } from "../tenkaStart.ts";
 import { ownerColour, TENKA_NEUTRAL_COLOUR, TENKA_SEAT_COLOURS } from "./colours.ts";
-import { continentView, nearestLand, tenkaMapModel } from "./mapModel.ts";
+import { continentView, landInDirection, nearestLand, tenkaMapModel } from "./mapModel.ts";
 import { TENKA_SHAPES } from "../tenkaShapes.data.ts";
 
 describe("the map drawn for a game", () => {
@@ -48,5 +48,24 @@ describe("the map drawn for a game", () => {
     const [x, y] = TENKA_SHAPES.labels[10]!;
     expect(nearestLand(x! + 3, y! - 2, 20)).toBe(10);
     expect(nearestLand(-500, -500, 20)).toBeNull();
+  });
+
+  it("moves a key to the nearest territory in that direction, and to none where nothing lies", () => {
+    const labels = TENKA_SHAPES.labels;
+    for (const from of [0, 10, 20, 35]) {
+      const [x, y] = labels[from]!;
+      for (const [arrow, along] of [["left", (lx: number) => x! - lx], ["right", (lx: number) => lx - x!], ["up", (_: number, ly: number) => y! - ly], ["down", (_: number, ly: number) => ly - y!]] as const) {
+        const there = landInDirection(from, arrow);
+        if (there === null) continue;
+        expect(there).not.toBe(from);
+        expect(along(labels[there]![0]!, labels[there]![1]!), `${arrow} from ${from}`).toBeGreaterThan(0);
+      }
+    }
+    // The westernmost counter has nothing to its west; a view that shows only one territory leaves nowhere to go.
+    const west = labels.reduce((best, [x], at) => (x! < labels[best]![0]! ? at : best), 0);
+    expect(landInDirection(west, "left")).toBeNull();
+    const [x, y] = labels[10]!;
+    expect(landInDirection(10, "right", "world", [x! - 5, y! - 5, 10, 10])).toBeNull();
+    expect(landInDirection(999, "right")).toBeNull();
   });
 });

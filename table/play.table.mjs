@@ -36,7 +36,7 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
   let s = await state(page);
   expect(s.lands[from].armies).toBe(dealt.armies[from] + 1);
   expect(s.controls).toEqual([`All ${dealt.reserve - 1} on ${TENKA_TERRITORIES[from].name}`]);
-  await tap(page, '[data-testid="tk-all"]');
+  await tap(page, '#table [data-testid="tk-all"]');
   game = playTenka(playTenka(game, { kind: "place", territory: from, armies: 1 }), { kind: "place", territory: from, armies: dealt.reserve - 1 });
   await expect(page.locator(ROOT)).toHaveAttribute("data-phase", "attack");
   s = await sound(page, errors);
@@ -52,7 +52,7 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
   expect(s.status).toBe(`Round 1 of 20. You: ${TENKA_TERRITORIES[from].name} attacks ${TENKA_TERRITORIES[to].name}.`);
   expect(s.controls).toEqual(["Attack with 3 dice", "Blitz", "Stop attacking"]);
 
-  await tap(page, '[data-testid="tk-blitz"]');
+  await tap(page, '#table [data-testid="tk-blitz"]');
   game = playTenka(game, { kind: "blitz", from, to });
   s = await sound(page, errors);
   // The dice fall as the seed has them, here as in the rules.
@@ -62,17 +62,17 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
   expect(s.lands.map((land) => land.armies)).toEqual([...game.armies]);
   if (game.phase === "occupy") {
     expect(s.status).toContain(`${TENKA_TERRITORIES[to].name} is taken. How many move in?`);
-    await tap(page, '[data-testid="tk-go"]');
+    await tap(page, '#table [data-testid="tk-go"]');
     game = playTenka(game, { kind: "occupy", armies: game.armies[from] - 1 });
     s = await state(page);
     expect(s.lands[to].owner).toBe(0);
     expect(s.lands[to].armies).toBe(game.armies[to]);
   }
-  await tap(page, '[data-testid="tk-stop"]');
+  await tap(page, '#table [data-testid="tk-stop"]');
   await expect(page.locator(ROOT)).toHaveAttribute("data-phase", "fortify");
   s = await sound(page, errors);
   expect(s.controls).toEqual(["End turn"]);
-  await tap(page, '[data-testid="tk-end"]');
+  await tap(page, '#table [data-testid="tk-end"]');
   // The computer takes its turns, and the table comes back to the first seat in round 2.
   await expect(page.locator(WAITING)).toHaveAttribute("data-to-play", "0");
   s = await sound(page, errors);
@@ -85,8 +85,8 @@ test("a fortifying move: from one of your territories to one joined to it, by th
   let game = dealt;
   const own = game.owners.findIndex((owner) => owner === 0);
   await tapLand(page, own);
-  await tap(page, '[data-testid="tk-all"]');
-  await tap(page, '[data-testid="tk-stop"]');
+  await tap(page, '#table [data-testid="tk-all"]');
+  await tap(page, '#table [data-testid="tk-stop"]');
   game = playTenka(playTenka(playTenka(game, { kind: "place", territory: own, armies: 1 }), { kind: "place", territory: own, armies: game.reserve - 1 }), { kind: "endAttack" });
   const move = tenkaMoves(game).find((one) => one.kind === "fortify");
   await tapLand(page, move.from);
@@ -94,7 +94,7 @@ test("a fortifying move: from one of your territories to one joined to it, by th
   let s = await sound(page, errors);
   const most = game.armies[move.from] - 1;
   expect(s.controls).toEqual([`Move ${most} to ${TENKA_TERRITORIES[move.to].name}`, "End turn"]);
-  await tap(page, '[data-testid="tk-go"]');
+  await tap(page, '#table [data-testid="tk-go"]');
   await expect(page.locator(WAITING)).toHaveAttribute("data-to-play", "0");
   s = await sound(page, errors);
   expect(s.status).toContain("Round 2 of 20.");
@@ -122,12 +122,12 @@ test("the set-up row starts the table it shows, and the other tables start their
   await tap(page, '[data-players="5"]');
   await tap(page, '[data-rounds="10"]');
   await tap(page, "#new");
-  await expect(page.locator('[data-testid="tk-player"]')).toHaveCount(5);
+  await expect(page.locator('#table [data-testid="tk-player"]')).toHaveCount(5);
   let s = await sound(page, errors);
   expect(s.status).toContain("of 10.");
 
   await tap(page, '[data-try="duel"]');
-  await expect(page.locator('[data-testid="tk-player"]')).toHaveCount(2);
+  await expect(page.locator('#table [data-testid="tk-player"]')).toHaveCount(2);
   s = await sound(page, errors);
   // A third of the world is dealt to the neutral army; the computer may already have taken some of it.
   const neutral = s.lands.filter((land) => land.owner === -1).length;
@@ -146,7 +146,7 @@ test("the set-up row starts the table it shows, and the other tables start their
   s = await sound(page, errors);
   expect(s.status).toMatch(/takes the world\.$|^A tie between /);
   expect(s.controls).toEqual(["New game"]);
-  await tap(page, '[data-testid="tk-new"]');
+  await tap(page, '#table [data-testid="tk-new"]');
   await expect(page.locator(ROOT)).not.toHaveAttribute("data-phase", "over");
 });
 

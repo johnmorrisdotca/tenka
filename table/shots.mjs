@@ -21,18 +21,18 @@ for (const width of [390, 1280]) {
         return existsSync(file) ? route.fulfill({ body: readFileSync(file), contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream" }) : route.fulfill({ status: 404, body: "" });
       });
       await page.goto(`http://tenka.test/?seed=7&delay=0&lang=${lang}`);
-      await page.waitForSelector('[data-testid="tk-root"][data-waiting="true"]');
+      await page.waitForSelector('#table [data-testid="tk-root"][data-waiting="true"]');
       // A turn's armies on one territory, and an attack chosen from it, so that the rings, the buttons and the record all show.
-      const own = await page.locator('.tk-land[data-owner="0"]').first().getAttribute("data-territory");
-      await page.locator(`.tk-counter[data-territory="${own}"]`).click({ force: true });
-      await page.locator('[data-testid="tk-all"]').click();
-      await page.locator(`.tk-counter[data-territory="${own}"]`).click({ force: true });
-      await page.locator('[data-testid="tk-record"] summary').click();
-      await page.waitForFunction(() => document.querySelector('[data-testid="tk-log"]').textContent !== "");
+      const own = await page.locator('#table .tk-land[data-owner="0"]').first().getAttribute("data-territory");
+      await page.locator(`#table .tk-counter[data-territory="${own}"]`).click({ force: true });
+      await page.locator('#table [data-testid="tk-all"]').click();
+      await page.locator(`#table .tk-counter[data-territory="${own}"]`).click({ force: true });
+      await page.locator('#table [data-testid="tk-record"] summary').click();
+      await page.waitForFunction(() => document.querySelector('#table [data-testid="tk-log"]').textContent !== "");
       await page.screenshot({ path: join(folder, `${name}-${width}-${colorScheme}-${lang}.png`), fullPage: true });
       if (width === 390 && lang === "en") {
-        await page.locator('.tk-zoom [data-view="europe"]').click();
-        await page.locator('[data-testid="tk-board"]').scrollIntoViewIfNeeded();
+        await page.locator('#table .tk-zoom [data-view="europe"]').click();
+        await page.locator('#table [data-testid="tk-board"]').scrollIntoViewIfNeeded();
         await page.screenshot({ path: join(folder, `${name}-${width}-${colorScheme}-europe.png`) });
       }
       await context.close();

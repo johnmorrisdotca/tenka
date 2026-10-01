@@ -1,4 +1,4 @@
-import type { TenkaMapModel, TenkaView } from "./mapModel.ts";
+import type { TenkaLand, TenkaMapModel, TenkaView } from "./mapModel.ts";
 
 const SVG = "http://www.w3.org/2000/svg";
 
@@ -21,17 +21,24 @@ const RING = { chosen: { stroke: "#111", width: 3 }, target: { stroke: "#fff", w
  *
  * `label` is the drawing's accessible name; `view` the part of the map to
  * show (`continentView`); `pixels` the drawing's width on the screen, so
- * that counters and rings are one size whatever is shown.
+ * that counters and rings are one size whatever is shown. A territory is a
+ * button to a screen reader and can be focused (not by Tab: `tabindex` is -1,
+ * for the page to choose which one Tab lands on); `describe` words what a
+ * reader hears for each, and `keys` is the drawing's description.
  */
-export function tenkaMapSvg(model: TenkaMapModel, options: { label?: string; view?: TenkaView; pixels?: number } = {}): SVGSVGElement {
+export function tenkaMapSvg(
+  model: TenkaMapModel,
+  options: { label?: string; view?: TenkaView; pixels?: number; describe?: (land: TenkaLand) => string; keys?: string } = {},
+): SVGSVGElement {
   const [vx, vy, vw, vh] = options.view ?? [0, 0, model.width, model.height];
   // A screen pixel in map units, so counters and rings are drawn one size on the screen whatever is shown:
   // from `pixels`, the drawing's width on the screen, or as though it were a thousand pixels wide.
   const unit = vw / (options.pixels ?? 1000);
   const svg = el("svg", { viewBox: `${vx} ${vy} ${vw} ${vh}`, role: "group", "aria-label": options.label ?? "Map of the world", class: "tk-map" });
+  if (options.keys !== undefined) svg.setAttribute("aria-description", options.keys);
   svg.append(el("rect", { x: -model.width, y: -model.height, width: model.width * 3, height: model.height * 3, class: "tk-sea" }));
   for (const land of model.lands) {
-    const path = el("path", { d: land.outline, fill: land.fill, class: "tk-land", "data-territory": land.territory, "data-owner": land.owner, "data-armies": land.armies, "stroke-linejoin": "round" });
+    const path = el("path", { d: land.outline, fill: land.fill, class: "tk-land", "data-territory": land.territory, "data-owner": land.owner, "data-armies": land.armies, "stroke-linejoin": "round", role: "button", tabindex: -1, "aria-label": options.describe?.(land) ?? `${land.name}: ${land.armies}` });
     const title = el("title", {});
     title.textContent = `${land.name}: ${land.armies}`;
     path.append(title);

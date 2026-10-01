@@ -1,7 +1,7 @@
 // The demo page's own script: a table of Tenka against the computer, set up from the row above it,
 // kept on this device between visits, and spoken in the language the header's chooser picks.
 /* global familyHelp, familyLanguage */
-import { tenkaFromJSON, tenkaToJSON } from "./dist/index.js";
+import { tenkaDailySeed, tenkaFromJSON, tenkaToJSON } from "./dist/index.js";
 import { mountTenka } from "./dist/ui.js";
 
 // The page's own words, in the two languages the table speaks. Set as text, never as HTML.
@@ -20,6 +20,12 @@ const WORDS = {
     mapWorld: "The world",
     mapEurope: "Europe",
     newGame: "New game",
+    daily: "Today's game",
+    share: "Copy link",
+    copied: "Copied",
+    copyFailed: "Could not copy",
+    tagTitle: "As a tag",
+    tagText: "The same table in one element, with no framework: Europe, two seats and ten rounds, dealt from a seed. The computer plays Kaze.",
     moreTitle: "Other tables",
     moreText: "You play the first seat and the computer plays the rest. Each of these starts a new game another way, and says what the table was given to do it.",
     tryDuel: "A game for two: a neutral army holds a third of the world and only defends",
@@ -45,6 +51,12 @@ const WORDS = {
     mapWorld: "世界",
     mapEurope: "ヨーロッパ",
     newGame: "新しいゲーム",
+    daily: "今日のゲーム",
+    share: "リンクをコピー",
+    copied: "コピーしました",
+    copyFailed: "コピーできませんでした",
+    tagTitle: "タグとして",
+    tagText: "同じテーブルを、フレームワークなしの一つの要素で。ヨーロッパ、2席、10ラウンドで、シードから配ります。風はコンピューターが担当します。",
     moreTitle: "ほかの遊び方",
     moreText: "あなたが最初の席で、残りの席はコンピューターが担当します。下のボタンは、それぞれ別の設定で新しいゲームを始めます。ボタンには、そのときテーブルに渡す設定が書いてあります。",
     tryDuel: "2人用: 中立の部隊が世界の3分の1を持ち、守るだけです",
@@ -67,17 +79,20 @@ const asked = (name, least, most) => {
 const delay = asked("delay", 0, 5000);
 const seed = asked("seed", 0, 0xffffffff);
 
-const setUp = { players: 3, rounds: 20, map: "world" };
+const setUp = { players: asked("players", 2, 6) ?? 3, rounds: [10, 20, 60].includes(asked("rounds", 10, 60)) ? asked("rounds", 10, 60) : 20, map: query.get("map") === "europe" ? "europe" : "world" };
 const language = familyLanguage({
   id: "tenka",
   words: WORDS,
   onChange: (lang) => {
     table.setLocale(lang);
+    // The table in a tag follows the page's language the same way, by its attribute.
+    document.getElementById("tag")?.setAttribute("lang", lang);
     // A game nobody has moved in yet is dealt again, the same deal, with the seats named in the new language.
     const game = table.game();
     if (game.moves.length === 0 && WORDS.en.seats.concat(WORDS.ja.seats).includes(game.players[0])) table.newGame({ players: names(game.players.length), computers, seed: game.seed });
   },
 });
+document.getElementById("tag")?.setAttribute("lang", language.lang);
 const names = (count) => WORDS[language.lang].seats.slice(0, count);
 
 /** What was being played when this device last left, if it is still a game the rules can replay. */
@@ -104,6 +119,7 @@ function keep(game) {
 const table = mountTenka(document.getElementById("table"), {
   players: names(setUp.players),
   rounds: setUp.rounds,
+  map: setUp.map,
   seed,
   locale: language.lang,
   computerDelayMs: delay,
@@ -169,6 +185,35 @@ for (const button of document.querySelectorAll("[data-map]")) {
   });
 }
 document.getElementById("new").addEventListener("click", () => start());
+document.getElementById("daily").addEventListener("click", () => start({ seed: tenkaDailySeed(new Date()) }));
+
+/** Say what a button did for a moment, then say what it is for again. */
+function said(button, text) {
+  const key = button.dataset.say;
+  button.textContent = text;
+  button.dataset.said = "true";
+  setTimeout(() => {
+    button.textContent = WORDS[language.lang][key];
+    delete button.dataset.said;
+  }, 1500);
+}
+
+/** The link that deals the game on the table to whoever opens it: its seed, and the set-up that goes with it. */
+function linkOf(game) {
+  const url = new URL(location.href);
+  url.search = new URLSearchParams({ seed: game.seed, players: game.players.length, rounds: game.rounds, map: game.map ?? "world", lang: language.lang }).toString();
+  url.hash = "";
+  return url.href;
+}
+document.getElementById("share").addEventListener("click", async () => {
+  const button = document.getElementById("share");
+  try {
+    await navigator.clipboard.writeText(linkOf(table.game()));
+    said(button, WORDS[language.lang].copied);
+  } catch {
+    said(button, WORDS[language.lang].copyFailed);
+  }
+});
 
 const TRIES = {
   duel: () => ({ players: names(2) }),

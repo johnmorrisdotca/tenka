@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/tenka",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "World conquest board game engine for two to six, in the manner of Risk: pure, seeded TypeScript rules on a map of the real world, dice battles, cards, a computer player, and a game saved and replayed as JSON, text or CSV. An SVG world map and a playable table for React, Vue, Svelte, Angular or plain HTML, in English and Japanese. Zero dependencies.",
   "keywords": [
     "world-conquest",
@@ -52,6 +52,8 @@
     "esm",
     "react",
     "react-component",
+    "custom-element",
+    "web-component",
     "vue",
     "svelte",
     "angular",
@@ -98,6 +100,14 @@
     "./react": {
       "types": "./dist/react.d.ts",
       "default": "./dist/react.js"
+    },
+    "./element": {
+      "types": "./dist/element.d.ts",
+      "default": "./dist/element.js"
+    },
+    "./element/define": {
+      "types": "./dist/element-define.d.ts",
+      "default": "./dist/element-define.js"
     }
   },
   "files": [
@@ -107,9 +117,11 @@
     "CHANGELOG.md",
     "CONTRIBUTING.md"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/element-define.js"
+  ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

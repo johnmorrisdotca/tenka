@@ -35,12 +35,12 @@ test("the address asks for a language, and a device remembers the one chosen", a
   await page.goto("http://tenka.test/?seed=7&delay=0");
   await tap(page, '[data-lang="ja"]');
   await page.goto("http://tenka.test/?seed=7&delay=0");
-  await expect(page.locator(".tk-zoom button").first()).toHaveText("世界");
+  await expect(page.locator("#table .tk-zoom button").first()).toHaveText("世界");
   s = await sound(page, errors);
   expect(s.lang).toBe("ja");
   await tap(page, '[data-lang="en"]');
   await page.goto("http://tenka.test/?seed=7&delay=0");
-  await expect(page.locator(".tk-zoom button").first()).toHaveText("World");
+  await expect(page.locator("#table .tk-zoom button").first()).toHaveText("World");
 });
 
 test("a first visit follows the browser's language", async ({ browser }) => {

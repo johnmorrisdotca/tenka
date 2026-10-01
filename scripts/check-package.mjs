@@ -68,13 +68,15 @@ if (tenkaFromJSON(tenkaToJSON(game)).moves.length !== 357) throw new Error("the 
 if (decodeTenka(encodeTenka(game)).winners.join() !== "1") throw new Error("the game did not read back as kept");
 if (TENKA_VERSION !== ${JSON.stringify(pkg.version)}) throw new Error("TENKA_VERSION is " + TENKA_VERSION);
 if (shapes.TENKA_SHAPES.outlines.length !== 42) throw new Error("the shapes are not forty-two outlines");
+if (tenka.tenkaDailySeed(new Date("2026-10-01T12:00:00Z")) !== 20261001) throw new Error("the day's seed is not the date as a number");
 `;
 writeFileSync(
   join(project, "esm.mjs"),
   `${entries.map((entry, i) => `import * as m${i} from ${JSON.stringify(entry)};`).join("\n")}
 const all = [${entries.map((_, i) => `m${i}`).join(", ")}];
 const names = ${JSON.stringify(entries)};
-all.forEach((m, i) => { if (Object.keys(m).length === 0) throw new Error(names[i] + " exports nothing"); });
+// An entry that only defines the tag on a page (the /define one) exports nothing, and is imported for its effect.
+all.forEach((m, i) => { if (Object.keys(m).length === 0 && !names[i].endsWith("/define")) throw new Error(names[i] + " exports nothing"); });
 const tenka = m0;
 const shapes = all[names.indexOf(${JSON.stringify(`${pkg.name}/shapes`)})];
 ${game}
@@ -84,7 +86,7 @@ console.log(names.join(" "));
 writeFileSync(
   join(project, "cjs.cjs"),
   `const names = ${JSON.stringify(entries)};
-for (const name of names) { const m = require(name); if (Object.keys(m).length === 0) throw new Error(name + " exports nothing"); }
+for (const name of names) { const m = require(name); if (Object.keys(m).length === 0 && !name.endsWith("/define")) throw new Error(name + " exports nothing"); }
 const tenka = require(${JSON.stringify(pkg.name)});
 const shapes = require(${JSON.stringify(`${pkg.name}/shapes`)});
 ${game}

@@ -11,7 +11,7 @@ import { NO_CHOICE, choiceNow, marksFor, tapTerritory } from "../tenkaTaps.ts";
 import { armiesHeld, territoriesHeld } from "../tenkaTurn.ts";
 import { continentNameIn, tenkaSay, tenkaStrings, territoryNameIn, type TenkaLocale, type TenkaStrings } from "../strings.ts";
 import { ownerColour } from "./colours.ts";
-import { continentView, nearestLand, tenkaMapModel } from "./mapModel.ts";
+import { continentView, landInDirection, nearestLand, tenkaMapModel, type TenkaArrow } from "./mapModel.ts";
 import { TENKA_STYLE } from "./style.ts";
 import { tenkaMapSvg } from "./svg.ts";
 
@@ -125,6 +125,8 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   let timer: ReturnType<typeof setTimeout> | null = null;
   let focus: TenkaContinentKey | null = null;
   let note = "";
+  // The territory a keyboard is on: the one Tab lands on, and the one the arrow keys move from.
+  let onLand: number | null = null;
 
   const root = node("div", "tk-root");
   root.dataset.testid = "tk-root";
@@ -194,6 +196,34 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     const scale = box.width / view.width;
     const near = nearestLand(view.x + (event.clientX - box.left) / scale, view.y + (event.clientY - box.top) / scale, 24 / scale, game.map);
     if (near !== null) tap(near);
+  });
+
+  // Keyboard play. A territory is focused (not by Tab, which would be forty-two stops) and the arrow keys move
+  // between neighbours on the screen; Enter or Space taps, as a finger would.
+  const ARROWS: Readonly<Record<string, TenkaArrow>> = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" };
+  const landAt = (territory: number) => board.querySelector<SVGElement>(`.tk-land[data-territory="${territory}"]`);
+  board.addEventListener("focusin", (event) => {
+    const hit = (event.target as Element).closest("[data-territory]");
+    if (hit !== null && hit.classList.contains("tk-land")) onLand = Number(hit.getAttribute("data-territory"));
+  });
+  board.addEventListener("keydown", (event) => {
+    const hit = (event.target as Element).closest(".tk-land[data-territory]");
+    if (hit === null || event.altKey || event.ctrlKey || event.metaKey) return;
+    const territory = Number(hit.getAttribute("data-territory"));
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      tap(territory);
+      return;
+    }
+    const arrow = ARROWS[event.key];
+    if (arrow === undefined) return;
+    event.preventDefault();
+    const next = landInDirection(territory, arrow, game.map, continentView(focus, game.map));
+    if (next === null) return;
+    landAt(territory)?.setAttribute("tabindex", "-1");
+    const there = landAt(next);
+    there?.setAttribute("tabindex", "0");
+    there?.focus();
   });
 
   const armiesPicker = (least: number, most: number, start: number, act: (armies: number) => void, label: (armies: number) => string) => {
@@ -436,7 +466,19 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     const marks = computers[game.toPlay] ? marksFor(game, NO_CHOICE) : marksFor(game, choice);
     const model = tenkaMapModel(game, marks, colours);
     const drawn = { ...model, lands: model.lands.map((land) => ({ ...land, name: landName(land.territory) })) };
-    board.replaceChildren(tenkaMapSvg(drawn, { view: continentView(focus, game.map), pixels: board.clientWidth || undefined, label: words.mapLabel }));
+    // The map is drawn again after every move; a keyboard stays where it was.
+    const kept = board.contains(document.activeElement) && onLand !== null;
+    const view = continentView(focus, game.map);
+    const describe = (land: { name: string; owner: number; armies: number }) => tenkaSay(words.landSay, { land: land.name, owner: land.owner < 0 ? words.neutral : who(land.owner), n: land.armies });
+    board.replaceChildren(tenkaMapSvg(drawn, { view, pixels: board.clientWidth || undefined, label: words.mapLabel, describe, keys: words.mapKeys }));
+    // The one Tab lands on: where the keyboard was, if that is on the screen; else the choice, else the first of the mover's on the screen.
+    const shown = drawn.lands.filter((land) => land.at[0] >= view[0] && land.at[0] <= view[0] + view[2] && land.at[1] >= view[1] && land.at[1] <= view[1] + view[3]);
+    const stop = shown.find((land) => land.territory === onLand) ?? shown.find((land) => land.territory === (choice.from ?? choice.placedOn)) ?? shown.find((land) => land.owner === game.toPlay) ?? shown[0];
+    if (stop === undefined) return;
+    onLand = stop.territory;
+    const there = landAt(stop.territory);
+    there?.setAttribute("tabindex", "0");
+    if (kept) there?.focus({ preventScroll: true });
   }
 
   function render() {

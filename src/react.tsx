@@ -1,4 +1,4 @@
-import { useEffect, useRef, type HTMLAttributes, type SVGAttributes } from "react";
+import { useEffect, useRef, type HTMLAttributes, type KeyboardEvent, type SVGAttributes } from "react";
 
 import type { TenkaGame, TenkaMapMarks } from "./tenka.types.ts";
 import { NO_MARKS, tenkaMapModel } from "./ui/mapModel.ts";
@@ -26,15 +26,30 @@ export type TenkaMapProps = {
  * or its counter reported by number. It draws; the rules stay in
  * `playTenka`, and what a press means in `tapTerritory`. Scales to its
  * container's width; style `.tk-land`, `.tk-sea` and the rest as you like.
+ * Where a press is wanted, each territory can be reached by Tab and pressed
+ * with Enter or Space.
  */
 export function TenkaMap({ game, marks = NO_MARKS, colours, onTerritory, label = "Map of the world", ...svg }: TenkaMapProps) {
   const model = tenkaMapModel(game, marks, colours);
   const press = onTerritory === undefined ? undefined : (territory: number) => () => onTerritory(territory);
+  const keyboard = (land: { territory: number; name: string; armies: number }) =>
+    onTerritory === undefined
+      ? {}
+      : {
+          role: "button",
+          tabIndex: 0,
+          "aria-label": `${land.name}: ${land.armies}`,
+          onKeyDown: (event: KeyboardEvent<SVGPathElement>) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            onTerritory(land.territory);
+          },
+        };
   return (
     <svg viewBox={`0 0 ${model.width} ${model.height}`} role="group" aria-label={label} {...svg}>
       <rect x={0} y={0} width={model.width} height={model.height} fill="#b9d3dc" className="tk-sea" />
       {model.lands.map((land) => (
-        <path key={land.key} d={land.outline} fill={land.fill} fillOpacity={0.82} stroke="rgba(20,20,20,0.55)" strokeWidth={1.2} strokeLinejoin="round" className="tk-land" data-territory={land.key} onClick={press?.(land.territory)} style={press === undefined ? undefined : { cursor: "pointer" }}>
+        <path key={land.key} d={land.outline} fill={land.fill} fillOpacity={0.82} stroke="rgba(20,20,20,0.55)" strokeWidth={1.2} strokeLinejoin="round" className="tk-land" data-territory={land.key} onClick={press?.(land.territory)} style={press === undefined ? undefined : { cursor: "pointer" }} {...keyboard(land)}>
           <title>{`${land.name}: ${land.armies}`}</title>
         </path>
       ))}
@@ -66,7 +81,7 @@ export type TenkaTableProps = TenkaTableOptions & Omit<HTMLAttributes<HTMLDivEle
  * browser has it. Options are read when it mounts; give it a new `key` to
  * start over with different ones.
  */
-export function TenkaTable({ players, computers, rounds, seed, colours, computerDelayMs, onChange, locale, strings, theme, record, ...element }: TenkaTableProps) {
+export function TenkaTable({ players, computers, rounds, seed, map, colours, computerDelayMs, onChange, locale, strings, theme, record, ...element }: TenkaTableProps) {
   const host = useRef<HTMLDivElement>(null);
   const latest = useRef(onChange);
   useEffect(() => {
@@ -75,7 +90,7 @@ export function TenkaTable({ players, computers, rounds, seed, colours, computer
   useEffect(() => {
     const target = host.current;
     if (target === null) return;
-    const table = mountTenka(target, { players, computers, rounds, seed, colours, computerDelayMs, locale, strings, theme, record, onChange: (game) => latest.current?.(game) });
+    const table = mountTenka(target, { players, computers, rounds, seed, map, colours, computerDelayMs, locale, strings, theme, record, onChange: (game) => latest.current?.(game) });
     return () => table.destroy();
     // Mounted once per key, as documented above.
     // eslint-disable-next-line react-hooks/exhaustive-deps

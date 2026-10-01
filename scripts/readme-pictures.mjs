@@ -29,14 +29,14 @@ async function shot({ width, height, colorScheme, lang, europe = false, path, sc
     return route.fulfill({ body: readFileSync(file), contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream" });
   });
   await page.goto(`${host}/?seed=7&delay=0&lang=${lang}`);
-  await page.waitForSelector('[data-testid="tk-root"][data-waiting="true"]');
-  const own = await page.locator('.tk-land[data-owner="0"]').first().getAttribute("data-territory");
-  await page.locator(`.tk-counter[data-territory="${own}"]`).click({ force: true });
-  await page.locator('[data-testid="tk-all"]').click();
-  await page.locator(`.tk-counter[data-territory="${own}"]`).click({ force: true });
-  await page.locator('[data-testid="tk-record"] summary').click();
-  await page.waitForFunction(() => document.querySelector('[data-testid="tk-log"]').textContent !== "");
-  if (europe) await page.locator('.tk-zoom [data-view="europe"]').click();
+  await page.waitForSelector('#table [data-testid="tk-root"][data-waiting="true"]');
+  const own = await page.locator('#table .tk-land[data-owner="0"]').first().getAttribute("data-territory");
+  await page.locator(`#table .tk-counter[data-territory="${own}"]`).click({ force: true });
+  await page.locator('#table [data-testid="tk-all"]').click();
+  await page.locator(`#table .tk-counter[data-territory="${own}"]`).click({ force: true });
+  await page.locator('#table [data-testid="tk-record"] summary').click();
+  await page.waitForFunction(() => document.querySelector('#table [data-testid="tk-log"]').textContent !== "");
+  if (europe) await page.locator('#table .tk-zoom [data-view="europe"]').click();
   await page.waitForTimeout(300);
   if (scrollTo) await page.locator(scrollTo).evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 16));
   else await page.evaluate(() => window.scrollTo(0, 0));
@@ -48,5 +48,5 @@ async function shot({ width, height, colorScheme, lang, europe = false, path, sc
 // From the top of the page, so the header, the language chooser and the cloth patches show.
 await shot({ width: 1280, height: 900, colorScheme: "light", lang: "en", path: join(docs, "desktop.jpg") });
 // Europe close up, on a phone, scrolled to the zoom buttons above the map.
-await shot({ width: 390, height: 844, colorScheme: "dark", lang: "ja", europe: true, path: join(docs, "phone.jpg"), scrollTo: ".tk-zoom" });
+await shot({ width: 390, height: 844, colorScheme: "dark", lang: "ja", europe: true, path: join(docs, "phone.jpg"), scrollTo: "#table .tk-zoom" });
 await browser.close();

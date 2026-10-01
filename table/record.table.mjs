@@ -16,25 +16,25 @@ async function saved(page, selector) {
 test("the record is written as the game goes, and saves as JSON, text and CSV", async ({ page }) => {
   const errors = await open(page);
   const own = (await state(page)).lands.findIndex((land) => land.owner === 0);
-  await tap(page, '[data-testid="tk-record"] summary');
-  await expect(page.locator('[data-testid="tk-log"]')).toContainText("Tenka:");
+  await tap(page, '#table [data-testid="tk-record"] summary');
+  await expect(page.locator('#table [data-testid="tk-log"]')).toContainText("Tenka:");
   let s = await sound(page, errors);
   expect(s.log).toBe("Tenka: You, Kaze, Yama; 20 rounds; seed 7\nNo moves yet.\n");
   await tapLand(page, own);
   s = await sound(page, errors);
   expect(s.log).toMatch(/^Tenka: You, Kaze, Yama; 20 rounds; seed 7\nRound 1\nYou places 1 on .+\.\n$/);
 
-  const json = await saved(page, '[data-testid="tk-save-json"]');
+  const json = await saved(page, '#table [data-testid="tk-save-json"]');
   expect(json.name).toBe("tenka-7.json");
   const data = JSON.parse(json.text);
   expect(data.format).toBe(1);
   expect(data.moves).toEqual([["p", own, 1]]);
   expect(tenkaFromJSON(json.text).armies[own]).toBe(s.lands[own].armies);
 
-  const text = await saved(page, '[data-testid="tk-save-text"]');
+  const text = await saved(page, '#table [data-testid="tk-save-text"]');
   expect(text.name).toBe("tenka-7.txt");
   expect(text.text).toBe(s.log);
-  const csv = await saved(page, '[data-testid="tk-save-csv"]');
+  const csv = await saved(page, '#table [data-testid="tk-save-csv"]');
   expect(csv.name).toBe("tenka-7.csv");
   expect(csv.text.split("\r\n")[0]).toBe(TENKA_CSV_COLUMNS.join(","));
   expect(csv.text.split("\r\n").length).toBe(3);
@@ -49,16 +49,16 @@ test("a saved game loads back, and a file that is not a game is refused", async 
   const errors = await open(page);
   const own = (await state(page)).lands.findIndex((land) => land.owner === 0);
   await tapLand(page, own);
-  await tap(page, '[data-testid="tk-record"] summary');
-  await expect(page.locator('[data-testid="tk-log"]')).toContainText("Round 1");
-  const json = await saved(page, '[data-testid="tk-save-json"]');
+  await tap(page, '#table [data-testid="tk-record"] summary');
+  await expect(page.locator('#table [data-testid="tk-log"]')).toContainText("Round 1");
+  const json = await saved(page, '#table [data-testid="tk-save-json"]');
   const before = await state(page);
 
   // Play on, then go back to the saved game.
   await tapLand(page, own);
   expect((await state(page)).lands[own].armies).toBe(before.lands[own].armies + 1);
-  await page.locator('[data-testid="tk-file"]').setInputFiles({ name: "tenka-7.json", mimeType: "application/json", buffer: Buffer.from(json.text) });
-  await expect(page.locator('[data-testid="tk-note"]')).toHaveText("Game loaded: 1 moves.");
+  await page.locator('#table [data-testid="tk-file"]').setInputFiles({ name: "tenka-7.json", mimeType: "application/json", buffer: Buffer.from(json.text) });
+  await expect(page.locator('#table [data-testid="tk-note"]')).toHaveText("Game loaded: 1 moves.");
   let s = await sound(page, errors);
   expect(s.lands.map((land) => land.armies)).toEqual(before.lands.map((land) => land.armies));
   expect(s.log).toBe(before.log);
@@ -66,8 +66,8 @@ test("a saved game loads back, and a file that is not a game is refused", async 
   // A move nobody could have made, and a file of something else.
   const forged = JSON.stringify({ ...JSON.parse(json.text), moves: [["a", 0, 41, 3]] });
   for (const text of [forged, "not a game", "{}"]) {
-    await page.locator('[data-testid="tk-file"]').setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(text) });
-    await expect(page.locator('[data-testid="tk-note"]')).toHaveText("That file is not a game of Tenka these rules can replay.");
+    await page.locator('#table [data-testid="tk-file"]').setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(text) });
+    await expect(page.locator('#table [data-testid="tk-note"]')).toHaveText("That file is not a game of Tenka these rules can replay.");
   }
   s = await sound(page, errors);
   expect(s.lands.map((land) => land.armies)).toEqual(before.lands.map((land) => land.armies));

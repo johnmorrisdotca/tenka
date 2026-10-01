@@ -1,7 +1,7 @@
 // The documents that are made from the source, or that quote it, checked against it.
 // Plain JavaScript, so that reading files needs no Node types. `pnpm docs:make` rewrites what is made.
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
@@ -9,6 +9,7 @@ import { pathToFileURL } from "node:url";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
+import { TenkaTable } from "./element.ts";
 import { TENKA_STRINGS } from "./strings.ts";
 import { playTenka } from "./tenka.ts";
 import { TENKA_CSV_COLUMNS, tenkaToJSON } from "./tenkaExport.ts";
@@ -136,7 +137,7 @@ describe("the README's tables", () => {
       expect(rows.length).toBeGreaterThan(4);
       for (const row of rows) for (const name of codes(row[2])) expect(tenka[name], name).toBeDefined();
     }
-    for (const heading of ["### Playing", "### The map's facts", "### Cards and dice", "### Keeping and export", "### Taps and words"]) {
+    for (const heading of ["### Playing", "### The map's facts", "### Cards and dice", "### Keeping and export", "### The day's seed", "### Taps and words"]) {
       for (const [names] of table(heading)) {
         for (const code of codes(names)) expect(tenka[code.replace(/\(.*$/, "")], code).toBeDefined();
       }
@@ -150,6 +151,10 @@ describe("the README's tables", () => {
   it("every export of the main entry is named in the README", async () => {
     const tenka = await import("./index.ts");
     for (const name of Object.keys(tenka)) expect(readme.includes(`\`${name}`), `${name} is documented in the README`).toBe(true);
+  });
+
+  it("the element's attributes are the ones listed", () => {
+    expect(table("| Attribute | Default | What it does |").map(([name]) => codes(name)[0])).toEqual(TenkaTable.observedAttributes);
   });
 
   it("the table's options and handle are the ones listed", () => {
@@ -205,6 +210,33 @@ describe("the package", () => {
     expect(TENKA_VERSION).toBe(pkg.version);
     expect(readFileSync("CHANGELOG.md", "utf8")).toContain(`## [${pkg.version}] - `);
     expect(readme).toContain(`"generator": "tenka ${pkg.version}"`);
+  });
+
+  it("needs Node 22 or later, and says so only that way", () => {
+    expect(pkg.engines.node).toBe(">=22");
+    expect(readme).not.toMatch(/Node 20/);
+    expect(readFileSync("CONTRIBUTING.md", "utf8")).not.toMatch(/Node 20/);
+  });
+
+  it("lists every package of the family, with its kana, as the demo's footer does", () => {
+    const template = readFileSync("scripts/family-template.mjs", "utf8");
+    const family = [...template.matchAll(/\{ id: "([\w-]+)", name: "(\w+)", kana: "([^"]+)" \}/g)].map((match) => ({ id: match[1], name: match[2], kana: match[3] }));
+    expect(family.length).toBeGreaterThanOrEqual(16);
+    const block = readme.slice(readme.indexOf("### The family"), readme.indexOf("\n## ", readme.indexOf("### The family")));
+    for (const { id, name, kana } of family) expect(block, id).toContain(`- [${name}](https://github.com/johnmorrisdotca/${id}) (${kana}`);
+    const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+    expect(block).toContain(`one of ${words[family.length]} packages`);
+    expect([...block.matchAll(/^- \[/gm)]).toHaveLength(family.length);
+    expect(template).toContain(`{ id: "tenka", name: "Tenka", kana: "天下" }`);
+  });
+
+  it("has the files a visitor looks for: issue templates, a pull request template, a security policy", () => {
+    for (const file of [".github/ISSUE_TEMPLATE/report-a-bug.md", ".github/ISSUE_TEMPLATE/suggest-a-feature.md", ".github/ISSUE_TEMPLATE/fix-a-translation.md", ".github/ISSUE_TEMPLATE/add-my-project.md", ".github/ISSUE_TEMPLATE/config.yml", ".github/pull_request_template.md", "SECURITY.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "LICENSE"]) expect(existsSync(file), file).toBe(true);
+    expect(readme).toContain("issues/new?template=fix-a-translation.md");
+  });
+
+  it("keeps SECURITY.md and CODE_OF_CONDUCT.md equal to the family's master text (the shared .github repository), a copy of which is kept in scripts/community", () => {
+    for (const file of ["SECURITY.md", "CODE_OF_CONDUCT.md"]) expect(readFileSync(file, "utf8"), file).toBe(readFileSync(`scripts/community/${file}`, "utf8"));
   });
 
   it("its description and keywords are fit for npm", () => {

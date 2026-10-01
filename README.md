@@ -14,7 +14,7 @@ The rules as pure, seeded TypeScript, a computer player, a game that saves and r
 <p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><strong>Play a game →</strong></a> · <a href="https://johnmorrisdotca.github.io/tenka/api.html">API reference</a></p>
 
 <p align="center">
-  <img src="docs/desktop.jpg" alt="A game of three on the map of the world, under the demo's header with its language chooser and five cloth patches: the set-up choices, an attack from Brazil begun, the players with their lands and armies, and the record of the game beside the map" width="720">
+  <img src="docs/desktop.jpg" alt="A game of three on the map of the world, under the demo's header with its language chooser, five cloth patches and Help switch: the set-up choices, an attack from Brazil begun, the players with their lands and armies, and the record of the game beside the map" width="720">
   <img src="docs/phone.jpg" alt="Europe close up on a phone in dark mode, in Japanese: the zoom buttons with Europe chosen, the map with its sea routes dashed, and under it the players and the record of the game" width="220">
 </p>
 
@@ -80,10 +80,11 @@ and the numbers of play the genre shares.
 
 ## Use it in your project
 
-Tenka is four things, each usable without the others: **the rules**, plain
+Tenka is five things, each usable without the others: **the rules**, plain
 functions over a plain game value; **the map's shapes**, as SVG paths; **a
-table** you mount into any element; and **React components** for the map and
-the table.
+table** you mount into any element; **the same table as a tag**,
+`<tenka-table>`, for a page with no script of its own; and **React
+components** for the map and the table.
 
 ### 1. The API alone
 
@@ -129,7 +130,22 @@ rules refuse is `null`: Alaska is not Ben's to attack from.
 Without a bundler, import from the files as they are published:
 `./node_modules/@johnmorrisdotca/tenka/dist/ui.js`, or a copy of `dist/`.
 
-### 3. React
+### 3. As a tag
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tenka@1/dist/element-define.js"></script>
+
+<tenka-table players="You, Kaze, Yama" rounds="10" seed="2026"></tenka-table>
+<tenka-table players="Ann, Ben, Cho" computers="none" map="europe"></tenka-table>
+```
+
+The first is a game against two computers, dealt from a seed; the second is
+three people taking turns on one device, on the map of Europe. A table in a
+tag needs no framework and no bundler, and a page with a framework can use it
+the same way. Every attribute is listed under [The element](#the-element); the
+table fires `tenka-change` after each move.
+
+### 4. React
 
 ```jsx
 import { useState } from "react";
@@ -152,7 +168,7 @@ draws an empty box and nothing needs a provider. In Next.js, use it from a
 client component (`"use client"`). `TenkaMap` is the map alone, for a table of
 your own: see [The React components](#the-react-components).
 
-### 4. Vue
+### 5. Vue
 
 ```vue
 <script setup>
@@ -174,7 +190,7 @@ onBeforeUnmount(() => table?.destroy());
 </template>
 ```
 
-### 5. Svelte
+### 6. Svelte
 
 ```svelte
 <script>
@@ -193,7 +209,7 @@ onBeforeUnmount(() => table?.destroy());
 <p id="moves">{moves}</p>
 ```
 
-### 6. Angular
+### 7. Angular
 
 ```typescript
 import { Component, ElementRef, OnDestroy, afterNextRender, provideZonelessChangeDetection, signal, viewChild } from "@angular/core";
@@ -221,7 +237,7 @@ class App implements OnDestroy {
 bootstrapApplication(App, { providers: [provideZonelessChangeDetection()] });
 ```
 
-Each of the five is taken from this page as it is written, built from the
+Each of the six is taken from this page as it is written, built from the
 packed tarball in a project of its own, and played by a tap on the map in
 Chromium and WebKit, by `scripts/check-frameworks.mjs`, before a release names
 it.
@@ -233,8 +249,9 @@ it.
 - **A game you can keep.** `tenkaToJSON` and `tenkaFromJSON`, plain text and
   CSV; what is read back is played through the rules again, never trusted.
 - **No dependencies**, ES modules, a `default` export condition so that
-  `require()` loads it too (Node 22 and later), and `sideEffects: false`, so a
-  bundler drops what you do not import.
+  `require()` loads it too (Node 22 and later), and a `sideEffects` list that
+  names only the file that defines the tag, so a bundler drops what you do not
+  import.
 - **Sizes.** The rules, the computer player and keeping a game are about 17 kB
   minified (6 kB gzipped) once a bundler has shaken the rest out; the whole
   main entry, with both languages and the exports, is 37 kB (12 kB). The
@@ -242,18 +259,20 @@ it.
   outlines are their own entry, `/shapes`, so code that only plays the rules
   never carries them.
 - **Where it runs.** Current Chrome, Edge, Firefox and Safari, on a desk or a
-  phone. The rules have no DOM in them and run in Node 20 and later, Deno,
+  phone. The rules have no DOM in them and run in Node 22 and later, Deno,
   Bun and web workers.
 
 ## Architecture
 
 The rules, the map and the computer player are plain functions over plain data
 with no DOM: a game is a value, and every move returns the next one. Drawing
-the map is its own entry (`/ui` for plain DOM, `/react` for React, `/shapes`
-for the outlines), so a page that only wants the rules loads none of it.
+the map is its own entry (`/ui` for plain DOM, `/element` for a tag, `/react`
+for React, `/shapes` for the outlines), so a page that only wants the rules loads none of it.
 
 ```text
 src/
+├── element-define.ts          the "/element/define" entry: defines <tenka-table> on the page by being imported
+├── element.ts                 the "/element" entry: the <tenka-table> element, a whole table in a tag
 ├── index.ts                   the main entry: the rules, the map, saving and the computer player, with no DOM
 ├── react.tsx                  the "/react" entry: a map to draw in React
 ├── shapes.ts                  the "/shapes" entry: how the world and Europe are drawn, as outlines
@@ -262,6 +281,7 @@ src/
 ├── tenka.ts                   the rules, nothing else: the classic world-conquest game for two to six players
 ├── tenka.types.ts             the game, its moves and its map, as the rules speak of them
 ├── tenkaCards.ts              the cards won by a conquest, and the sets that trade for armies
+├── tenkaDaily.ts              one seed a day, the same for everybody
 ├── tenkaDice.ts               the dice and the seeded random they are thrown with
 ├── tenkaEurope.data.ts        Europe's thirty-seven territories and neighbours, written by scripts/map.mjs europe
 ├── tenkaEuropeShapes.data.ts  Europe's outlines, written by scripts/map.mjs europe
@@ -279,7 +299,7 @@ src/
 ├── version.ts                 the version of this package, as package.json has it
 └── ui/  the table that draws and plays a game
     ├── colours.ts   the colours a table is drawn in
-    ├── mapModel.ts  which outlines draw which map
+    ├── mapModel.ts  which outlines draw which map, and which territory an arrow key moves to
     ├── mount.ts     the table itself: mounting it on a page, and the options it takes
     ├── style.ts     the table's own styles, every colour a CSS variable so a page can re-colour it
     └── svg.ts       small helpers that build the map's SVG
@@ -317,25 +337,27 @@ issue and we will add you.
 
 ### The family
 
-Tenka has siblings, each made for the same site, each MIT, each at
+Tenka is one of sixteen packages, each made for the same site, each MIT, each at
 [github.com/johnmorrisdotca](https://github.com/johnmorrisdotca):
 
-- [Korokoro](https://github.com/johnmorrisdotca/korokoro) (コロコロ, the sound
-  of something small rolling along): a dice roller and a dice notation
-  parser, with the exact odds of every roll.
-- [Kyuubu](https://github.com/johnmorrisdotca/kyuubu) (キューブ, how Japanese
-  says "cube"): a turning cube for the browser, 2×2 to 7×7, drawn in CSS 3D.
-- [Hitotsu](https://github.com/johnmorrisdotca/hitotsu) (一つ, "one"): a
-  colour-card game, named for the call a player makes with one card left.
-- [Toranpu](https://github.com/johnmorrisdotca/toranpu) (トランプ, the everyday
-  Japanese word for a deck of playing cards): ten card games, complete, with a
-  computer for every seat.
-- [Tane](https://github.com/johnmorrisdotca/tane) (種, a seed, the kind you
-  plant): seeded random numbers and daily seeds.
-- [Narabe](https://github.com/johnmorrisdotca/narabe) (並べ, "line them up"):
-  a rules engine for forty-eight board games, from five in a row to Go.
-- [Kumimoji](https://github.com/johnmorrisdotca/kumimoji) (組み文字, "letters
-  put together"): the crossword tile race, in English and Japanese.
+- [Korokoro](https://github.com/johnmorrisdotca/korokoro) (コロコロ, the sound of something small rolling): dice, with notation, exact odds and games.
+- [Kyuubu](https://github.com/johnmorrisdotca/kyuubu) (キューブ, how Japanese says "cube"): a turning cube for the browser, 2×2 to 7×7.
+- [Hitotsu](https://github.com/johnmorrisdotca/hitotsu) (一つ, "one"): a colour-card game, named for the call a player makes with one card left.
+- [Toranpu](https://github.com/johnmorrisdotca/toranpu) (トランプ, the everyday Japanese word for a deck of playing cards): card games as pure rules.
+- [Tane](https://github.com/johnmorrisdotca/tane) (種, a seed, the kind you plant): seeded random numbers and daily seeds.
+- [Narabe](https://github.com/johnmorrisdotca/narabe) (並べ, "line them up"): a rules engine for gomoku, Reversi, Go, checkers and many more.
+- [Tenka](https://github.com/johnmorrisdotca/tenka) (天下, "under heaven"): a world-conquest game for two to six.
+- [Kumimoji](https://github.com/johnmorrisdotca/kumimoji) (組み文字, "letters put together"): a crossword tile race in English and Japanese.
+- [Tsunagi](https://github.com/johnmorrisdotca/tsunagi) (繋ぎ, "joining"): a line-joining puzzle.
+- [Jarajara](https://github.com/johnmorrisdotca/jarajara) (ジャラジャラ, the rattle of mahjong tiles being shuffled): mahjong tiles and a matching solitaire.
+- [Suido](https://github.com/johnmorrisdotca/suido) (水道, "waterworks"): a pipe puzzle.
+- [Domino](https://github.com/johnmorrisdotca/domino) (ドミノ, the Japanese word for dominoes): dominoes and Mexican Train.
+- [Kotoba](https://github.com/johnmorrisdotca/kotoba) (言葉, "words"): word lists and word-game rules.
+- [Sugoroku](https://github.com/johnmorrisdotca/sugoroku) (双六, backgammon's Japanese name): backgammon and its variants.
+- [Kazu](https://github.com/johnmorrisdotca/kazu) (数, "number"): grid number puzzles, Sudoku and five more.
+- [Meikyuu](https://github.com/johnmorrisdotca/meikyuu) (迷宮, "labyrinth"): mazes to draw a line through.
+
+**This package is Tenka.** The demos of all sixteen share one header and footer, so each links the rest.
 
 ## Features
 
@@ -358,6 +380,12 @@ Tenka has siblings, each made for the same site, each MIT, each at
 - **A table to play on.** The whole world or one continent at a tap, sea
   routes dashed, the dice of the last throw, the players and their cards, and
   the record of the game. Against the computer, or passed round one device.
+- **A tag.** `<tenka-table>` is the whole table in one element, with no
+  framework.
+- **One game a day.** `tenkaDailySeed(new Date())` is the same seed for
+  everybody, worldwide.
+- **Played from a keyboard.** Arrow keys between territories, Enter or Space to
+  tap; see [Accessibility](#accessibility).
 - **Export and import.** JSON that reads back in, plain text, and CSV.
 - **English and Japanese**, and any other language by a table of your own.
 - **Themeable.** Every colour is a CSS variable, light and dark.
@@ -551,7 +579,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 1,
   "game": "tenka",
-  "generator": "tenka 1.2.1",
+  "generator": "tenka 1.3.0",
   "seed": 2026,
   "players": [
     "Ann",
@@ -649,6 +677,8 @@ as you type. The entries:
 | `@johnmorrisdotca/tenka` | The rules, the map's facts, the computer player, keeping and export, taps, and the words |
 | `@johnmorrisdotca/tenka/shapes` | `TENKA_SHAPES`, the outline of every territory |
 | `@johnmorrisdotca/tenka/ui` | `mountTenka`, the whole table in plain DOM, and the map as SVG |
+| `@johnmorrisdotca/tenka/element` | `TenkaTable`, the `<tenka-table>` element's class, to extend or to define under another name |
+| `@johnmorrisdotca/tenka/element/define` | Defines `<tenka-table>` on the page by being imported; exports nothing |
 | `@johnmorrisdotca/tenka/react` | `TenkaMap` and `TenkaTable` |
 
 ### Playing
@@ -715,6 +745,25 @@ Each of these takes the map as a last argument, the world when it is left out:
 | `writeTenkaMove(move)`, `readTenkaMove(list)` | One move as a short list, and back |
 | `TENKA_EXPORT_FORMAT`, `TENKA_VERSION` | The JSON's format number, and this package's version |
 
+### The day's seed
+
+| Export | What it does |
+| --- | --- |
+| `tenkaDay(date)` | The day a moment falls on, in UTC, written `YYYY-MM-DD` |
+| `tenkaDailySeed(date)` | That day's seed: the date as a number, so 2026-10-01 is `20261001` |
+
+```ts
+import { startTenka, tenkaDailySeed } from "@johnmorrisdotca/tenka";
+
+tenkaDailySeed(new Date("2026-10-01T12:00:00Z")); // → 20261001
+startTenka(10, ["Ann", "Ben"], tenkaDailySeed(new Date("2026-10-01T23:00:00Z")))!.toPlay; // → startTenka(10, ["Ann", "Ben"], 20261001)!.toPlay
+```
+
+The day is the UTC date, so it changes at one moment for the whole world, and
+everybody who starts from it with the same players and length is dealt the same
+game. It is the same number as Tane's `dailySeed`, so a page that uses both
+agrees; Tenka does not need Tane. What a player does with the deal is their own.
+
 ### Taps and words
 
 | Export | What it does |
@@ -765,13 +814,41 @@ plays a whole game in the element, and returns a handle.
 
 To draw the map yourself, the same entry has `tenkaMapModel(game, marks?,
 colours?)`, which works out every territory's colour, counter and ring;
-`tenkaMapSvg(model, { label?, view?, pixels? })`, which draws it as an `<svg>`
-whose shapes and counters carry `data-territory`; `continentView(key)`, the
+`tenkaMapSvg(model, { label?, view?, pixels?, describe?, keys? })`, which draws
+it as an `<svg>` whose shapes and counters carry `data-territory` and whose
+territories are named buttons for a screen reader (`describe` words what is
+read for each, `keys` is the drawing's description);
+`landInDirection(territory, arrow, map?, view?)`, the territory an arrow key
+moves to; `continentView(key)`, the
 part of the map that frames a continent; `nearestLand(x, y, reach)`, for a
 press on the sea beside an island (each of the two takes the map's key last);
 `TENKA_MAP_SHAPES` and `tenkaShapesOf(map)`, how each map is drawn; and `TENKA_SEAT_COLOURS`,
 `TENKA_NEUTRAL_COLOUR`, `ownerColour(owner, colours?)`, `NO_MARKS` and
 `TENKA_STYLE`, the table's stylesheet as a string.
+
+### The element
+
+`<tenka-table>` is `mountTenka` as a tag: `@johnmorrisdotca/tenka/element/define`
+defines it, and `@johnmorrisdotca/tenka/element` holds the class alone. Each
+attribute is read again when it changes, and a change to any but `lang` deals a
+new game. A table the rules do not offer (one player, say, or 15 rounds) draws
+nothing.
+
+| Attribute | Default | What it does |
+| --- | --- | --- |
+| `players` | You, Kaze, Yama | The names round the table, in seat order, separated by commas: two to six |
+| `computers` | every seat but the first | `true` or `false` for each seat, separated by commas, or `none` for people taking turns on one device, or `all` |
+| `rounds` | `60` | 10, 20, or 60 for the whole world |
+| `seed` | a new one each game | A whole number to deal from, or `daily` for the day's seed |
+| `map` | `world` | `world` or `europe` |
+| `lang` | the page's | `en` or `ja` |
+| `record` | on | `off` leaves the record of the game out |
+| `delay` | `450` | How long the computer waits before each of its moves, in milliseconds |
+
+It fires `tenka-change` after every move, with the game as `event.detail.game`
+(a bubbling `CustomEvent`), and has `game`, `table` (the handle `mountTenka`
+returns), `newGame(options?)` and `setGame(game, computers?)`. To style it,
+set the table's variables on `tenka-table .tk-root`: see [Theming](#theming).
 
 ### The React components
 
@@ -797,7 +874,7 @@ export function Board() {
 | `game` | The game to draw: `owners` and `armies` are read |
 | `marks` | What to light up: from `marksFor(game, choice)` |
 | `colours` | A colour for each seat |
-| `onTerritory` | Called with a territory's number when it or its counter is pressed. Without it the map is a picture |
+| `onTerritory` | Called with a territory's number when it or its counter is pressed, or when Enter or Space is pressed on a territory reached by Tab. Without it the map is a picture |
 | `label` | The map's accessible name |
 | anything else | Passed to the `<svg>` |
 
@@ -805,10 +882,34 @@ export function Board() {
 for its `<div>`. Options are read when it mounts; give it a new `key` to start
 over with different ones.
 
+## Accessibility
+
+- **A keyboard plays it.** On the table, each territory is a button, named for
+  a screen reader with its holder and its armies ("Brazil, Ann, armies 4").
+  Tab lands on one of them, the arrow keys move to the nearest territory in
+  that direction among those on the screen, and Enter or Space taps it, as a
+  finger would. The keyboard stays where it was after each move, and the map's
+  description says so. The choice buttons, the slider and the record are
+  ordinary controls.
+- **What is happening is said.** The line above the map, which says whose turn
+  it is and what to do, is a polite live region, so each turn is read out
+  without moving focus.
+- **Targets are big enough.** Every button, slider and summary is at least 44
+  pixels each way, which a test holds at a phone's width.
+- **Colour is not the only mark.** The armies on a territory are numbers, and
+  a player's marble sits beside their name.
+- **Motion.** There is none to reduce: the table has no animation. The
+  computer's pause between moves is `computerDelayMs`, and 0 plays without it.
+- **Not yet.** The arrow keys go by where territories lie on the screen, not
+  by the neighbours the rules count, so a sea route is not followed by a key.
+  The focus ring is drawn in `--tk-accent`; a page that re-colours it should
+  check its contrast.
+
 ## Theming
 
-Every colour is a CSS variable on `.tk-root`. Set them in your stylesheet, on
-the table's element or any ancestor, or pass them as `theme`, which sets them
+Every colour is a CSS variable on `.tk-root`. Set them in your stylesheet on
+`.tk-root` with a selector more specific than the table's own, such as
+`#table .tk-root`, or pass them as `theme`, which sets them
 on the table itself and so wins in light and dark alike. The seats' colours
 are the `colours` option.
 
@@ -884,7 +985,7 @@ Any current browser: Chrome, Edge, Firefox and Safari, on a desk or a phone.
 It needs ES2020 and, for the table, inline SVG and `ResizeObserver` (without
 which the map is drawn once and not again on a change of width). The table is
 tested in Chromium and in WebKit, Safari's engine, at phone size with touch
-and on a desktop. The rules run in Node 20 and later, Deno, Bun and web
+and on a desktop. The rules run in Node 22 and later, Deno, Bun and web
 workers, and load by `import` and by `require()`.
 
 ## The command line
@@ -907,7 +1008,7 @@ game === null ? "not a game these rules can replay" : tenkaToText(game); // → 
 - Maps of your own: the map as data, with a tool to draw one.
 - A stronger computer player that plans a whole turn.
 - The throw of the dice and armies moving in, animated on the table.
-- A Vue wrapper and a web component, beside the React one.
+- A Vue wrapper, beside the React one and the tag.
 
 Left out on purpose: play between devices, which needs a server (the moves
 are made to be sent, and Itsutsu sends them; the sending is yours); a command
@@ -925,9 +1026,10 @@ pnpm install
 pnpm check        # lint, types and tests
 pnpm test:table   # the demo in real browsers, by taps
 pnpm site         # build the demo into ./site, then serve it
+pnpm pictures     # take the README's two pictures from the built demo
 ```
 
-Please follow the [code of conduct](./CODE_OF_CONDUCT.md).
+Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make a game, a saved game or the map take far too long, or markup that gets out of the drawing, is for the [security policy](./SECURITY.md), not a public issue.
 
 ## Changes
 

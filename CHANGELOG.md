@@ -6,10 +6,28 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-01
+
+Nothing that was exported has changed; the rules, the maps and every saved game are exactly as they were.
+
+### Added
+
+- **`<tenka-table>`**, the whole table as a tag, with no framework: `@johnmorrisdotca/tenka/element/define` defines it (or `…/element` holds the class alone), and `players`, `computers`, `rounds`, `seed`, `map`, `lang`, `record` and `delay` are attributes, read again when they change. It fires `tenka-change` after every move. A table the rules do not offer draws nothing.
+- **A game a day**: `tenkaDailySeed(date)` is the UTC date as a number (2026-10-01 is `20261001`), the same seed for everybody and the same number as Tane's `dailySeed`; `tenkaDay(date)` writes the day. The tag takes `seed="daily"`, and the demo has Today's game.
+- **Played from a keyboard.** Each territory on the table is a named button (its holder and its armies); Tab lands on one, the arrow keys move to the nearest territory in that direction among those on the screen (`landInDirection`), and Enter or Space taps it. The keyboard stays put after each move. `tenkaMapSvg` takes `describe` and `keys`, and the React `TenkaMap` makes each territory a button when it is given `onTerritory`. Two words are new in both languages for it (`landSay`, `neutral`) and one for the map's description (`mapKeys`).
+- **Demo:** a table in a tag, Today's game, and Copy link, which copies an address that deals the same game (its seed, players, length and map).
+- **README:** an Accessibility section, "The element", "The day's seed", and the list of all sixteen packages of the family.
+- SECURITY.md and CODE_OF_CONDUCT.md are the family's shared text, held equal by a test; a pull request template; the family's house rules in CONTRIBUTING.md.
+
 ### Changed
 
+- **Node 22 or later** (`engines`), where it said 20, which is out of support and was never tested. The package's `sideEffects` now names the one file that defines the tag.
 - **A Help switch in the demo.** Beside the language chooser in the family header, shared by every demo. Off (the default) the page is as it was; on, each option row (the players, the length, the map, and the table's view chooser) says in one plain line what it does, in English or Japanese, and every button in it has the same words as its hover text. Kept on the device.
+- The README's pictures are taken again, with the Help switch in the header.
 
+### Fixed
+
+- The React `TenkaTable` did not pass its `map` prop on, so a table for Europe came up as the world. It does now.
 
 ## [1.2.1] - 2026-10-01
 
