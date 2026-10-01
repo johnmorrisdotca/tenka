@@ -4,6 +4,21 @@ import { tenkaDailySeed } from "./tenkaDaily.ts";
 import { isTenkaSeed, isTenkaTable } from "./tenkaStart.ts";
 import { mountTenka, type TenkaTableHandle } from "./ui/mount.ts";
 
+const ElementBase: typeof HTMLElement = typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
+
+const isOff = (value: string | null): boolean => value !== null && ["false", "off", "0", "no"].includes(value.toLowerCase());
+const isOn = (value: string): boolean => ["true", "on", "1", "yes", "computer"].includes(value.toLowerCase());
+
+/** The seats a `computers` attribute names, for `count` seats: undefined to leave it to the table. */
+function computersFrom(value: string | null, count: number): boolean[] | undefined {
+  if (value === null || value.trim() === "") return undefined;
+  const word = value.trim().toLowerCase();
+  if (word === "none") return Array.from({ length: count }, () => false);
+  if (word === "all") return Array.from({ length: count }, () => true);
+  const listed = value.split(",").map((one) => isOn(one.trim()));
+  return Array.from({ length: count }, (_, seat) => listed[seat] ?? true);
+}
+
 /**
  * THE `<tenka-table>` ELEMENT: a whole table of Tenka in a tag, with no
  * framework. `@johnmorrisdotca/tenka/element/define` defines it; this entry
@@ -32,21 +47,6 @@ import { mountTenka, type TenkaTableHandle } from "./ui/mount.ts";
  * methods `newGame()` and `setGame()`. A table the rules do not offer (one player, say, or 15
  * rounds) draws nothing.
  */
-const ElementBase: typeof HTMLElement = typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
-
-const isOff = (value: string | null): boolean => value !== null && ["false", "off", "0", "no"].includes(value.toLowerCase());
-const isOn = (value: string): boolean => ["true", "on", "1", "yes", "computer"].includes(value.toLowerCase());
-
-/** The seats a `computers` attribute names, for `count` seats: undefined to leave it to the table. */
-function computersFrom(value: string | null, count: number): boolean[] | undefined {
-  if (value === null || value.trim() === "") return undefined;
-  const word = value.trim().toLowerCase();
-  if (word === "none") return Array.from({ length: count }, () => false);
-  if (word === "all") return Array.from({ length: count }, () => true);
-  const listed = value.split(",").map((one) => isOn(one.trim()));
-  return Array.from({ length: count }, (_, seat) => listed[seat] ?? true);
-}
-
 export class TenkaTable extends ElementBase {
   static observedAttributes = ["players", "computers", "rounds", "seed", "map", "lang", "record", "delay"];
 
