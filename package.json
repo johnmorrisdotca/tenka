@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/tenka",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "World conquest board game engine for two to six, in the manner of Risk: pure, seeded TypeScript rules on a map of the real world, dice battles, cards, a computer player, and a game saved and replayed as JSON, text or CSV. An SVG world map and a playable table for React, Vue, Svelte, Angular or plain HTML, in English and Japanese. Zero dependencies.",
   "keywords": [
     "world-conquest",

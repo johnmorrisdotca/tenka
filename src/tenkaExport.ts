@@ -1,8 +1,8 @@
 import { TENKA_MOVES, TENKA_PHASES } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaMove, TenkaPhase, TenkaRoll, TenkaSeat, TenkaTrade } from "./tenka.types.ts";
+import type { TenkaGame, TenkaMove, TenkaPhase, TenkaRoll, TenkaSeat, TenkaTrade, TenkaMap, TenkaMapKey } from "./tenka.types.ts";
 import { playTenka } from "./tenka.ts";
 import { decodeTenka, readTenkaMove, replayTenka, writeTenkaMove } from "./tenkaKeep.ts";
-import { TENKA_TERRITORIES } from "./tenkaMap.ts";
+import { TENKA_MAPS, tenkaMapOf } from "./tenkaMap.ts";
 import { startTenka } from "./tenkaStart.ts";
 import { TENKA_STRINGS, tenkaSay, territoryNameIn, type TenkaStrings } from "./strings.ts";
 import { TENKA_VERSION } from "./version.ts";
@@ -39,6 +39,8 @@ export type TenkaExported = {
   rounds: number;
   /** Whether the starting armies were scattered (`"auto"`) or placed by hand (`"hand"`). */
   placing: "auto" | "hand";
+  /** The map, when it is not the world (`"europe"`); left out for the world. */
+  map?: TenkaMapKey;
   /** Every move, in order, each as the short list `writeTenkaMove` makes: `["a", 0, 1, 3]`. */
   moves: (string | number)[][];
   /** Where the game stood when it was written. For people and for listings; never read back, since the moves say it. */
@@ -55,6 +57,7 @@ export function tenkaExported(game: TenkaGame): TenkaExported {
     players: [...game.players],
     rounds: game.rounds,
     placing: game.placing,
+    ...(game.map === undefined || game.map === "world" ? {} : { map: game.map }),
     moves: game.moves.map(writeTenkaMove),
     state: { round: game.round, phase: game.phase, toPlay: game.toPlay, winners: [...game.winners] },
   };
@@ -85,7 +88,7 @@ export function tenkaFromJSON(text: string): TenkaGame | null {
     return null;
   }
   if (typeof data !== "object" || data === null || Array.isArray(data)) return null;
-  const { format, game, seed, players, rounds, placing, moves } = data as Record<string, unknown>;
+  const { format, game, seed, players, rounds, placing, moves, map } = data as Record<string, unknown>;
   // What `encodeTenka` keeps has a `v` and no `format`: read by the reader it was written for.
   if (format === undefined) return decodeTenka(text);
   if (typeof format !== "number" || !Number.isInteger(format) || format < 1 || format > TENKA_EXPORT_FORMAT) return null;
@@ -96,7 +99,8 @@ export function tenkaFromJSON(text: string): TenkaGame | null {
   if (!Array.isArray(moves)) return null;
   const read = moves.map(readTenkaMove);
   if (read.some((move) => move === null)) return null;
-  return replayTenka({ seed, players: players as string[], rounds, placing }, read as TenkaMove[]);
+  if (map !== undefined && !(typeof map === "string" && map in TENKA_MAPS)) return null;
+  return replayTenka({ seed, players: players as string[], rounds, placing, map: (map as TenkaMapKey | undefined) ?? "world" }, read as TenkaMove[]);
 }
 
 /** One move of a game's record, with what came of it: what the text and the CSV are written from. */
@@ -133,7 +137,7 @@ export type TenkaRecordEntry = {
  */
 export function tenkaRecord(game: TenkaGame): TenkaRecordEntry[] {
   const entries: TenkaRecordEntry[] = [];
-  let now = startTenka(game.rounds, game.players, game.seed, game.placing);
+  let now = startTenka(game.rounds, game.players, game.seed, game.placing, game.map ?? "world");
   if (now === null) return entries;
   for (const move of game.moves) {
     const next = playTenka(now, move);
@@ -162,8 +166,8 @@ function nameOf(game: TenkaGame, seat: TenkaSeat, strings: TenkaStrings): string
   return given === "" ? tenkaSay(strings.player, { n: seat + 1 }) : given;
 }
 
-function landOf(territory: number, strings: TenkaStrings): string {
-  const data = TENKA_TERRITORIES[territory];
+function landOf(territory: number, strings: TenkaStrings, map: TenkaMap = TENKA_MAPS.world): string {
+  const data = map.territories[territory];
   return data === undefined ? String(territory) : territoryNameIn(strings, data.key) || data.name;
 }
 
@@ -174,16 +178,16 @@ function entryText(game: TenkaGame, entry: TenkaRecordEntry, strings: TenkaStrin
   const parts: string[] = [];
   switch (move.kind) {
     case TENKA_MOVES.place:
-      parts.push(tenkaSay(strings.logPlace, { name, n: move.armies, land: landOf(move.territory, strings) }));
+      parts.push(tenkaSay(strings.logPlace, { name, n: move.armies, land: landOf(move.territory, strings, tenkaMapOf(game)) }));
       break;
     case TENKA_MOVES.trade:
       parts.push(tenkaSay(strings.logTrade, { name, n: entry.trade?.armies ?? 0 }));
-      if (entry.trade !== undefined && entry.trade.bonusTerritory !== null) parts.push(tenkaSay(strings.logTradeBonus, { land: landOf(entry.trade.bonusTerritory, strings) }));
+      if (entry.trade !== undefined && entry.trade.bonusTerritory !== null) parts.push(tenkaSay(strings.logTradeBonus, { land: landOf(entry.trade.bonusTerritory, strings, tenkaMapOf(game)) }));
       break;
     case TENKA_MOVES.attack:
     case TENKA_MOVES.blitz: {
       const roll = entry.roll;
-      const values = { name, from: landOf(move.from, strings), to: landOf(move.to, strings), a: roll?.attackDice.join(" ") ?? "", d: roll?.defendDice.join(" ") ?? "", al: roll?.attackerLost ?? 0, dl: roll?.defenderLost ?? 0, n: roll?.throws ?? 1 };
+      const values = { name, from: landOf(move.from, strings, tenkaMapOf(game)), to: landOf(move.to, strings, tenkaMapOf(game)), a: roll?.attackDice.join(" ") ?? "", d: roll?.defendDice.join(" ") ?? "", al: roll?.attackerLost ?? 0, dl: roll?.defenderLost ?? 0, n: roll?.throws ?? 1 };
       // A blitz decided in one throw reads as the one throw it was, dice and all.
       parts.push(tenkaSay(move.kind === TENKA_MOVES.blitz && values.n > 1 ? strings.logBlitz : strings.logAttack, values));
       if (roll?.took === true) parts.push(tenkaSay(strings.logTook, { land: values.to }));
@@ -199,7 +203,7 @@ function entryText(game: TenkaGame, entry: TenkaRecordEntry, strings: TenkaStrin
     case TENKA_MOVES.fortify:
       return null;
     case TENKA_MOVES.shift:
-      parts.push(tenkaSay(strings.logFortify, { name, n: move.armies, from: landOf(entry.moved?.from ?? -1, strings), to: landOf(entry.moved?.to ?? -1, strings) }));
+      parts.push(tenkaSay(strings.logFortify, { name, n: move.armies, from: landOf(entry.moved?.from ?? -1, strings, tenkaMapOf(game)), to: landOf(entry.moved?.to ?? -1, strings, tenkaMapOf(game)) }));
       break;
     case TENKA_MOVES.endTurn:
       parts.push(tenkaSay(strings.logEndTurn, { name }));
@@ -253,7 +257,7 @@ function cell(value: string | number | undefined): string {
  * made safe with a leading apostrophe.
  */
 export function tenkaToCSV(game: TenkaGame): string {
-  const key = (territory: number | undefined) => (territory === undefined ? undefined : (TENKA_TERRITORIES[territory]?.key ?? String(territory)));
+  const key = (territory: number | undefined) => (territory === undefined ? undefined : (tenkaMapOf(game).territories[territory]?.key ?? String(territory)));
   const rows = tenkaRecord(game).map((entry) => {
     const { move, roll } = entry;
     const from = "from" in move ? move.from : entry.moved?.from;

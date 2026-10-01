@@ -378,6 +378,41 @@ areNeighbours(0, 31); // → true
 Alaska's neighbours are Western Canada by land and the Russian Far East by
 sea: the world wraps round.
 
+### Europe
+
+A second map, played by the same rules: thirty-seven territories in eleven
+regions, from Iceland to the Urals and from the North Cape to the Maghreb.
+Start a game on it with `startTenka(rounds, players, seed, placing, "europe")`;
+the game says `map: "europe"`, and every rule reads that map.
+
+| Region | Territories | Armies for holding it | Key |
+| --- | --- | --- | --- |
+| Britain and Ireland | 3 | 2 | `britishIsles` |
+| The Nordic Countries | 4 | 3 | `scandinavia` |
+| Iberia | 3 | 2 | `iberia` |
+| The Maghreb | 3 | 2 | `maghreb` |
+| France and the Low Countries | 3 | 3 | `france` |
+| Central Europe | 5 | 4 | `centralEurope` |
+| Italy and the Balkans | 4 | 3 | `italyBalkans` |
+| The Danube | 3 | 2 | `danube` |
+| Eastern Europe | 4 | 3 | `easternEurope` |
+| Russia | 3 | 3 | `russia` |
+| Anatolia and the Caucasus | 2 | 2 | `anatolia` |
+
+```ts
+import { TENKA_MAPS, startTenka, tenkaMapOf } from "@johnmorrisdotca/tenka";
+
+TENKA_MAPS.europe.territories.length; // → 37
+const game = startTenka(10, ["Ann", "Ben", "Cho"], 2026, "auto", "europe")!;
+game.map; // → "europe"
+tenkaMapOf(game).continents.length; // → 11
+```
+
+The territories are modern names for real stretches of Europe, laid out for
+this game: a whole country where it is about the size of the others, two
+together where they are small, and a large country cut along a meridian. A
+game saved before there was a choice names no map, and reads as the world's.
+
 ### What a game is
 
 A `TenkaGame` holds everything, as plain data:
@@ -471,7 +506,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 1,
   "game": "tenka",
-  "generator": "tenka 1.1.0",
+  "generator": "tenka 1.2.0",
   "seed": 2026,
   "players": [
     "Ann",
@@ -547,6 +582,11 @@ TENKA_SHAPES.outlines.length; // → 42
 TENKA_SHAPES.labels[0]; // → [95, 203]
 ```
 
+Europe's are `TENKA_EUROPE_SHAPES`, built the same way by `pnpm map europe`
+from Natural Earth's countries at 1:50m, finer because Europe is drawn at four
+times the scale (`scripts/map-europe.mjs` lays out its territories), into
+`src/tenkaEurope.data.ts` and `src/tenkaEuropeShapes.data.ts`.
+
 `TENKA_SHAPES` has each territory's `outlines` (one SVG path), where its
 counter stands (`labels`), its extent (`boxes`), the dashed `seaLines`, the
 links that go off one edge and on at the other (`wraps`), and the
@@ -568,7 +608,7 @@ as you type. The entries:
 
 | Export | What it does |
 | --- | --- |
-| `startTenka(rounds, players, seed, placing?)` | A new game, all of it drawn from the seed; `null` for a table the game is not offered for. `placing` is `"auto"` (starting armies scattered) or `"hand"` (placed one at a time round the table) |
+| `startTenka(rounds, players, seed, placing?, map?)` | A new game, all of it drawn from the seed; `null` for a table the game is not offered for. `placing` is `"auto"` (starting armies scattered) or `"hand"` (placed one at a time round the table); `map` is `"world"` (the default) or `"europe"` |
 | `playTenka(game, move)` | The game after the move, or `null` when the rules refuse it |
 | `tenkaMoves(game)` | Every move the player to move may make now |
 | `attacksOpen(game)` | Every attack open now, with each number of dice, and each as a blitz |
@@ -587,20 +627,27 @@ as you type. The entries:
 
 | Export | What it is |
 | --- | --- |
-| `TENKA_TERRITORIES`, `TENKA_TERRITORY_COUNT` | The forty-two territories: `key`, `name`, `continent`, and neighbours by `land` and by `sea` |
+| `TENKA_MAPS`, `TENKA_MAP_LIST` | Every map, by key (`world`, `europe`): its `territories`, `continents` and each territory's `neighbours` |
+| `tenkaMapOf(game)` | The map a game is played on: the world for a game that names none |
+| `boardOf(map)` | The map an argument names, and the world for anything else (an array's index, handed in by `map`) |
+| `TENKA_TERRITORIES`, `TENKA_TERRITORY_COUNT` | The world's forty-two territories: `key`, `name`, `continent`, and neighbours by `land` and by `sea` |
 | `TENKA_CONTINENTS`, `tenkaContinent(key)` | The six continents: `key`, `name`, `kanji`, `bonus`, `territories` |
 | `tenkaNeighbours(territory)`, `areNeighbours(a, b)` | Where an army may go from a territory |
 | `isTerritory(n)` | Whether a number is a territory's |
 | `continentsHeld(owners, seat)` | The continents a player holds whole |
 | `connectedOwn(owners, from)` | Where one fortifying move may take armies |
 
+Each of these takes the map as a last argument, the world when it is left out:
+`tenkaNeighbours(5, tenkaMapOf(game))`.
+
 ### Cards and dice
 
 | Export | What it does |
 | --- | --- |
-| `TENKA_DECK` | Every card: 0 to 41 the territories', 42 and 43 wild |
-| `cardKind(card)`, `cardTerritory(card)`, `isWild(card)` | What a card shows |
-| `isSet(cards)`, `setsIn(hand)` | Whether three cards make a set; every set in a hand |
+| `TENKA_DECK` | Every card of the world: 0 to 41 the territories', 42 and 43 wild |
+| `tenkaDeckFor(map)` | Every card of a game on that map: one for each territory, then the two wild |
+| `cardKind(card, map?)`, `cardTerritory(card, map?)`, `isWild(card, map?)` | What a card shows |
+| `isSet(cards, map?)`, `setsIn(hand, map?)` | Whether three cards make a set; every set in a hand |
 | `tradeValue(trades)` | What the next set is worth |
 | `throwDice(state, count)` | Dice from the game's random, highest first, and the state after them |
 | `battleLosses(attack, defend)` | Who loses what |
@@ -652,6 +699,7 @@ plays a whole game in the element, and returns a handle.
 | `computers` | every seat but the first | Which seats the computer plays. All `false` passes one device round |
 | `rounds` | `60` | Rounds before the count: 10, 20, or 60 for the whole world |
 | `seed` | a new one each game | The seed every deal and die is drawn from |
+| `map` | `"world"` | The map: `"world"` or `"europe"` |
 | `colours` | `TENKA_SEAT_COLOURS` | A CSS colour for each seat |
 | `computerDelayMs` | `450` | How long the computer waits before each of its moves |
 | `onChange` | | Called with the game after every move |
@@ -663,7 +711,7 @@ plays a whole game in the element, and returns a handle.
 | Handle | What it does |
 | --- | --- |
 | `game()` | The game as it stands |
-| `newGame(options?)` | A new game at the same table; `players`, `computers`, `rounds` and `seed` may change |
+| `newGame(options?)` | A new game at the same table; `players`, `computers`, `rounds`, `seed` and `map` may change |
 | `setGame(game, computers?)` | Put a game on the table: one read back by `tenkaFromJSON` |
 | `setLocale(locale, strings?)` | Change the table's language |
 | `destroy()` | Take the table off the page and stop its timers |
@@ -673,7 +721,8 @@ colours?)`, which works out every territory's colour, counter and ring;
 `tenkaMapSvg(model, { label?, view?, pixels? })`, which draws it as an `<svg>`
 whose shapes and counters carry `data-territory`; `continentView(key)`, the
 part of the map that frames a continent; `nearestLand(x, y, reach)`, for a
-press on the sea beside an island; and `TENKA_SEAT_COLOURS`,
+press on the sea beside an island (each of the two takes the map's key last);
+`TENKA_MAP_SHAPES` and `tenkaShapesOf(map)`, how each map is drawn; and `TENKA_SEAT_COLOURS`,
 `TENKA_NEUTRAL_COLOUR`, `ownerColour(owner, colours?)`, `NO_MARKS` and
 `TENKA_STYLE`, the table's stylesheet as a string.
 

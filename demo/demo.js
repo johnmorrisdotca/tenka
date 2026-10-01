@@ -14,7 +14,10 @@ const WORDS = {
     length: "Length",
     rounds10: "10 rounds",
     rounds20: "20 rounds",
-    rounds60: "The whole world",
+    rounds60: "The whole map",
+    map: "Map",
+    mapWorld: "The world",
+    mapEurope: "Europe",
     newGame: "New game",
     moreTitle: "Other tables",
     moreText: "You play the first seat and the computer plays the rest. Each of these starts a new game another way, and says what the table was given to do it.",
@@ -35,7 +38,10 @@ const WORDS = {
     length: "長さ",
     rounds10: "10ラウンド",
     rounds20: "20ラウンド",
-    rounds60: "世界全体",
+    rounds60: "地図全体",
+    map: "地図",
+    mapWorld: "世界",
+    mapEurope: "ヨーロッパ",
     newGame: "新しいゲーム",
     moreTitle: "ほかの遊び方",
     moreText: "あなたが最初の席で、残りの席はコンピューターが担当します。下のボタンは、それぞれ別の設定で新しいゲームを始めます。ボタンには、そのときテーブルに渡す設定が書いてあります。",
@@ -59,7 +65,7 @@ const asked = (name, least, most) => {
 const delay = asked("delay", 0, 5000);
 const seed = asked("seed", 0, 0xffffffff);
 
-const setUp = { players: 3, rounds: 20 };
+const setUp = { players: 3, rounds: 20, map: "world" };
 const language = familyLanguage({
   id: "tenka",
   words: WORDS,
@@ -108,6 +114,7 @@ const table = mountTenka(document.getElementById("table"), {
 function show() {
   for (const button of document.querySelectorAll("[data-players]")) button.setAttribute("aria-pressed", String(Number(button.dataset.players) === setUp.players));
   for (const button of document.querySelectorAll("[data-rounds]")) button.setAttribute("aria-pressed", String(Number(button.dataset.rounds) === setUp.rounds));
+  for (const button of document.querySelectorAll("[data-map]")) button.setAttribute("aria-pressed", String(button.dataset.map === setUp.map));
 }
 
 function start(options = {}) {
@@ -115,7 +122,8 @@ function start(options = {}) {
   computers = options.computers ?? players.map((_, seat) => seat !== 0);
   setUp.players = players.length;
   setUp.rounds = options.rounds ?? setUp.rounds;
-  table.newGame({ players, computers, rounds: setUp.rounds, seed: options.seed });
+  setUp.map = options.map ?? setUp.map;
+  table.newGame({ players, computers, rounds: setUp.rounds, seed: options.seed, map: setUp.map });
   show();
   document.getElementById("table").scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
@@ -126,6 +134,7 @@ if (before !== null) {
   computers = before.computers;
   setUp.players = before.game.players.length;
   setUp.rounds = before.game.rounds;
+  setUp.map = before.game.map ?? "world";
   table.setGame(before.game, computers);
 }
 show();
@@ -139,6 +148,12 @@ for (const button of document.querySelectorAll("[data-players]")) {
 for (const button of document.querySelectorAll("[data-rounds]")) {
   button.addEventListener("click", () => {
     setUp.rounds = Number(button.dataset.rounds);
+    show();
+  });
+}
+for (const button of document.querySelectorAll("[data-map]")) {
+  button.addEventListener("click", () => {
+    setUp.map = button.dataset.map;
     show();
   });
 }

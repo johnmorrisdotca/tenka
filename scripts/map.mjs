@@ -39,31 +39,41 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const REMOTE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson";
-const CACHE = process.env.TENKA_SOURCE ?? join(tmpdir(), "ne_110m_admin_0_countries.geojson");
-const WORLD_OUT = "src/tenkaWorld.data.ts";
-const SHAPES_OUT = "src/tenkaShapes.data.ts";
+import { EUROPE_COUNTRIES, EUROPE_CUT_MERIDIANS, EUROPE_REGIONS, EUROPE_SEA_LINKS, EUROPE_TERRITORIES } from "./map-europe.mjs";
+
+/** Which map to build: `node scripts/map.mjs` for the world, `node scripts/map.mjs europe` for Europe. */
+const MAP = process.argv[2] ?? "world";
+if (MAP !== "world" && MAP !== "europe") throw new Error(`No map called ${MAP}: world or europe.`);
+const EUROPE = MAP === "europe";
+const SCALE_NAME = EUROPE ? "50m" : "110m";
+const REMOTE = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_${SCALE_NAME}_admin_0_countries.geojson`;
+const CACHE = (EUROPE ? process.env.TENKA_EUROPE_SOURCE : process.env.TENKA_SOURCE) ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_0_countries.geojson`);
+const WORLD_OUT = EUROPE ? "src/tenkaEurope.data.ts" : "src/tenkaWorld.data.ts";
+const SHAPES_OUT = EUROPE ? "src/tenkaEuropeShapes.data.ts" : "src/tenkaShapes.data.ts";
+/** What the two files export. */
+const DATA_NAME = EUROPE ? "TENKA_EUROPE_TERRITORY_DATA" : "TENKA_TERRITORY_DATA";
+const SHAPES_NAME = EUROPE ? "TENKA_EUROPE_SHAPES" : "TENKA_SHAPES";
 
 /** The map's width in its own units; coordinates are whole units, which is fine enough at four times zoom. */
 const WIDTH = 2000;
 /** The seam, and how far round the map runs from it. */
-const WEST = -170;
-const EAST = 192;
+const WEST = EUROPE ? -25 : -170;
+const EAST = EUROPE ? 60 : 192;
 /** The rows of the map: Greenland's northern tip to Tierra del Fuego. */
-const NORTH = 84;
-const SOUTH = -56.5;
+const NORTH = EUROPE ? 71.5 : 84;
+const SOUTH = EUROPE ? 33.5 : -56.5;
 /** The least an island's outline may enclose, in square map units, to be drawn: about four pixels square at a whole-world view. */
-const LEAST_AREA = 30;
+const LEAST_AREA = EUROPE ? 40 : 30;
 
 /** The six continents, in the order the rules list them. */
-const CONTINENTS = ["northAmerica", "southAmerica", "europe", "africa", "asia", "oceania"];
+const CONTINENTS = EUROPE ? EUROPE_REGIONS : ["northAmerica", "southAmerica", "europe", "africa", "asia", "oceania"];
 
 /**
  * THE FORTY-TWO TERRITORIES, each a modern name for a real stretch of the
  * world, in continent order. `label` places the army counter by hand where
  * the middle of the largest piece would sit badly.
  */
-const TERRITORIES = [
+const TERRITORIES = EUROPE ? EUROPE_TERRITORIES : [
   { key: "alaska", name: "Alaska", continent: "northAmerica" },
   { key: "westernCanada", name: "Western Canada", continent: "northAmerica", label: [-115, 58] },
   { key: "easternCanada", name: "Eastern Canada", continent: "northAmerica", label: [-78, 51] },
@@ -121,7 +131,7 @@ const TERRITORIES = [
  * CUT (`{ at: [meridians], into: [territories west to east] }`), or null to
  * leave that piece off the map.
  */
-const COUNTRIES = {
+const COUNTRIES = EUROPE ? EUROPE_COUNTRIES : {
   // North America
   // St Lawrence Island lies west of the seam, so it lands at the map's far east edge: left off, like Hawaii, rather
   // than given to a territory on the other side of the world (it once stretched Eastern United States across the map).
@@ -190,7 +200,7 @@ const COUNTRIES = {
  * them): Alaska–Kamchatka is alaska–farEast, Greenland–Iceland is
  * greenland–nordic, Southern Europe–Egypt is southernEurope–egypt.
  */
-const SEA_LINKS = [
+const SEA_LINKS = EUROPE ? EUROPE_SEA_LINKS : [
   ["alaska", "farEast", { wrap: true }],
   ["arcticIslands", "greenland"],
   ["arcticIslands", "westernCanada"],
@@ -260,7 +270,7 @@ function crossing(a, b, at) {
 }
 
 /** Every meridian some mainland is cut along. */
-const CUT_MERIDIANS = [-100, -97, 59, 100, 129];
+const CUT_MERIDIANS = EUROPE ? EUROPE_CUT_MERIDIANS : [-100, -97, 59, 100, 129];
 
 /**
  * A ring with a point added wherever it crosses a cut meridian. Done to EVERY
@@ -343,6 +353,8 @@ function assign(features) {
   const byTerritory = new Map(TERRITORIES.map((territory) => [territory.key, []]));
   for (const feature of features) {
     const code = codeOf(feature.properties);
+    // Europe lists only the countries on it; the world must account for every one.
+    if (!(code in COUNTRIES) && EUROPE) continue;
     if (!(code in COUNTRIES)) throw new Error(`${code} (${feature.properties.NAME}) is given to no territory; add it to COUNTRIES, or null to leave it off.`);
     const rule = COUNTRIES[code];
     if (rule === null) continue;
@@ -363,7 +375,7 @@ function assign(features) {
         continue;
       }
       if (polygon.length > 1) throw new Error(`${code}: a mainland with a hole cannot be cut here.`);
-      for (const piece of cutRing(polygon[0], answer.at, answer.into)) byTerritory.get(piece.territory).push({ code, main: true, rings: [piece.ring] });
+      for (const piece of cutRing(polygon[0], answer.at, answer.into)) if (piece.territory !== null) byTerritory.get(piece.territory).push({ code, main: true, rings: [piece.ring] });
     }
   }
   return byTerritory;
@@ -537,7 +549,7 @@ const LEAST_CROSSING = 64;
  * frames: they carry no counter and no link, and counting them made Asia's
  * view as tall as Svalbard to Malaysia, too tall to fill a desk's width.
  */
-const FRAME_NORTH = 75;
+const FRAME_NORTH = EUROPE ? 90 : 75;
 
 /** A crossing drawn across the strait, lengthened about its middle to at least `LEAST_CROSSING`, toward `towards` where its two ends touch. */
 function crossingLine(p, q, towards) {
@@ -630,7 +642,7 @@ const bordersPath = continentBorders.map(([a, b]) => `M${a[0]} ${a[1]}L${b[0]} $
 const header = [
   `/*`,
   ` * WRITTEN BY scripts/map.mjs, NEVER BY HAND: run it again to change the map.`,
-  ` * From Natural Earth's admin-0 countries at 1:110m, which is in the public domain`,
+  ` * From Natural Earth's admin-0 countries at 1:${SCALE_NAME}, which is in the public domain`,
   ` * (naturalearthdata.com; ${REMOTE}).`,
   ` */`,
 ];
@@ -641,8 +653,8 @@ writeFileSync(
     ...header,
     `import type { TenkaTerritoryData } from "./tenka.types.ts";`,
     ``,
-    `/** Tenka's forty-two territories in continent order: each one's key, name, continent, and neighbours by land and by sea (indices into this list). */`,
-    `export const TENKA_TERRITORY_DATA: readonly TenkaTerritoryData[] = [`,
+    `/** Tenka's ${EUROPE ? "Europe, thirty-seven" : "forty-two"} territories in ${EUROPE ? "region" : "continent"} order: each one's key, name, ${EUROPE ? "region" : "continent"}, and neighbours by land and by sea (indices into this list). */`,
+    `export const ${DATA_NAME}: readonly TenkaTerritoryData[] = [`,
     ...TERRITORIES.map(
       (territory, at) =>
         `  { key: ${JSON.stringify(territory.key)}, name: ${JSON.stringify(territory.name)}, continent: ${JSON.stringify(territory.continent)}, land: [${[...land[at]].sort((x, y) => x - y).join(", ")}], sea: [${[...sea[at]].sort((x, y) => x - y).join(", ")}] },`,
@@ -659,12 +671,12 @@ writeFileSync(
     `import type { TenkaShapes } from "./tenka.types.ts";`,
     ``,
     `/**`,
-    ` * How Tenka's world is drawn: Miller's projection from ${-WEST}°W round to ${EAST}°E, ${WIDTH} by ${HEIGHT} units.`,
-    ` * One outline per territory, in the order of \`TENKA_TERRITORY_DATA\`; where its army counter stands; its extent; the`,
+    EUROPE ? ` * How Tenka's Europe is drawn: Miller's projection from ${-WEST}°W to ${EAST}°E and ${SOUTH}°N to ${NORTH}°N, ${WIDTH} by ${HEIGHT} units.` : ` * How Tenka's world is drawn: Miller's projection from ${-WEST}°W round to ${EAST}°E, ${WIDTH} by ${HEIGHT} units.`,
+    ` * One outline per territory, in the order of \`${DATA_NAME}\`; where its army counter stands; its extent; the`,
     ` * sea links' dashed lines; the links that go off one edge and on at the other; and the borders between continents, drawn heavier. Read only by the board in`,
     ` * the browser, so none of it is carried by a page the server renders for the rules.`,
     ` */`,
-    `export const TENKA_SHAPES: TenkaShapes = {`,
+    `export const ${SHAPES_NAME}: TenkaShapes = {`,
     `  width: ${WIDTH},`,
     `  height: ${HEIGHT},`,
     `  labels: ${JSON.stringify(labels)},`,

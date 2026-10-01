@@ -1,6 +1,7 @@
 import { TENKA_MOVES, TENKA_PLACING } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaMove, TenkaPlacing } from "./tenka.types.ts";
+import type { TenkaGame, TenkaMove, TenkaPlacing, TenkaMapKey } from "./tenka.types.ts";
 import { playTenka } from "./tenka.ts";
+import { TENKA_MAPS } from "./tenkaMap.ts";
 import { startTenka } from "./tenkaStart.ts";
 
 /**
@@ -79,10 +80,10 @@ export function readTenkaMove(kept: unknown): TenkaMove | null {
 
 /** A game made again from its table and its moves, or null if any move could not have been made when it was. */
 export function replayTenka(
-  table: { rounds: number; players: readonly string[]; seed: number; placing: TenkaPlacing },
+  table: { rounds: number; players: readonly string[]; seed: number; placing: TenkaPlacing; map?: TenkaMapKey },
   moves: readonly TenkaMove[],
 ): TenkaGame | null {
-  let game = startTenka(table.rounds, table.players, table.seed, table.placing);
+  let game = startTenka(table.rounds, table.players, table.seed, table.placing, table.map ?? "world");
   for (const move of moves) {
     if (game === null) return null;
     game = playTenka(game, move);
@@ -98,6 +99,8 @@ export function encodeTenka(game: TenkaGame): string {
     players: game.players,
     rounds: game.rounds,
     placing: game.placing,
+    // The map only when it is not the world, so a world game is kept exactly as before there was a choice.
+    ...(game.map === undefined || game.map === "world" ? {} : { map: game.map }),
     moves: game.moves.map(writeTenkaMove),
   });
 }
@@ -116,12 +119,13 @@ export function decodeTenka(text: string | null): TenkaGame | null {
     return null;
   }
   if (typeof kept !== "object" || kept === null) return null;
-  const { v, seed, players, rounds, placing, moves } = kept as Record<string, unknown>;
+  const { v, seed, players, rounds, placing, moves, map } = kept as Record<string, unknown>;
   if (v !== KEPT_VERSION || typeof seed !== "number" || typeof rounds !== "number") return null;
   if (placing !== TENKA_PLACING.auto && placing !== TENKA_PLACING.hand) return null;
   if (!Array.isArray(players) || !players.every((name) => typeof name === "string")) return null;
   if (!Array.isArray(moves)) return null;
+  if (map !== undefined && !(typeof map === "string" && map in TENKA_MAPS)) return null;
   const read = moves.map(readTenkaMove);
   if (read.some((move) => move === null)) return null;
-  return replayTenka({ seed, players: players as string[], rounds, placing }, read as TenkaMove[]);
+  return replayTenka({ seed, players: players as string[], rounds, placing, map: (map as TenkaMapKey | undefined) ?? "world" }, read as TenkaMove[]);
 }

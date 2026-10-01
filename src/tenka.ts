@@ -2,7 +2,7 @@ import { TENKA_MOVES, TENKA_MUST_TRADE_AT, TENKA_NEUTRAL, TENKA_PHASES, TENKA_TE
 import type { TenkaCard, TenkaGame, TenkaMove } from "./tenka.types.ts";
 import { cardTerritory, isSet, tradeValue } from "./tenkaCards.ts";
 import { battleLosses, defendDice, mostAttackDice, throwDice } from "./tenkaDice.ts";
-import { areNeighbours, connectedOwn, isTerritory } from "./tenkaMap.ts";
+import { areNeighbours, connectedOwn, isTerritory, tenkaMapOf } from "./tenkaMap.ts";
 import { beginTurn, endOfTurn, finished, nextSeatIn, territoriesHeld } from "./tenkaTurn.ts";
 
 /**
@@ -32,7 +32,7 @@ function recorded(game: TenkaGame, move: TenkaMove): TenkaGame {
 }
 
 function place(game: TenkaGame, territory: number, armies: number): TenkaGame | null {
-  if (!isTerritory(territory) || game.owners[territory] !== game.toPlay || !Number.isInteger(armies)) return null;
+  if (!isTerritory(territory, tenkaMapOf(game)) || game.owners[territory] !== game.toPlay || !Number.isInteger(armies)) return null;
   const on = game.armies.map((count, at) => (at === territory ? count + armies : count));
   if (game.phase === TENKA_PHASES.setUp) {
     if (armies !== 1 || game.setUpLeft[game.toPlay] < 1) return null;
@@ -54,11 +54,11 @@ function place(game: TenkaGame, territory: number, armies: number): TenkaGame | 
 
 function trade(game: TenkaGame, cards: readonly TenkaCard[]): TenkaGame | null {
   const hand = game.hands[game.toPlay];
-  if (game.phase !== TENKA_PHASES.reinforce || !isSet(cards) || !cards.every((card) => hand.includes(card))) return null;
+  if (game.phase !== TENKA_PHASES.reinforce || !isSet(cards, tenkaMapOf(game)) || !cards.every((card) => hand.includes(card))) return null;
   const set = [...cards].sort((a, b) => a - b);
   const armies = tradeValue(game.trades);
   // Two more armies straight onto a territory the trader holds that one of the cards shows: the first such, if any.
-  const bonusTerritory = set.map(cardTerritory).find((territory) => territory !== null && game.owners[territory] === game.toPlay) ?? null;
+  const bonusTerritory = set.map((card) => cardTerritory(card, tenkaMapOf(game))).find((territory) => territory !== null && game.owners[territory] === game.toPlay) ?? null;
   return {
     ...game,
     hands: game.hands.map((held, seat) => (seat === game.toPlay ? held.filter((card) => !set.includes(card)) : held)),
@@ -72,8 +72,8 @@ function trade(game: TenkaGame, cards: readonly TenkaCard[]): TenkaGame | null {
 
 /** Whether the player to move may attack `to` from `from` at all: theirs, a neighbour, somebody else's, armies to spare. */
 function mayAttack(game: TenkaGame, from: number, to: number): boolean {
-  if (game.phase !== TENKA_PHASES.attack || !isTerritory(from) || !isTerritory(to)) return false;
-  return game.owners[from] === game.toPlay && game.owners[to] !== game.toPlay && areNeighbours(from, to) && game.armies[from] >= 2;
+  if (game.phase !== TENKA_PHASES.attack || !isTerritory(from, tenkaMapOf(game)) || !isTerritory(to, tenkaMapOf(game))) return false;
+  return game.owners[from] === game.toPlay && game.owners[to] !== game.toPlay && areNeighbours(from, to, tenkaMapOf(game)) && game.armies[from] >= 2;
 }
 
 /**
@@ -157,8 +157,8 @@ function occupy(game: TenkaGame, armies: number): TenkaGame | null {
 }
 
 function fortify(game: TenkaGame, from: number, to: number): TenkaGame | null {
-  if (game.phase !== TENKA_PHASES.fortify || !isTerritory(from) || !isTerritory(to)) return null;
-  if (game.owners[from] !== game.toPlay || game.armies[from] < 2 || !connectedOwn(game.owners, from).includes(to)) return null;
+  if (game.phase !== TENKA_PHASES.fortify || !isTerritory(from, tenkaMapOf(game)) || !isTerritory(to, tenkaMapOf(game))) return null;
+  if (game.owners[from] !== game.toPlay || game.armies[from] < 2 || !connectedOwn(game.owners, from, tenkaMapOf(game)).includes(to)) return null;
   return { ...game, phase: TENKA_PHASES.shift, shifting: { from, to } };
 }
 

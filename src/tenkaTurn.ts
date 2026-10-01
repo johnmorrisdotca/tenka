@@ -1,7 +1,7 @@
 import { TENKA_LEAST_REINFORCEMENT, TENKA_NAME_MOST, TENKA_PHASES, TENKA_TERRITORIES_PER_ARMY } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaOwner, TenkaSeat } from "./tenka.types.ts";
+import type { TenkaGame, TenkaOwner, TenkaSeat, TenkaMap } from "./tenka.types.ts";
 import { shuffled } from "./tenkaDice.ts";
-import { continentsHeld } from "./tenkaMap.ts";
+import { TENKA_MAPS, continentsHeld, tenkaMapOf } from "./tenkaMap.ts";
 
 /**
  * HOW A TURN BEGINS AND ENDS, and how a game is counted: the parts of the
@@ -41,9 +41,9 @@ export function armiesHeld(game: Pick<TenkaGame, "owners" | "armies">, owner: Te
  * fewer than three, and each continent held whole adds its bonus. Cards
  * traded in come on top (`tenka.ts`).
  */
-export function reinforcementFor(owners: readonly TenkaOwner[], seat: TenkaSeat): number {
+export function reinforcementFor(owners: readonly TenkaOwner[], seat: TenkaSeat, map: TenkaMap = TENKA_MAPS.world): number {
   const fromLand = Math.max(TENKA_LEAST_REINFORCEMENT, Math.floor(territoriesHeld(owners, seat) / TENKA_TERRITORIES_PER_ARMY));
-  return fromLand + continentsHeld(owners, seat).reduce((sum, continent) => sum + continent.bonus, 0);
+  return fromLand + continentsHeld(owners, seat, map).reduce((sum, continent) => sum + continent.bonus, 0);
 }
 
 /** A seat's place in the round: 0 for whoever plays first, counting on round the table. */
@@ -67,7 +67,7 @@ export function beginTurn(game: TenkaGame, seat: TenkaSeat, round: number): Tenk
     toPlay: seat,
     round,
     phase: TENKA_PHASES.reinforce,
-    reserve: reinforcementFor(game.owners, seat),
+    reserve: reinforcementFor(game.owners, seat, tenkaMapOf(game)),
     conquered: false,
     occupying: null,
     shifting: null,

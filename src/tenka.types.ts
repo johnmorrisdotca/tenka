@@ -9,8 +9,25 @@
  * `TENKA_NEUTRAL`, which is nobody's seat.
  */
 
-/** The six continents, by key. */
-export type TenkaContinentKey = "northAmerica" | "southAmerica" | "europe" | "africa" | "asia" | "oceania";
+/** The world's six continents, by key. */
+export type TenkaWorldContinentKey = "northAmerica" | "southAmerica" | "europe" | "africa" | "asia" | "oceania";
+
+/** Europe's eleven regions, by key: the continents of the Europe map. */
+export type TenkaEuropeRegionKey =
+  | "britishIsles"
+  | "scandinavia"
+  | "iberia"
+  | "maghreb"
+  | "france"
+  | "centralEurope"
+  | "italyBalkans"
+  | "danube"
+  | "easternEurope"
+  | "russia"
+  | "anatolia";
+
+/** A continent of any map, by key: the world's continents and Europe's regions. */
+export type TenkaContinentKey = TenkaWorldContinentKey | TenkaEuropeRegionKey;
 
 /** One territory as the map script writes it: neighbours by land and by sea are indices into the same list. */
 export type TenkaTerritoryData = {
@@ -19,6 +36,19 @@ export type TenkaTerritoryData = {
   continent: TenkaContinentKey;
   land: readonly number[];
   sea: readonly number[];
+};
+
+/** The maps a game may be played on. */
+export type TenkaMapKey = "world" | "europe";
+
+/** A map as the rules read it: its territories, its continents and each territory's neighbours by land and by sea. */
+export type TenkaMap = {
+  key: TenkaMapKey;
+  name: string;
+  kanji: string;
+  territories: readonly TenkaTerritoryData[];
+  continents: readonly TenkaContinent[];
+  neighbours: readonly (readonly number[])[];
 };
 
 /** A continent: its name, the armies holding all of it is worth each turn, and its territories. */
@@ -123,6 +153,8 @@ export type TenkaTrade = { seat: TenkaSeat; cards: readonly TenkaCard[]; armies:
  * its moves do not make.
  */
 export type TenkaGame = {
+  /** The map it is played on; left out for the world, so a game saved before there was a choice reads as it did. */
+  map?: TenkaMapKey;
   /** The seed every shuffle, deal and die of this game is drawn from. */
   seed: number;
   /** The names given at the table, in seat order: "" for one left blank. */

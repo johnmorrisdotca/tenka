@@ -6,6 +6,24 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-01
+
+### Added
+
+- **Europe**, a second map: thirty-seven territories in eleven regions, from
+  Iceland to the Urals and from the North Cape to the Maghreb, built from
+  Natural Earth's countries at 1:50m by `pnpm map europe`
+  (`scripts/map-europe.mjs`), with its regions' bonuses and every name in
+  English and Japanese. `startTenka(…, "europe")`, the table's `map` option,
+  and `TENKA_EUROPE_SHAPES`.
+- `TENKA_MAPS`, `TENKA_MAP_LIST`, `tenkaMapOf`, `boardOf`, `tenkaDeckFor`,
+  `TENKA_MAP_SHAPES` and `tenkaShapesOf`; every function that reads the map
+  takes it as a last argument, the world when it is left out.
+
+Nothing that was exported has changed for the world: a game names its map only
+when it is not the world, so every game kept or exported by 1.1.0 reads and
+replays exactly as it did.
+
 ## [1.1.0] - 2026-09-30
 
 Nothing that was exported has changed, and a game kept by 1.0 replays move for

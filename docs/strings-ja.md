@@ -13,6 +13,7 @@ shown. ␠ marks a space at the start or end of a string.
 | `mapLabel` | Map of the world | 世界地図 |
 | `lookAt` | Look at | 表示する地域 |
 | `world` | World | 世界 |
+| `europe` | Europe | ヨーロッパ |
 | `armiesLabel` | Armies | 部隊の数 |
 | `newGame` | New game | 新しいゲーム |
 | `trade` | Trade cards | カードを交換 |
@@ -126,3 +127,50 @@ shown. ␠ marks a space at the start or end of a string.
 | `tWesternAustralia` | Western Australia | オーストラリア西部 |
 | `tEasternAustralia` | Eastern Australia | オーストラリア東部 |
 | `tNewZealand` | New Zealand | ニュージーランド |
+| `cBritishIsles` | Britain and Ireland | イギリス・アイルランド |
+| `cScandinavia` | The Nordic Countries | 北欧 |
+| `cIberia` | Iberia | イベリア |
+| `cMaghreb` | The Maghreb | マグリブ |
+| `cFrance` | France and the Low Countries | フランス・ベネルクス |
+| `cCentralEurope` | Central Europe | 中欧 |
+| `cItalyBalkans` | Italy and the Balkans | イタリア・バルカン |
+| `cDanube` | The Danube | ドナウ |
+| `cEasternEurope` | Eastern Europe | 東欧 |
+| `cRussia` | Russia | ロシア |
+| `cAnatolia` | Anatolia and the Caucasus | アナトリア・コーカサス |
+| `tIceland` | Iceland | アイスランド |
+| `tIreland` | Ireland | アイルランド |
+| `tGreatBritain` | Great Britain | グレートブリテン島 |
+| `tNorway` | Norway | ノルウェー |
+| `tSweden` | Sweden | スウェーデン |
+| `tFinland` | Finland | フィンランド |
+| `tDenmark` | Denmark | デンマーク |
+| `tPortugal` | Portugal | ポルトガル |
+| `tWesternSpain` | Western Spain | スペイン西部 |
+| `tEasternSpain` | Eastern Spain | スペイン東部 |
+| `tMorocco` | Morocco | モロッコ |
+| `tAlgeria` | Algeria | アルジェリア |
+| `tTunisia` | Tunisia and Libya | チュニジア・リビア |
+| `tWesternFrance` | Western France | フランス西部 |
+| `tEasternFrance` | Eastern France | フランス東部 |
+| `tLowCountries` | The Low Countries | ベネルクス |
+| `tWesternGermany` | Western Germany | ドイツ西部 |
+| `tEasternGermany` | Eastern Germany | ドイツ東部 |
+| `tPoland` | Poland | ポーランド |
+| `tCzechSlovakia` | Czechia and Slovakia | チェコ・スロバキア |
+| `tAlps` | The Alps | アルプス |
+| `tItaly` | Italy | イタリア |
+| `tWesternBalkans` | The Western Balkans | 西バルカン |
+| `tCentralBalkans` | Serbia and North Macedonia | セルビア・北マケドニア |
+| `tGreece` | Greece | ギリシャ |
+| `tHungary` | Hungary | ハンガリー |
+| `tRomania` | Romania and Moldova | ルーマニア・モルドバ |
+| `tBulgaria` | Bulgaria | ブルガリア |
+| `tBaltics` | The Baltic States | バルト三国 |
+| `tBelarus` | Belarus | ベラルーシ |
+| `tWesternUkraine` | Western Ukraine | ウクライナ西部 |
+| `tEasternUkraine` | Eastern Ukraine | ウクライナ東部 |
+| `tCentralRussia` | Central Russia | ロシア中部 |
+| `tVolga` | The Volga and the Urals | ヴォルガ・ウラル |
+| `tAnatolia` | Anatolia | アナトリア |
+| `tCaucasus` | The Caucasus | コーカサス |

@@ -3,7 +3,7 @@ import type { TenkaGame, TenkaMove } from "./tenka.types.ts";
 import { mustTrade } from "./tenka.ts";
 import { setsIn } from "./tenkaCards.ts";
 import { mostAttackDice } from "./tenkaDice.ts";
-import { connectedOwn, tenkaNeighbours } from "./tenkaMap.ts";
+import { connectedOwn, tenkaMapOf, tenkaNeighbours } from "./tenkaMap.ts";
 
 /**
  * EVERY MOVE THE PLAYER TO MOVE MAY MAKE NOW: what `playTenka` takes,
@@ -29,7 +29,7 @@ function span(from: number, to: number): number[] {
 export function attacksOpen(game: TenkaGame): TenkaMove[] {
   if (game.phase !== TENKA_PHASES.attack) return [];
   return own(game).flatMap((from) =>
-    tenkaNeighbours(from)
+    tenkaNeighbours(from, tenkaMapOf(game))
       .filter((to) => game.owners[to] !== game.toPlay && game.armies[from] >= 2)
       .flatMap((to): TenkaMove[] => [
         ...span(1, mostAttackDice(game.armies[from])).map((dice) => ({ kind: TENKA_MOVES.attack, from, to, dice })),
@@ -48,7 +48,7 @@ export function tenkaMoves(game: TenkaGame): TenkaMove[] {
     case TENKA_PHASES.setUp:
       return own(game).map((territory) => ({ kind: TENKA_MOVES.place, territory, armies: 1 }));
     case TENKA_PHASES.reinforce: {
-      const trades: TenkaMove[] = setsIn(game.hands[game.toPlay]).map((cards) => ({ kind: TENKA_MOVES.trade, cards }));
+      const trades: TenkaMove[] = setsIn(game.hands[game.toPlay], tenkaMapOf(game)).map((cards) => ({ kind: TENKA_MOVES.trade, cards }));
       if (mustTrade(game)) return trades;
       // One army, or all the rest: every spread of the turn's armies is a run of these (`playTenka`).
       const counts = game.reserve > 1 ? [1, game.reserve] : [1];
@@ -64,7 +64,7 @@ export function tenkaMoves(game: TenkaGame): TenkaMove[] {
     case TENKA_PHASES.fortify: {
       const pairs: TenkaMove[] = own(game)
         .filter((from) => game.armies[from] >= 2)
-        .flatMap((from) => connectedOwn(game.owners, from).map((to) => ({ kind: TENKA_MOVES.fortify, from, to })));
+        .flatMap((from) => connectedOwn(game.owners, from, tenkaMapOf(game)).map((to) => ({ kind: TENKA_MOVES.fortify, from, to })));
       return [...pairs, { kind: TENKA_MOVES.endTurn }];
     }
     case TENKA_PHASES.shift:

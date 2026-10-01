@@ -42,6 +42,11 @@ const page = `<!doctype html>
         <div class="fam-seg" role="group" data-say-label="length">
           ${[10, 20, 60].map((rounds) => `<button type="button" data-rounds="${rounds}" data-say="rounds${rounds}"></button>`).join("")}
         </div>
+        <span class="fam-label" data-say="map"></span>
+        <div class="fam-seg" role="group" data-say-label="map">
+          <button type="button" data-map="world" data-say="mapWorld"></button>
+          <button type="button" data-map="europe" data-say="mapEurope"></button>
+        </div>
         <button type="button" class="fam-button" data-accent="true" id="new" data-say="newGame"></button>
       </div>
       <div id="table"></div>

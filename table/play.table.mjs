@@ -149,3 +149,22 @@ test("the set-up row starts the table it shows, and the other tables start their
   await tap(page, '[data-testid="tk-new"]');
   await expect(page.locator(ROOT)).not.toHaveAttribute("data-phase", "over");
 });
+
+test("Europe is a map of its own: chosen above the table, drawn with its regions, and played", async ({ page }) => {
+  const errors = await open(page);
+  await tap(page, '[data-map="europe"]');
+  await expect(page.locator('[data-map="europe"]')).toHaveAttribute("aria-pressed", "true");
+  await tap(page, "#new");
+  const s = await sound(page, errors);
+  expect(s.lands).toHaveLength(37);
+  // The views above the map are Europe's: the whole map and its eleven regions.
+  await expect(page.locator(`${ROOT} [data-view]`)).toHaveCount(12);
+  await expect(page.locator(`${ROOT} [data-view="europe"]`)).toHaveText("Europe");
+  await expect(page.locator(`${ROOT} [data-view="scandinavia"]`)).toHaveText("The Nordic Countries");
+
+  // Back to the world, it is the world's again.
+  await tap(page, '[data-map="world"]');
+  await tap(page, "#new");
+  expect((await sound(page, errors)).lands).toHaveLength(42);
+  await expect(page.locator(`${ROOT} [data-view]`)).toHaveCount(7);
+});

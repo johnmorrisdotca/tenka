@@ -1,10 +1,10 @@
 import { TENKA_MOVES, TENKA_PHASES, TENKA_WORLD_ROUNDS } from "../tenka.constants.ts";
-import type { TenkaChoice, TenkaContinentKey, TenkaGame, TenkaMove } from "../tenka.types.ts";
+import type { TenkaChoice, TenkaContinentKey, TenkaGame, TenkaMove, TenkaMapKey } from "../tenka.types.ts";
 import { mustTrade, playTenka } from "../tenka.ts";
 import { cardKind, cardTerritory, setsIn } from "../tenkaCards.ts";
 import { mostAttackDice } from "../tenkaDice.ts";
 import { tenkaFromJSON, tenkaToCSV, tenkaToJSON, tenkaToText } from "../tenkaExport.ts";
-import { TENKA_CONTINENTS, TENKA_TERRITORIES } from "../tenkaMap.ts";
+import { tenkaMapOf } from "../tenkaMap.ts";
 import { sensibleTenkaMove } from "../tenkaPolicy.ts";
 import { startTenka } from "../tenkaStart.ts";
 import { NO_CHOICE, choiceNow, marksFor, tapTerritory } from "../tenkaTaps.ts";
@@ -25,6 +25,8 @@ export type TenkaTableOptions = {
   rounds?: number;
   /** The seed every deal and die is drawn from; a new one each game when absent. */
   seed?: number;
+  /** The map: `"world"` (the default) or `"europe"`. */
+  map?: TenkaMapKey;
   /** A colour for each seat. */
   colours?: readonly string[];
   /** How long the computer waits before each of its moves, in milliseconds. */
@@ -46,7 +48,7 @@ export type TenkaTableHandle = {
   /** The game as it stands. */
   game: () => TenkaGame;
   /** A new game at the same table, with any options changed. */
-  newGame: (options?: Pick<TenkaTableOptions, "players" | "computers" | "rounds" | "seed">) => void;
+  newGame: (options?: Pick<TenkaTableOptions, "players" | "computers" | "rounds" | "seed" | "map">) => void;
   /** Put a game on the table: one read back by `tenkaFromJSON` or `decodeTenka`. Seats keep who plays them when the number of players is the same; otherwise every seat but the first is the computer's, unless `computers` says. */
   setGame: (game: TenkaGame, computers?: readonly boolean[]) => void;
   /** Change the table's language, and with it any words of your own. */
@@ -107,12 +109,13 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   let players = options.players ?? [words.you, ...COMPUTER_NAMES];
   let computers = options.computers ?? players.map((_, seat) => seat !== 0);
   let rounds = options.rounds ?? TENKA_WORLD_ROUNDS;
+  let map: TenkaMapKey = options.map ?? "world";
   const colours = options.colours;
   const delay = options.computerDelayMs ?? 450;
   const showRecord = options.record !== false;
 
   const begin = (seed: number): TenkaGame => {
-    const game = startTenka(rounds, players, seed);
+    const game = startTenka(rounds, players, seed, undefined, map);
     if (game === null) throw new Error(`Tenka is played by two to six, for 10, 20 or 60 rounds; not ${players.length} for ${rounds}.`);
     return game;
   };
@@ -151,7 +154,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   target.append(root);
 
   const landName = (territory: number) => {
-    const data = TENKA_TERRITORIES[territory]!;
+    const data = tenkaMapOf(game).territories[territory]!;
     return territoryNameIn(words, data.key) || data.name;
   };
   const who = (seat: number) => {
@@ -189,7 +192,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     const box = svg.getBoundingClientRect();
     const view = svg.viewBox.baseVal;
     const scale = box.width / view.width;
-    const near = nearestLand(view.x + (event.clientX - box.left) / scale, view.y + (event.clientY - box.top) / scale, 24 / scale);
+    const near = nearestLand(view.x + (event.clientX - box.left) / scale, view.y + (event.clientY - box.top) / scale, 24 / scale, game.map);
     if (near !== null) tap(near);
   });
 
@@ -223,7 +226,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     const hand = game.hands[game.toPlay]!;
     switch (game.phase) {
       case TENKA_PHASES.reinforce: {
-        const sets = setsIn(hand);
+        const sets = setsIn(hand, tenkaMapOf(game));
         if (sets.length > 0) controls.append(button(mustTrade(game) ? words.tradeMust : words.trade, () => make({ kind: TENKA_MOVES.trade, cards: sets[0]! }), mustTrade(game), "tk-trade"));
         if (!mustTrade(game) && now.placedOn !== null && game.reserve > 1) {
           controls.append(button(tenkaSay(words.allOn, { n: game.reserve, land: landName(now.placedOn) }), () => make({ kind: TENKA_MOVES.place, territory: now.placedOn!, armies: game.reserve }), false, "tk-all"));
@@ -335,8 +338,9 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       cards.append(node("p", "tk-hand-title", tenkaSay(hand.length === 0 ? words.noCards : words.cardsInHand, { name: who(shown) })));
       const kinds = { land: words.kindLand, sea: words.kindSea, air: words.kindAir, wild: words.wild };
       for (const card of hand) {
-        const territory = cardTerritory(card);
-        cards.append(node("span", `tk-card tk-${cardKind(card)}`, territory === null ? words.wild : tenkaSay(words.card, { kind: kinds[cardKind(card)], land: landName(territory) })));
+        const territory = cardTerritory(card, tenkaMapOf(game));
+        const kind = cardKind(card, tenkaMapOf(game));
+        cards.append(node("span", `tk-card tk-${kind}`, territory === null ? words.wild : tenkaSay(words.card, { kind: kinds[kind], land: landName(territory) })));
       }
       seats.append(cards);
     }
@@ -398,21 +402,32 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     recordLines.scrollTop = recordLines.scrollHeight;
   }
 
-  // The views' buttons are made once and only told their words and which is pressed, so a button being pressed is never replaced under the finger.
-  const views: { key: TenkaContinentKey | null; pick: HTMLButtonElement }[] = [null, ...TENKA_CONTINENTS.map((one) => one.key)].map((key) => {
-    const pick = button("", () => {
-      focus = key;
-      render();
+  // The views' buttons are made once for a map and only told their words and which is pressed, so a button being
+  // pressed is never replaced under the finger; a game on another map makes them again, for its own continents.
+  let viewsOf: TenkaMapKey | null = null;
+  let views: { key: TenkaContinentKey | null; pick: HTMLButtonElement }[] = [];
+  function makeViews() {
+    const now = game.map ?? "world";
+    if (viewsOf === now) return;
+    viewsOf = now;
+    focus = null;
+    zoom.replaceChildren();
+    views = [null, ...tenkaMapOf(game).continents.map((one) => one.key)].map((key) => {
+      const pick = button("", () => {
+        focus = key;
+        render();
+      });
+      pick.dataset.view = key ?? now;
+      zoom.append(pick);
+      return { key, pick };
     });
-    pick.dataset.view = key ?? "world";
-    zoom.append(pick);
-    return { key, pick };
-  });
+  }
 
   function renderZoom() {
+    makeViews();
     zoom.setAttribute("aria-label", words.lookAt);
     for (const { key, pick } of views) {
-      pick.textContent = key === null ? words.world : continentNameIn(words, key) || key;
+      pick.textContent = key === null ? ((game.map ?? "world") === "europe" ? words.europe : words.world) : continentNameIn(words, key) || key;
       pick.setAttribute("aria-pressed", String(focus === key));
     }
   }
@@ -421,7 +436,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     const marks = computers[game.toPlay] ? marksFor(game, NO_CHOICE) : marksFor(game, choice);
     const model = tenkaMapModel(game, marks, colours);
     const drawn = { ...model, lands: model.lands.map((land) => ({ ...land, name: landName(land.territory) })) };
-    board.replaceChildren(tenkaMapSvg(drawn, { view: continentView(focus), pixels: board.clientWidth || undefined, label: words.mapLabel }));
+    board.replaceChildren(tenkaMapSvg(drawn, { view: continentView(focus, game.map), pixels: board.clientWidth || undefined, label: words.mapLabel }));
   }
 
   function render() {
@@ -455,6 +470,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       players = changed.players ?? players;
       computers = changed.computers ?? (changed.players === undefined ? computers : players.map((_, seat) => seat !== 0));
       rounds = changed.rounds ?? rounds;
+      map = changed.map ?? map;
       game = begin(changed.seed ?? freshSeed());
       choice = NO_CHOICE;
       note = "";
@@ -466,6 +482,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       else if (loaded.players.length !== players.length) computers = loaded.players.map((_, seat) => seat !== 0);
       players = loaded.players;
       rounds = loaded.rounds;
+      map = loaded.map ?? "world";
       game = loaded;
       choice = NO_CHOICE;
       note = "";

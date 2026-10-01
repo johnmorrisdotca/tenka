@@ -1,6 +1,15 @@
-import { TENKA_CONTINENTS, TENKA_TERRITORIES } from "../tenkaMap.ts";
+import { tenkaMapOf } from "../tenkaMap.ts";
+import { TENKA_EUROPE_SHAPES } from "../tenkaEuropeShapes.data.ts";
 import { TENKA_SHAPES } from "../tenkaShapes.data.ts";
-import type { TenkaContinentKey, TenkaGame, TenkaMapMarks } from "../tenka.types.ts";
+import type { TenkaContinentKey, TenkaGame, TenkaMapKey, TenkaMapMarks, TenkaShapes } from "../tenka.types.ts";
+
+/** How each map is drawn. */
+export const TENKA_MAP_SHAPES: Readonly<Record<TenkaMapKey, TenkaShapes>> = { world: TENKA_SHAPES, europe: TENKA_EUROPE_SHAPES };
+
+/** How a game's map is drawn: the world unless the game says otherwise. */
+export function tenkaShapesOf(map: TenkaMapKey | undefined): TenkaShapes {
+  return TENKA_MAP_SHAPES[map ?? "world"] ?? TENKA_SHAPES;
+}
 import { ownerColour } from "./colours.ts";
 
 /** How a territory is ringed: the one chosen, one it can reach, or the target. */
@@ -46,16 +55,18 @@ export const NO_MARKS: TenkaMapMarks = { chosen: null, reach: [], target: null }
  * ring. Shared by the plain-DOM table and the React map, so both draw the
  * same world from the same few rules.
  */
-export function tenkaMapModel(game: Pick<TenkaGame, "owners" | "armies">, marks: TenkaMapMarks = NO_MARKS, colours?: readonly string[]): TenkaMapModel {
+export function tenkaMapModel(game: Pick<TenkaGame, "owners" | "armies" | "map">, marks: TenkaMapMarks = NO_MARKS, colours?: readonly string[]): TenkaMapModel {
   const reach = new Set(marks.reach);
-  const lands = TENKA_SHAPES.outlines.map((outline, territory): TenkaLand => {
+  const shapes = tenkaShapesOf(game.map);
+  const { territories } = tenkaMapOf(game.map);
+  const lands = shapes.outlines.map((outline, territory): TenkaLand => {
     const owner = game.owners[territory] ?? -1;
     const ring: TenkaRing = marks.target === territory ? "target" : marks.chosen === territory ? "chosen" : reach.has(territory) ? "reach" : null;
-    const label = TENKA_SHAPES.labels[territory]!;
+    const label = shapes.labels[territory]!;
     return {
       territory,
-      key: TENKA_TERRITORIES[territory]!.key,
-      name: TENKA_TERRITORIES[territory]!.name,
+      key: territories[territory]!.key,
+      name: territories[territory]!.name,
       outline,
       fill: ownerColour(owner, colours),
       ring,
@@ -64,14 +75,14 @@ export function tenkaMapModel(game: Pick<TenkaGame, "owners" | "armies">, marks:
       owner,
     };
   });
-  return { width: TENKA_SHAPES.width, height: TENKA_SHAPES.height, lands, seaLines: TENKA_SHAPES.seaLines, continentBorders: TENKA_SHAPES.continentBorders };
+  return { width: shapes.width, height: shapes.height, lands, seaLines: shapes.seaLines, continentBorders: shapes.continentBorders };
 }
 
 /** The territory whose counter is nearest a point of the map, within `reach` map units, or null. */
-export function nearestLand(x: number, y: number, reach: number): number | null {
+export function nearestLand(x: number, y: number, reach: number, map: TenkaMapKey = "world"): number | null {
   let best: number | null = null;
   let bestDistance = reach;
-  TENKA_SHAPES.labels.forEach(([lx, ly], territory) => {
+  tenkaShapesOf(map).labels.forEach(([lx, ly], territory) => {
     const distance = Math.hypot(lx! - x, ly! - y);
     if (distance <= bestDistance) {
       best = territory;
@@ -88,16 +99,17 @@ export type TenkaView = readonly [number, number, number, number];
  * The part of the map that frames a continent, with a margin, widened to the
  * map's own shape so it fills the same box; the whole world for null.
  */
-export function continentView(key: TenkaContinentKey | null): TenkaView {
-  const { width, height, boxes } = TENKA_SHAPES;
+export function continentView(key: TenkaContinentKey | null, map: TenkaMapKey = "world"): TenkaView {
+  const shapes = tenkaShapesOf(map);
+  const { width, height, boxes } = shapes;
   if (key === null) return [0, 0, width, height];
-  const continent = TENKA_CONTINENTS.find((one) => one.key === key);
+  const continent = tenkaMapOf(map).continents.find((one) => one.key === key);
   if (continent === undefined) return [0, 0, width, height];
   // A territory whose extent crosses the map's seam (an island far out, the east of Russia) is framed by its counter instead.
   const areas = continent.territories.map((territory) => {
     const box = boxes[territory]!;
     if (box[2]! - box[0]! <= width / 2) return box;
-    const [x, y] = TENKA_SHAPES.labels[territory]!;
+    const [x, y] = shapes.labels[territory]!;
     return [x! - 60, y! - 60, x! + 60, y! + 60];
   });
   const left = Math.min(...areas.map((area) => area[0]!));

@@ -1,7 +1,7 @@
 import { TENKA_MOVES, TENKA_PHASES } from "./tenka.constants.ts";
 import type { TenkaChoice, TenkaGame, TenkaMapMarks, TenkaMove } from "./tenka.types.ts";
 import { mustTrade } from "./tenka.ts";
-import { areNeighbours, connectedOwn, tenkaNeighbours } from "./tenkaMap.ts";
+import { areNeighbours, connectedOwn, tenkaMapOf, tenkaNeighbours } from "./tenkaMap.ts";
 
 /**
  * WHAT A TAP ON THE MAP MEANS, in each part of a turn — and what the map
@@ -34,7 +34,7 @@ export function choiceNow(game: TenkaGame, choice: TenkaChoice): TenkaChoice {
       return { ...NO_CHOICE, placedOn: choice.placedOn !== null && isOwn(game, choice.placedOn) ? choice.placedOn : null };
     case TENKA_PHASES.attack: {
       const from = choice.from !== null && canLeave(game, choice.from) ? choice.from : null;
-      const to = from !== null && choice.to !== null && !isOwn(game, choice.to) && areNeighbours(from, choice.to) ? choice.to : null;
+      const to = from !== null && choice.to !== null && !isOwn(game, choice.to) && areNeighbours(from, choice.to, tenkaMapOf(game)) ? choice.to : null;
       return { ...NO_CHOICE, from, to };
     }
     case TENKA_PHASES.occupy: {
@@ -45,7 +45,7 @@ export function choiceNow(game: TenkaGame, choice: TenkaChoice): TenkaChoice {
     }
     case TENKA_PHASES.fortify: {
       const from = choice.from !== null && canLeave(game, choice.from) ? choice.from : null;
-      const to = from !== null && choice.to !== null && connectedOwn(game.owners, from).includes(choice.to) ? choice.to : null;
+      const to = from !== null && choice.to !== null && connectedOwn(game.owners, from, tenkaMapOf(game)).includes(choice.to) ? choice.to : null;
       const most = from === null ? 0 : game.armies[from] - 1;
       return { ...NO_CHOICE, from, to, armies: to === null ? 0 : choice.armies >= 1 && choice.armies <= most ? choice.armies : most };
     }
@@ -66,11 +66,11 @@ export function tapTerritory(game: TenkaGame, choice: TenkaChoice, territory: nu
     case TENKA_PHASES.attack:
       if (territory === now.from) return { choice: NO_CHOICE, move: null };
       if (canLeave(game, territory)) return { choice: { ...NO_CHOICE, from: territory }, move: null };
-      if (now.from !== null && !isOwn(game, territory) && areNeighbours(now.from, territory)) return { choice: { ...now, to: territory }, move: null };
+      if (now.from !== null && !isOwn(game, territory) && areNeighbours(now.from, territory, tenkaMapOf(game))) return { choice: { ...now, to: territory }, move: null };
       return { choice: now, move: null };
     case TENKA_PHASES.fortify:
       if (territory === now.from) return { choice: NO_CHOICE, move: null };
-      if (now.from !== null && connectedOwn(game.owners, now.from).includes(territory)) {
+      if (now.from !== null && connectedOwn(game.owners, now.from, tenkaMapOf(game)).includes(territory)) {
         return { choice: { ...now, to: territory, armies: game.armies[now.from] - 1 }, move: null };
       }
       if (canLeave(game, territory)) return { choice: { ...NO_CHOICE, from: territory }, move: null };
@@ -87,13 +87,13 @@ export function marksFor(game: TenkaGame, choice: TenkaChoice): TenkaMapMarks {
     case TENKA_PHASES.attack:
       return {
         chosen: now.from,
-        reach: now.from === null ? [] : tenkaNeighbours(now.from).filter((next) => !isOwn(game, next)),
+        reach: now.from === null ? [] : tenkaNeighbours(now.from, tenkaMapOf(game)).filter((next) => !isOwn(game, next)),
         target: now.to,
       };
     case TENKA_PHASES.occupy:
       return { chosen: now.from, reach: [], target: now.to };
     case TENKA_PHASES.fortify:
-      return { chosen: now.from, reach: now.from === null ? [] : connectedOwn(game.owners, now.from), target: now.to };
+      return { chosen: now.from, reach: now.from === null ? [] : connectedOwn(game.owners, now.from, tenkaMapOf(game)), target: now.to };
     case TENKA_PHASES.reinforce:
       return { chosen: now.placedOn, reach: [], target: null };
     default:

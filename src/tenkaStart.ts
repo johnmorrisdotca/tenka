@@ -1,8 +1,8 @@
 import { TENKA_FEWEST_PLAYERS, TENKA_LENGTHS, TENKA_MOST_PLAYERS, TENKA_NEUTRAL, TENKA_PHASES, TENKA_PLACING, TENKA_STARTING_ARMIES } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaOwner, TenkaPlacing, TenkaSeat } from "./tenka.types.ts";
-import { TENKA_DECK } from "./tenkaCards.ts";
+import type { TenkaGame, TenkaOwner, TenkaPlacing, TenkaSeat, TenkaMapKey } from "./tenka.types.ts";
+import { tenkaDeckFor } from "./tenkaCards.ts";
 import { randomBelow, shuffled } from "./tenkaDice.ts";
-import { TENKA_TERRITORY_COUNT } from "./tenkaMap.ts";
+import { TENKA_MAPS } from "./tenkaMap.ts";
 import { beginTurn, cleanTenkaName, territoriesHeld } from "./tenkaTurn.ts";
 
 /** The largest seed a game keeps: the random's state is one 32-bit number. */
@@ -41,9 +41,12 @@ function scatter(armies: number[], owners: readonly TenkaOwner[], owner: TenkaOw
  *
  * Null for a table the game is not offered for, or a seed that is not one.
  */
-export function startTenka(rounds: number, players: readonly string[], seed: number, placing: TenkaPlacing = TENKA_PLACING.auto): TenkaGame | null {
+export function startTenka(rounds: number, players: readonly string[], seed: number, placing: TenkaPlacing = TENKA_PLACING.auto, map: TenkaMapKey = "world"): TenkaGame | null {
   if (!isTenkaTable(rounds, players.length) || !isTenkaSeed(seed)) return null;
   if (placing !== TENKA_PLACING.auto && placing !== TENKA_PLACING.hand) return null;
+  if (!(map in TENKA_MAPS)) return null;
+  const board = TENKA_MAPS[map];
+  const territories = board.territories.length;
   const count = players.length;
   let rng = seed;
 
@@ -53,18 +56,18 @@ export function startTenka(rounds: number, players: readonly string[], seed: num
 
   const dealt = shuffled(
     rng,
-    Array.from({ length: TENKA_TERRITORY_COUNT }, (_, territory) => territory),
+    Array.from({ length: territories }, (_, territory) => territory),
   );
   rng = dealt.state;
   const round: TenkaOwner[] = Array.from({ length: count }, (_, step) => (first + step) % count);
   if (count === 2) round.push(TENKA_NEUTRAL);
-  const owners: TenkaOwner[] = new Array<TenkaOwner>(TENKA_TERRITORY_COUNT);
+  const owners: TenkaOwner[] = new Array<TenkaOwner>(territories);
   dealt.value.forEach((territory, at) => {
     owners[territory] = round[at % round.length];
   });
-  const armies = new Array<number>(TENKA_TERRITORY_COUNT).fill(1);
+  const armies = new Array<number>(territories).fill(1);
 
-  const cards = shuffled(rng, TENKA_DECK);
+  const cards = shuffled(rng, tenkaDeckFor(board));
   rng = cards.state;
 
   const starting = TENKA_STARTING_ARMIES[count];
@@ -78,6 +81,8 @@ export function startTenka(rounds: number, players: readonly string[], seed: num
   }
 
   const game: TenkaGame = {
+    // Written only for a map other than the world, so a world game is saved exactly as before there was a choice.
+    ...(map === "world" ? {} : { map }),
     seed,
     players: players.map(cleanTenkaName),
     rounds,
@@ -111,5 +116,5 @@ export function startTenka(rounds: number, players: readonly string[], seed: num
 
 /** The same table again, from nothing, with a new seed: a new deal, a new first player, new dice. */
 export function tenkaAgain(game: TenkaGame, seed: number): TenkaGame | null {
-  return startTenka(game.rounds, game.players, seed, game.placing);
+  return startTenka(game.rounds, game.players, seed, game.placing, game.map ?? "world");
 }
