@@ -6,6 +6,8 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-02
+
 Nothing that was exported has changed; the rules, both maps and every saved game (kept version 2, export format 2) are exactly as they were. The dice and cards the table draws can now be Korokoro's and Toranpu's; by default they are drawn as before. This is a minor release (2.1.0).
 
 ### Added
