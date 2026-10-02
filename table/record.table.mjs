@@ -27,7 +27,7 @@ test("the record is written as the game goes, and saves as JSON, text and CSV", 
   const json = await saved(page, '#table [data-testid="tk-save-json"]');
   expect(json.name).toBe("tenka-7.json");
   const data = JSON.parse(json.text);
-  expect(data.format).toBe(1);
+  expect(data.format).toBe(2);
   expect(data.moves).toEqual([["p", own, 1]]);
   expect(tenkaFromJSON(json.text).armies[own]).toBe(s.lands[own].armies);
 

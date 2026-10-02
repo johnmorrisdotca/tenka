@@ -31,33 +31,35 @@ const WORLD_CONTINENTS: readonly Omit<TenkaContinent, "territories">[] = [
 ];
 
 /**
- * EUROPE'S ELEVEN REGIONS, the continents of the Europe map (`scripts/map-europe.mjs`), each worth what the world's
- * continents are worth for their size and the ways into them:
+ * EUROPE'S ELEVEN REGIONS, the continents of the Europe map. The map is the classic Europe board's as a graph, exactly
+ * (forty-nine territories, eighty-two borders on land and nineteen routes across the water, `scripts/europe-edges.mjs`);
+ * that board has no regions, so these are this package's own, sized the way the world's continents are: by how many
+ * territories a region has and how many other territories touch it (its ways in). `tenkaEurope.test.ts` counts both.
  *
- *   Britain and Ireland            3 territories   2
- *   The Nordic Countries           4 territories   3
- *   Iberia                         3 territories   2
- *   The Maghreb                    3 territories   2
- *   France and the Low Countries   3 territories   3
- *   Central Europe                 5 territories   4
- *   Italy and the Balkans          4 territories   3
- *   The Danube                     3 territories   2
- *   Eastern Europe                 4 territories   3
- *   Russia                         3 territories   3
- *   Anatolia and the Caucasus      2 territories   2
+ *   Britain and Ireland            4 territories   4 ways in   2
+ *   The Nordic Countries           4 territories   8           3
+ *   Iberia                         6 territories   5           3
+ *   The Maghreb                    3 territories   4           2
+ *   France                         4 territories   8           3
+ *   Germany and the Low Countries  5 territories   7           4
+ *   Central Europe                 4 territories  10           3
+ *   Italy                          4 territories   5           2
+ *   The Balkans and Turkey         5 territories   5           3
+ *   Poland and the Baltic          5 territories  10           4
+ *   Eastern Europe                 5 territories   7           4
  */
 const EUROPE_REGIONS: readonly Omit<TenkaContinent, "territories">[] = [
   { key: "britishIsles", name: "Britain and Ireland", kanji: "英愛", bonus: 2 },
   { key: "scandinavia", name: "The Nordic Countries", kanji: "北欧", bonus: 3 },
-  { key: "iberia", name: "Iberia", kanji: "イベリア", bonus: 2 },
+  { key: "iberia", name: "Iberia", kanji: "イベリア", bonus: 3 },
   { key: "maghreb", name: "The Maghreb", kanji: "マグリブ", bonus: 2 },
-  { key: "france", name: "France and the Low Countries", kanji: "西欧", bonus: 3 },
-  { key: "centralEurope", name: "Central Europe", kanji: "中欧", bonus: 4 },
-  { key: "italyBalkans", name: "Italy and the Balkans", kanji: "南欧", bonus: 3 },
-  { key: "danube", name: "The Danube", kanji: "ドナウ", bonus: 2 },
-  { key: "easternEurope", name: "Eastern Europe", kanji: "東欧", bonus: 3 },
-  { key: "russia", name: "Russia", kanji: "露", bonus: 3 },
-  { key: "anatolia", name: "Anatolia and the Caucasus", kanji: "小亜細亜", bonus: 2 },
+  { key: "france", name: "France", kanji: "仏", bonus: 3 },
+  { key: "germany", name: "Germany and the Low Countries", kanji: "独", bonus: 4 },
+  { key: "centralEurope", name: "Central Europe", kanji: "中欧", bonus: 3 },
+  { key: "italy", name: "Italy", kanji: "伊", bonus: 2 },
+  { key: "balkans", name: "The Balkans and Turkey", kanji: "南東欧", bonus: 3 },
+  { key: "baltic", name: "Poland and the Baltic", kanji: "波", bonus: 4 },
+  { key: "easternEurope", name: "Eastern Europe", kanji: "東欧", bonus: 4 },
 ];
 
 /** A map as the rules read it, made from its territories and its continents' names and bonuses. */

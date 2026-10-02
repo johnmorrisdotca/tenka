@@ -134,46 +134,59 @@ shown. ␠ marks a space at the start or end of a string.
 | `cScandinavia` | The Nordic Countries | 北欧 |
 | `cIberia` | Iberia | イベリア |
 | `cMaghreb` | The Maghreb | マグリブ |
-| `cFrance` | France and the Low Countries | フランス・ベネルクス |
+| `cFrance` | France | フランス |
+| `cGermany` | Germany and the Low Countries | ドイツ・低地諸国 |
 | `cCentralEurope` | Central Europe | 中欧 |
-| `cItalyBalkans` | Italy and the Balkans | イタリア・バルカン |
-| `cDanube` | The Danube | ドナウ |
+| `cItaly` | Italy | イタリア |
+| `cBalkans` | The Balkans and Turkey | バルカン・トルコ |
+| `cBaltic` | Poland and the Baltic | ポーランド・バルト |
 | `cEasternEurope` | Eastern Europe | 東欧 |
-| `cRussia` | Russia | ロシア |
-| `cAnatolia` | Anatolia and the Caucasus | アナトリア・コーカサス |
-| `tIceland` | Iceland | アイスランド |
+| `tScotland` | Scotland | スコットランド |
+| `tEngland` | England | イングランド |
+| `tWales` | Wales | ウェールズ |
 | `tIreland` | Ireland | アイルランド |
-| `tGreatBritain` | Great Britain | グレートブリテン島 |
 | `tNorway` | Norway | ノルウェー |
 | `tSweden` | Sweden | スウェーデン |
 | `tFinland` | Finland | フィンランド |
 | `tDenmark` | Denmark | デンマーク |
 | `tPortugal` | Portugal | ポルトガル |
-| `tWesternSpain` | Western Spain | スペイン西部 |
-| `tEasternSpain` | Eastern Spain | スペイン東部 |
+| `tLeonCastile` | León-Castile | レオン・カスティーリャ |
+| `tNavarre` | Navarre | ナバラ |
+| `tBarcelona` | Barcelona | バルセロナ |
+| `tValencia` | Valencia | バレンシア |
+| `tGranada` | Granada | グラナダ |
 | `tMorocco` | Morocco | モロッコ |
 | `tAlgeria` | Algeria | アルジェリア |
-| `tTunisia` | Tunisia and Libya | チュニジア・リビア |
-| `tWesternFrance` | Western France | フランス西部 |
-| `tEasternFrance` | Eastern France | フランス東部 |
-| `tLowCountries` | The Low Countries | ベネルクス |
-| `tWesternGermany` | Western Germany | ドイツ西部 |
-| `tEasternGermany` | Eastern Germany | ドイツ東部 |
-| `tPoland` | Poland | ポーランド |
-| `tCzechSlovakia` | Czechia and Slovakia | チェコ・スロバキア |
-| `tAlps` | The Alps | アルプス |
-| `tItaly` | Italy | イタリア |
-| `tWesternBalkans` | The Western Balkans | 西バルカン |
-| `tCentralBalkans` | Serbia and North Macedonia | セルビア・北マケドニア |
-| `tGreece` | Greece | ギリシャ |
+| `tTunisia` | Tunisia | チュニジア |
+| `tNormandy` | Normandy | ノルマンディー |
+| `tBrittany` | Brittany | ブルターニュ |
+| `tFrance` | France | フランス |
+| `tBurgundy` | Burgundy | ブルゴーニュ |
+| `tFriesland` | Friesland | フリースラント |
+| `tSaxony` | Saxony | ザクセン |
+| `tLorraine` | Lorraine | ロレーヌ |
+| `tFranconia` | Franconia | フランケン |
+| `tSwabia` | Swabia | シュヴァーベン |
+| `tBavaria` | Bavaria | バイエルン |
+| `tBohemia` | Bohemia | ボヘミア |
+| `tHighlands` | Highlands | 高地地方 |
 | `tHungary` | Hungary | ハンガリー |
-| `tRomania` | Romania and Moldova | ルーマニア・モルドバ |
+| `tLombardy` | Lombardy | ロンバルディア |
+| `tRome` | Rome | ローマ |
+| `tKingdomOfSicily` | Kingdom of Sicily | シチリア王国 |
+| `tSardinia` | Sardinia | サルデーニャ |
+| `tVenice` | Venice | ヴェネツィア |
+| `tSerbia` | Serbia | セルビア |
+| `tGreece` | Greece | ギリシャ |
 | `tBulgaria` | Bulgaria | ブルガリア |
-| `tBaltics` | The Baltic States | バルト三国 |
-| `tBelarus` | Belarus | ベラルーシ |
-| `tWesternUkraine` | Western Ukraine | ウクライナ西部 |
-| `tEasternUkraine` | Eastern Ukraine | ウクライナ東部 |
-| `tCentralRussia` | Central Russia | ロシア中部 |
-| `tVolga` | The Volga and the Urals | ヴォルガ・ウラル |
-| `tAnatolia` | Anatolia | アナトリア |
-| `tCaucasus` | The Caucasus | コーカサス |
+| `tTurkey` | Turkey | トルコ |
+| `tPomerania` | Pomerania | ポメラニア |
+| `tPrussia` | Prussia | プロイセン |
+| `tPoland` | Poland | ポーランド |
+| `tLithuania` | Lithuania | リトアニア |
+| `tEstonia` | Estonia | エストニア |
+| `tNovgorod` | Republic of Novgorod | ノヴゴロド共和国 |
+| `tSmolensk` | Smolensk | スモレンスク |
+| `tPolotsk` | Polotsk | ポロツク |
+| `tRusland` | Rusland | ルーシ |
+| `tGalicia` | Galicia | ガリツィア |

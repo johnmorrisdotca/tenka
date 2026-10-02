@@ -287,7 +287,7 @@ describe("keeping a game", () => {
     const kept = JSON.parse(encodeTenka(startTenka(10, ["A", "B"], 1)!));
     expect(decodeTenka(null)).toBeNull();
     expect(decodeTenka("{")).toBeNull();
-    expect(decodeTenka(JSON.stringify({ ...kept, v: 2 }))).toBeNull();
+    expect(decodeTenka(JSON.stringify({ ...kept, v: 3 }))).toBeNull();
     expect(decodeTenka(JSON.stringify({ ...kept, moves: [["z"]] }))).toBeNull();
     // Attacking before placing the turn's armies is not a move these rules can play.
     expect(decodeTenka(JSON.stringify({ ...kept, moves: [["e"]] }))).toBeNull();

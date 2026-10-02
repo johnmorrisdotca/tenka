@@ -8,7 +8,7 @@ test("the table in a tag is on the page, played by the computer in turn, and spe
   const errors = await open(page);
   const tag = page.locator('[data-testid="tag"] [data-testid="tk-root"]');
   await expect(tag).toHaveCount(1);
-  await expect(tag.locator(".tk-land")).toHaveCount(37);
+  await expect(tag.locator(".tk-land")).toHaveCount(49);
   await expect(tag.locator('[data-testid="tk-player"]')).toHaveCount(2);
   await expect(tag.locator('[data-testid="tk-record"]')).toHaveCount(0);
   await expect(tag.locator(".tk-status")).toContainText("of 10.");
@@ -40,7 +40,7 @@ test("Copy link copies a link that deals the same game, and the address is read 
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", { value: { writeText: async (text) => void (window.__copied = text) } });
   });
-  const errors = await open(page, "?seed=2026&players=4&rounds=10&map=europe&delay=0&lang=en", 37);
+  const errors = await open(page, "?seed=2026&players=4&rounds=10&map=europe&delay=0&lang=en", 49);
   await expect(page.locator('#table [data-testid="tk-player"]')).toHaveCount(4);
   await expect(page.locator(ROOT)).toContainText("of 10.");
   await expect(page.locator('#table .tk-zoom [data-view="europe"]')).toHaveCount(1);

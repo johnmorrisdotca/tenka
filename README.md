@@ -283,8 +283,8 @@ src/
 ├── tenkaCards.ts              the cards won by a conquest, and the sets that trade for armies
 ├── tenkaDaily.ts              one seed a day, the same for everybody
 ├── tenkaDice.ts               the dice and the seeded random they are thrown with
-├── tenkaEurope.data.ts        Europe's thirty-seven territories and neighbours, written by scripts/map.mjs europe
-├── tenkaEuropeShapes.data.ts  Europe's outlines, written by scripts/map.mjs europe
+├── tenkaEurope.data.ts        Europe's forty-nine territories and neighbours, written by scripts/map-europe.mjs
+├── tenkaEuropeShapes.data.ts  Europe's outlines, written by scripts/map-europe.mjs
 ├── tenkaExport.ts             a game written out as JSON, plain text or CSV
 ├── tenkaKeep.ts               a game as short text to keep, and read back by playing its moves again
 ├── tenkaMap.ts                the world as the rules read it: territories, neighbours, continents and their bonuses
@@ -453,38 +453,53 @@ sea: the world wraps round.
 
 ### Europe
 
-A second map, played by the same rules: thirty-seven territories in eleven
-regions, from Iceland to the Urals and from the North Cape to the Maghreb.
-Start a game on it with `startTenka(rounds, players, seed, placing, "europe")`;
-the game says `map: "europe"`, and every rule reads that map.
+A second map, played by the same rules: forty-nine territories in eleven
+regions, from Scotland to Turkey and from Norway to Morocco. It is the board
+of the classic game of Europe as a graph, exactly: the same named areas
+(Scotland, Normandy, Lombardy, the Kingdom of Sicily, the Republic of
+Novgorod, Rusland, Galicia and the rest), the same eighty-two borders on land,
+and the same nineteen routes across the water. Start a game on it with
+`startTenka(rounds, players, seed, placing, "europe")`; the game says
+`map: "europe"`, and every rule reads that map.
 
-| Region | Territories | Armies for holding it | Key |
-| --- | --- | --- | --- |
-| Britain and Ireland | 3 | 2 | `britishIsles` |
-| The Nordic Countries | 4 | 3 | `scandinavia` |
-| Iberia | 3 | 2 | `iberia` |
-| The Maghreb | 3 | 2 | `maghreb` |
-| France and the Low Countries | 3 | 3 | `france` |
-| Central Europe | 5 | 4 | `centralEurope` |
-| Italy and the Balkans | 4 | 3 | `italyBalkans` |
-| The Danube | 3 | 2 | `danube` |
-| Eastern Europe | 4 | 3 | `easternEurope` |
-| Russia | 3 | 3 | `russia` |
-| Anatolia and the Caucasus | 2 | 2 | `anatolia` |
+The list of what touches what is `scripts/europe-edges.mjs`, written out by
+hand; `pnpm map europe` draws the territories from real geography so that
+they have exactly those borders, and refuses to write if they do not, and
+`tenkaEurope.test.ts` holds the finished map to the list again, written out a
+second time there by name.
+
+The regions are Tenka's own, since that board has none; each is worth what its
+size and the ways into it say:
+
+| Region | Territories | Ways in | Armies for holding it | Key |
+| --- | --- | --- | --- | --- |
+| Britain and Ireland | 4 | 4 | 2 | `britishIsles` |
+| The Nordic Countries | 4 | 8 | 3 | `scandinavia` |
+| Iberia | 6 | 5 | 3 | `iberia` |
+| The Maghreb | 3 | 4 | 2 | `maghreb` |
+| France | 4 | 8 | 3 | `france` |
+| Germany and the Low Countries | 5 | 7 | 4 | `germany` |
+| Central Europe | 4 | 10 | 3 | `centralEurope` |
+| Italy | 4 | 5 | 2 | `italy` |
+| The Balkans and Turkey | 5 | 5 | 3 | `balkans` |
+| Poland and the Baltic | 5 | 10 | 4 | `baltic` |
+| Eastern Europe | 5 | 7 | 4 | `easternEurope` |
 
 ```ts
 import { TENKA_MAPS, startTenka, tenkaMapOf } from "@johnmorrisdotca/tenka";
 
-TENKA_MAPS.europe.territories.length; // → 37
+TENKA_MAPS.europe.territories.length; // → 49
 const game = startTenka(10, ["Ann", "Ben", "Cho"], 2026, "auto", "europe")!;
 game.map; // → "europe"
 tenkaMapOf(game).continents.length; // → 11
 ```
 
-The territories are modern names for real stretches of Europe, laid out for
-this game: a whole country where it is about the size of the others, two
-together where they are small, and a large country cut along a meridian. A
-game saved before there was a choice names no map, and reads as the world's.
+The territories are historical areas, not modern countries: Denmark runs on
+down the German coast to Poland's border, Venice is the Adriatic's far shore,
+and Rusland is the Ukraine. Each is made of the provinces of its place, drawn
+from Natural Earth. A game saved before this map was the board's (version 1 of
+the kept text, format 1 of the JSON) is refused on Europe, because its moves
+mean other territories now; the world's games are read as before.
 
 ### What a game is
 
@@ -577,7 +592,7 @@ The JSON, as `tenkaToJSON` writes it:
 
 ```json
 {
-  "format": 1,
+  "format": 2,
   "game": "tenka",
   "generator": "tenka 1.3.0",
   "seed": 2026,
@@ -655,10 +670,11 @@ TENKA_SHAPES.outlines.length; // → 42
 TENKA_SHAPES.labels[0]; // → [95, 203]
 ```
 
-Europe's are `TENKA_EUROPE_SHAPES`, built the same way by `pnpm map europe`
-from Natural Earth's countries at 1:50m, finer because Europe is drawn at four
-times the scale (`scripts/map-europe.mjs` lays out its territories), into
-`src/tenkaEurope.data.ts` and `src/tenkaEuropeShapes.data.ts`.
+Europe's are `TENKA_EUROPE_SHAPES`, built by `pnpm map europe` from Natural
+Earth's provinces and states at 1:10m, because its territories are made of
+them (`scripts/europe-units.mjs` gives each province to its territory, and
+`scripts/map-europe.mjs` draws them), into `src/tenkaEurope.data.ts` and
+`src/tenkaEuropeShapes.data.ts`.
 
 `TENKA_SHAPES` has each territory's `outlines` (one SVG path), where its
 counter stands (`labels`), its extent (`boxes`), the dashed `seaLines`, the

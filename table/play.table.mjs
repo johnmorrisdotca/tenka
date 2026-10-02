@@ -156,7 +156,7 @@ test("Europe is a map of its own: chosen above the table, drawn with its regions
   await expect(page.locator('[data-map="europe"]')).toHaveAttribute("aria-pressed", "true");
   await tap(page, "#new");
   const s = await sound(page, errors);
-  expect(s.lands).toHaveLength(37);
+  expect(s.lands).toHaveLength(49);
   // The views above the map are Europe's: the whole map and its eleven regions.
   await expect(page.locator(`${ROOT} [data-view]`)).toHaveCount(12);
   await expect(page.locator(`${ROOT} [data-view="europe"]`)).toHaveText("Europe");

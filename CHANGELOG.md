@@ -6,10 +6,23 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
-Only the dashed sea lines on the maps are drawn differently. Which territories touch which, the rules and every saved game are exactly as they were.
+**A major release: the Europe map is a different map, and a Europe game saved before it can no longer be played.** The rules, the world map and a world game saved before are as they were; the world's dashed sea lines are drawn differently.
+
+### Breaking
+
+- **Europe is the classic Europe board's, as a graph, exactly.** John, 2026-10-02: the maps are to be equal to the original boards. Forty-nine named areas (Scotland, England, Wales, Ireland, Norway, Sweden, Finland, Denmark, Estonia, the Republic of Novgorod, Lithuania, Prussia, Pomerania, Polotsk, Smolensk, Friesland, Saxony, Poland, Rusland, Galicia, Lorraine, Franconia, Bohemia, Highlands, Normandy, Brittany, France, Burgundy, Swabia, Bavaria, Lombardy, Venice, Rome, the Kingdom of Sicily, Sardinia, Hungary, Serbia, Bulgaria, Greece, Turkey, León-Castile, Portugal, Navarre, Barcelona, Valencia, Granada, Morocco, Algeria and Tunisia) take the place of the thirty-seven modern ones, with eighty-two borders on land and nineteen dashed routes across the water. Every territory key is new (`scotland`, `leonCastile`, `kingdomOfSicily`…), so nothing that named a Europe territory by key or number means what it did, and the deck is fifty-one cards, not thirty-nine. Only the geography is used: no artwork, wording, logo or name of any published game.
+- **A Europe game kept by 1.3.0 or earlier is refused, not replayed as another game.** Its moves are numbered by territory and the territories are different. The kept text is version 2 now (`decodeTenka` reads version 1 only for a world game, which did not change) and the JSON's `TENKA_EXPORT_FORMAT` is 2 (`tenkaFromJSON` reads format 1 only for a world game). A seed that dealt a Europe table before deals another now.
+- **Europe's eleven regions are different, and Tenka's own** (the board has none): Britain and Ireland, the Nordic Countries, Iberia, the Maghreb, France, Germany and the Low Countries, Central Europe, Italy, the Balkans and Turkey, Poland and the Baltic, Eastern Europe. `TenkaEuropeRegionKey` loses `italyBalkans`, `danube`, `russia` and `anatolia` and gains `germany`, `italy`, `balkans` and `baltic`; the bonuses are in the README.
+
+### Added
+
+- **`scripts/europe-edges.mjs`**, the graph written out by hand, which `pnpm map europe` holds the drawn borders to (it refuses to write a map whose borders differ) and which `tenkaEurope.test.ts` holds the finished map to a second time, written out again there by name.
+- **`scripts/europe-units.mjs`**, which gives each province of Natural Earth's admin-1 file (1:10m, public domain) to its territory, with a few straight cuts through a province (Bavaria, Lower Saxony, Leningrad).
 
 ### Changed
 
+- **Europe is drawn from provinces, not countries**, by `scripts/map-europe.mjs` (`pnpm map europe` runs it), so a historical area can be a stretch of several modern countries: Denmark runs on down the German coast, Venice is the Adriatic's far shore, Rusland is the Ukraine. The frame is the board's: Ireland to the Caucasus and the Maghreb's coast to the Arctic Circle, so Iceland is no longer on the Europe map.
+- **`scripts/map.mjs europe` hands over to `scripts/map-europe.mjs`**, and the Europe branches of `map.mjs` are gone; the world is built as before (its two files are byte for byte the same).
 - **Iceland is joined to Europe on the map.** It lies inside the Nordic Countries here, and the sea route from Greenland used to stop at an island with no line onward. Greenland's line now ends on Iceland, and a second line runs from Iceland to Scotland beside the Scotland to Norway one.
 - **Madagascar's two routes, to Southern Africa and to East Africa, and Oceania's four** (Indonesia to Western Australia, Melanesia to Eastern Australia, and New Zealand to both) are drawn from one territory's counter to the other's, not between the two nearest coasts, which left Madagascar's as stubs and Australia's as short strokes lost in the islands. `scripts/map.mjs` takes `anchors` for that, and `also` for a second line on the same link.
 
