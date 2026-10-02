@@ -81,7 +81,7 @@ export type TenkaTableProps = TenkaTableOptions & Omit<HTMLAttributes<HTMLDivEle
  * browser has it. Options are read when it mounts; give it a new `key` to
  * start over with different ones.
  */
-export function TenkaTable({ players, computers, rounds, seed, map, colours, computerDelayMs, onChange, locale, strings, theme, record, ...element }: TenkaTableProps) {
+export function TenkaTable({ players, computers, rounds, seed, map, colours, computerDelayMs, onChange, locale, strings, theme, record, dressing, ...element }: TenkaTableProps) {
   const host = useRef<HTMLDivElement>(null);
   const latest = useRef(onChange);
   useEffect(() => {
@@ -90,7 +90,7 @@ export function TenkaTable({ players, computers, rounds, seed, map, colours, com
   useEffect(() => {
     const target = host.current;
     if (target === null) return;
-    const table = mountTenka(target, { players, computers, rounds, seed, map, colours, computerDelayMs, locale, strings, theme, record, onChange: (game) => latest.current?.(game) });
+    const table = mountTenka(target, { players, computers, rounds, seed, map, colours, computerDelayMs, locale, strings, theme, record, dressing, onChange: (game) => latest.current?.(game) });
     return () => table.destroy();
     // Mounted once per key, as documented above.
     // eslint-disable-next-line react-hooks/exhaustive-deps

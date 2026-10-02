@@ -6,6 +6,24 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+Nothing that was exported has changed; the rules, both maps and every saved game (kept version 2, export format 2) are exactly as they were. The dice and cards the table draws can now be Korokoro's and Toranpu's; by default they are drawn as before. This is a minor release (2.1.0).
+
+### Added
+
+- **`@johnmorrisdotca/tenka/dressing`**, a new entry: `tenkaDressing(options?)` makes a `TenkaDressing` that draws the table's dice with Korokoro and its cards with Toranpu. The dice are Korokoro's, with pips, and tumble onto the faces the game threw (a die lands on `tenkaThrownDie(face)`, the source Korokoro throws from) only when a move has just thrown them, never when the table is drawn again for another reason; a device that asks for reduced motion lands them at once, and `sound: true` plays the sound of real dice once for each throw. Each card in hand is Toranpu's, drawn with its own territory's outline from the map, its name in the table's language, its region and the symbol of its army (a castle for land, a ship for sea, a plane for air); the wild cards show all three. The deck sits beside the hand face down, in Tenka's own back (`TENKA_BACK`: the table's green, with 天), with the number left in it. Also exported: `tenkaCardDesign()` (the cards as a Toranpu design named `tenka`, for Toranpu's own elements), `tenkaCardId` and `tenkaCardOfId`.
+- **`dressing` in the table's options**, in `mountTenka`, on the React `TenkaTable` and as the `<tenka-table>` element's `dressing` property; a `TenkaDressing` is `{ die?, card?, back? }`, each given what the game decided and returning the element to show, so a look of your own is a function. The types (`TenkaDressing`, `TenkaDrawn`, `TenkaDieHow`, `TenkaCardHow`, `TenkaBackHow`) are exported from `/ui`. A dressing only draws: the game is the same, move for move and dice for dice, dressed or plain, and a dressing that throws is replaced by the plain drawing. Every die carries its number as `data-face`, and every card `data-card` and `data-territory`, plain or dressed.
+- **Three words in both languages** (`dieAttack`, `dieDefend`, `deckLeft`): "Attacker's die: 4" for a screen reader, and "Deck: 41" beside the deck. Two theme variables, `--tk-die-size` and `--tk-card-width`.
+- **README:** "Dice and cards from Korokoro and Toranpu", with a picture (`docs/dressed.jpg`, taken by `pnpm pictures`); the demo's table is dressed, and `?dressing=off` shows the plain one.
+
+### Dependencies
+
+- **`@johnmorrisdotca/korokoro` (1.15 or later) and `@johnmorrisdotca/toranpu` (2.14 or later) are optional peer dependencies**, imported by `/dressing` and by nothing else. Tenka still has no dependencies: the rules, the map, saving, the computer player and the plain table (`/ui`, `/react`, `/element`) never import either, and `pnpm test:package` installs the package without them and imports every other entry, then installs them and proves `/dressing`. Without them, importing `/dressing` fails naming the missing package. A page with no bundler needs an import map, as the demo's has.
+
+### Changed
+
+- The demo's table is dressed (`?dressing=off` for the plain one), carrying the files of Korokoro and Toranpu it reaches under `vendor/`; the table in a tag stays plain. If they cannot be fetched the table is drawn plain.
+- The table's tests read the dice from `data-face` and not from the text of the line, and a new `table/dressed.table.mjs` checks the dice against the numbers the game threw, each card against its territory's own outline and name, the deck, that a dressed and a plain table make the same game from the same taps, and that the dice tumble once.
+
 ## [2.0.0] - 2026-10-02
 
 **This is a major release: both maps, the world and Europe, are different maps, and games kept by 1.x do not play on either.**

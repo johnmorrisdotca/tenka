@@ -15,8 +15,8 @@ export const ROOT = '#table [data-testid="tk-root"]';
 /** The table when it is a person's turn. */
 export const WAITING = `${ROOT}[data-waiting="true"]`;
 
-/** Open the demo with a query, and collect anything the page complains of. The computer moves at once unless the query says otherwise. */
-export async function open(page, query = "?seed=7&delay=0&lang=en", lands = 42) {
+/** Open the demo with a query, and collect anything the page complains of. The computer moves at once unless the query says otherwise. `missing` names paths (folders, by their start) the page is told are not there. */
+export async function open(page, query = "?seed=7&delay=0&lang=en", lands = 42, missing = []) {
   if (!existsSync(join(site, "index.html"))) throw new Error("site/ is not built: run `pnpm site` first (`pnpm test:table` does)");
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
@@ -24,7 +24,7 @@ export async function open(page, query = "?seed=7&delay=0&lang=en", lands = 42) 
   await page.route("http://tenka.test/**", (route) => {
     const { pathname } = new URL(route.request().url());
     const file = join(site, pathname === "/" ? "index.html" : pathname);
-    if (!existsSync(file)) return route.fulfill({ status: 404, body: "" });
+    if (!existsSync(file) || missing.some((start) => pathname.startsWith(start))) return route.fulfill({ status: 404, body: "" });
     return route.fulfill({ body: readFileSync(file), contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream" });
   });
   await page.goto(`http://tenka.test/${query}`);
@@ -67,6 +67,8 @@ export function state(page) {
       status: q('#table [data-testid="tk-status"]').textContent,
       controls: all('#table [data-testid="tk-controls"] button').map((b) => b.textContent),
       dice: q('#table [data-testid="tk-dice"]').textContent,
+      // The numbers on the dice of the last throw, by side, as the table says they are (every die carries its face, drawn plain or dressed).
+      faces: { attack: all("#table .tk-attack .tk-die").map((d) => Number(d.dataset.face)), defend: all("#table .tk-defend .tk-die").map((d) => Number(d.dataset.face)) },
       players: all('#table [data-testid="tk-player"]').map((p) => p.textContent),
       views: all("#table .tk-zoom button").map((b) => b.textContent),
       viewBox: q("#table .tk-map").getAttribute("viewBox"),

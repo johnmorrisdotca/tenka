@@ -25,6 +25,7 @@ const blocks = [...readme.matchAll(/^```(\w*)\n([\s\S]*?)^```$/gm)].map((found) 
 
 /** The entries of the package, as a block of the README imports them, and the source each one is. */
 const ENTRIES = {
+  "@johnmorrisdotca/tenka/dressing": "src/dressing.ts",
   "@johnmorrisdotca/tenka/shapes": "src/shapes.ts",
   "@johnmorrisdotca/tenka/ui": "src/ui.ts",
   "@johnmorrisdotca/tenka": "src/index.ts",
@@ -86,7 +87,11 @@ describe("the README's examples", () => {
   it("the install lines name this package", () => {
     expect(readme).toContain(`npm install ${pkg.name}`);
     for (const block of blocks.filter((one) => one.lang !== "sh" && one.lang !== "json")) {
-      for (const found of block.text.matchAll(/from "(@johnmorrisdotca\/[^"]+)"/g)) expect(Object.keys(ENTRIES).concat("@johnmorrisdotca/tenka/react"), block.text).toContain(found[1]);
+      // Tenka's own entries, and the two sibling packages its dressing draws with.
+      for (const found of block.text.matchAll(/from "(@johnmorrisdotca\/[^"]+)"/g)) {
+        if (/^@johnmorrisdotca\/(korokoro|toranpu)(\/|$)/.test(found[1])) continue;
+        expect(Object.keys(ENTRIES).concat("@johnmorrisdotca/tenka/react"), block.text).toContain(found[1]);
+      }
     }
   });
 });
@@ -255,7 +260,7 @@ describe("the package", () => {
   });
 
   it("every export of every entry has a doc comment", () => {
-    const entries = ["src/index.ts", "src/ui.ts", "src/react.tsx", "src/shapes.ts"];
+    const entries = ["src/index.ts", "src/ui.ts", "src/react.tsx", "src/shapes.ts", "src/dressing.ts"];
     const program = ts.createProgram(entries, { allowImportingTsExtensions: true, noEmit: true, jsx: ts.JsxEmit.ReactJSX, moduleResolution: ts.ModuleResolutionKind.Bundler, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020, skipLibCheck: true });
     const checker = program.getTypeChecker();
     const bare = [];

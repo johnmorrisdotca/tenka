@@ -56,7 +56,7 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
   game = playTenka(game, { kind: "blitz", from, to });
   s = await sound(page, errors);
   // The dice fall as the seed has them, here as in the rules.
-  expect(s.dice).toContain(game.lastRoll.attackDice.join(""));
+  expect(s.faces).toEqual({ attack: [...game.lastRoll.attackDice], defend: [...game.lastRoll.defendDice] });
   expect(s.dice).toContain(`attacker lost ${game.lastRoll.attackerLost}, defender lost ${game.lastRoll.defenderLost}`);
   expect(s.phase).toBe(game.phase);
   expect(s.lands.map((land) => land.armies)).toEqual([...game.armies]);

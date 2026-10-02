@@ -2,6 +2,7 @@ import { TENKA_WORLD_ROUNDS } from "./tenka.constants.ts";
 import type { TenkaGame, TenkaMapKey } from "./tenka.types.ts";
 import { tenkaDailySeed } from "./tenkaDaily.ts";
 import { isTenkaSeed, isTenkaTable } from "./tenkaStart.ts";
+import type { TenkaDressing } from "./ui/dressing.types.ts";
 import { mountTenka, type TenkaTableHandle } from "./ui/mount.ts";
 
 const ElementBase: typeof HTMLElement = typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
@@ -44,7 +45,8 @@ function computersFrom(value: string | null, count: number): boolean[] | undefin
  *  - `delay`: how long the computer waits before each move, in milliseconds.
  *
  * It fires `tenka-change` after every move, with the game as `event.detail.game`, and has the
- * methods `newGame()` and `setGame()`. A table the rules do not offer (one player, say, or 15
+ * methods `newGame()` and `setGame()`, and the property `dressing` (the dice and cards drawn by
+ * Korokoro and Toranpu: see `tenkaDressing`, which an attribute cannot carry). A table the rules do not offer (one player, say, or 15
  * rounds) draws nothing.
  */
 export class TenkaTable extends ElementBase {
@@ -54,6 +56,7 @@ export class TenkaTable extends ElementBase {
   #key = "";
   #queued = false;
   #seed: number | null = null;
+  #dressing: TenkaDressing | undefined;
 
   connectedCallback(): void {
     this.#refresh();
@@ -72,6 +75,16 @@ export class TenkaTable extends ElementBase {
       this.#queued = false;
       this.#refresh();
     });
+  }
+
+  /** How the dice and the cards are drawn, if not the plain way: `tenkaDressing()` from `@johnmorrisdotca/tenka/dressing`. Setting it draws the table again, with a new game from the same seed. */
+  get dressing(): TenkaDressing | undefined {
+    return this.#dressing;
+  }
+  set dressing(next: TenkaDressing | undefined) {
+    this.#dressing = next;
+    this.#key = "";
+    if (this.isConnected) this.#refresh();
   }
 
   /** The mounted table's handle (`mountTenka`), or null while the attributes name no table the rules offer. */
@@ -127,6 +140,7 @@ export class TenkaTable extends ElementBase {
       locale,
       record,
       computerDelayMs: delay,
+      dressing: this.#dressing,
       onChange: (game) => this.dispatchEvent(new CustomEvent("tenka-change", { detail: { game }, bubbles: true })),
     });
   }

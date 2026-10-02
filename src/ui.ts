@@ -7,5 +7,6 @@ export { mountTenka, type TenkaTableHandle, type TenkaTableOptions } from "./ui/
 export { NO_MARKS, TENKA_MAP_SHAPES, continentView, landInDirection, nearestLand, tenkaMapModel, tenkaShapesOf, type TenkaArrow, type TenkaLand, type TenkaMapModel, type TenkaRing, type TenkaView } from "./ui/mapModel.ts";
 export { TENKA_NEUTRAL_COLOUR, TENKA_SEAT_COLOURS, ownerColour } from "./ui/colours.ts";
 export { tenkaMapSvg } from "./ui/svg.ts";
+export type { TenkaBackHow, TenkaCardHow, TenkaDieHow, TenkaDrawn, TenkaDressing } from "./ui/dressing.types.ts";
 export { TENKA_STYLE } from "./ui/style.ts";
 export { TENKA_STRINGS, continentNameIn, tenkaSay, tenkaStrings, territoryNameIn, type TenkaLocale, type TenkaStrings } from "./strings.ts";

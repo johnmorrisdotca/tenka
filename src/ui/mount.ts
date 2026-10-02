@@ -12,6 +12,7 @@ import { armiesHeld, territoriesHeld } from "../tenkaTurn.ts";
 import { continentNameIn, tenkaSay, tenkaStrings, territoryNameIn, type TenkaLocale, type TenkaStrings } from "../strings.ts";
 import { ownerColour } from "./colours.ts";
 import { continentView, landInDirection, nearestLand, tenkaMapModel, type TenkaArrow } from "./mapModel.ts";
+import type { TenkaDressing, TenkaDrawn } from "./dressing.types.ts";
 import { TENKA_STYLE } from "./style.ts";
 import { tenkaMapSvg } from "./svg.ts";
 
@@ -41,6 +42,8 @@ export type TenkaTableOptions = {
   theme?: Readonly<Record<string, string>>;
   /** Whether the table shows the record of the game, with saving and loading. True by default. */
   record?: boolean;
+  /** How the dice and the cards are drawn, if not the plain way: `tenkaDressing()` from `@johnmorrisdotca/tenka/dressing` draws them with Korokoro's dice and Toranpu's cards. The game is the same either way. */
+  dressing?: TenkaDressing;
 };
 
 /** What `mountTenka` hands back: the game being played, and the ways to change it from outside. */
@@ -113,6 +116,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   const colours = options.colours;
   const delay = options.computerDelayMs ?? 450;
   const showRecord = options.record !== false;
+  const dressing = options.dressing;
 
   const begin = (seed: number): TenkaGame => {
     const game = startTenka(rounds, players, seed, undefined, map);
@@ -127,6 +131,33 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   let note = "";
   // The territory a keyboard is on: the one Tab lands on, and the one the arrow keys move from.
   let onLand: number | null = null;
+  // The dice are shown landing only when a move has just thrown them, never when the table is drawn again for any other reason.
+  let drawnRoll: TenkaGame["lastRoll"] = null;
+  let moved = false;
+  // What a dressing drew for the dice, and for the hand and the deck: told when it is drawn again, or the table goes.
+  let diceDrawn: TenkaDrawn[] = [];
+  let handDrawn: TenkaDrawn[] = [];
+  const letGo = (drawn: TenkaDrawn[]) => {
+    for (const one of drawn) {
+      try {
+        one.destroy?.();
+      } catch {
+        // A dressing that fails to tidy up is no reason to stop the game.
+      }
+    }
+    return [];
+  };
+  // A dressing that fails draws nothing, and the plain way is drawn instead.
+  const dress = (make: (() => TenkaDrawn) | undefined, kept: TenkaDrawn[]): Element | null => {
+    if (make === undefined) return null;
+    try {
+      const drawn = make();
+      kept.push(drawn);
+      return drawn.element;
+    } catch {
+      return null;
+    }
+  };
 
   const root = node("div", "tk-root");
   root.dataset.testid = "tk-root";
@@ -170,6 +201,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     game = next;
     choice = choiceNow(game, choice);
     note = "";
+    moved = true;
     options.onChange?.(game);
     render();
   };
@@ -333,13 +365,38 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   }
 
   function renderDice() {
+    diceDrawn = letGo(diceDrawn);
     dice.replaceChildren();
+    const thrownNow = moved;
+    moved = false;
     const roll = game.lastRoll;
-    if (roll === null) return;
+    if (roll === null) {
+      drawnRoll = null;
+      return;
+    }
+    const tumble = thrownNow && roll !== drawnRoll;
+    drawnRoll = roll;
     const line = node("p", "tk-roll");
-    const faces = (values: readonly number[], kind: string) => {
-      const group = node("span", `tk-faces tk-${kind}`);
-      for (const value of values) group.append(node("span", "tk-die", String(value)));
+    const count = roll.attackDice.length + roll.defendDice.length;
+    let index = 0;
+    const faces = (values: readonly number[], side: "attack" | "defend") => {
+      const group = node("span", `tk-faces tk-${side}`);
+      for (const value of values) {
+        const die = node("span", "tk-die");
+        die.dataset.face = String(value);
+        const label = tenkaSay(side === "attack" ? words.dieAttack : words.dieDefend, { n: value });
+        const drawn = dress(dressing?.die === undefined ? undefined : () => dressing.die!(value, { side, tumble, index: index++, count, label, locale }), diceDrawn);
+        if (drawn === null) die.textContent = String(value);
+        else {
+          // The picture is the whole of what a screen reader gets, so what is inside it is left out.
+          die.classList.add("tk-die-drawn");
+          die.setAttribute("role", "img");
+          die.setAttribute("aria-label", label);
+          drawn.setAttribute("aria-hidden", "true");
+          die.append(drawn);
+        }
+        group.append(die);
+      }
       return group;
     };
     const after = `${roll.throws > 1 ? tenkaSay(words.rollThrows, { n: roll.throws }) : ""}${tenkaSay(words.rollLost, { a: roll.attackerLost, d: roll.defenderLost })}${roll.took ? words.rollTook : ""}`;
@@ -348,6 +405,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   }
 
   function renderSeats() {
+    handDrawn = letGo(handDrawn);
     seats.replaceChildren();
     const list = node("ol", "tk-players");
     game.players.forEach((_, seat) => {
@@ -370,7 +428,31 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       for (const card of hand) {
         const territory = cardTerritory(card, tenkaMapOf(game));
         const kind = cardKind(card, tenkaMapOf(game));
-        cards.append(node("span", `tk-card tk-${kind}`, territory === null ? words.wild : tenkaSay(words.card, { kind: kinds[kind], land: landName(territory) })));
+        const name = territory === null ? words.wild : landName(territory);
+        const label = territory === null ? words.wild : tenkaSay(words.card, { kind: kinds[kind], land: name });
+        const chip = node("span", `tk-card tk-${kind}`);
+        chip.dataset.card = String(card);
+        if (territory !== null) chip.dataset.territory = String(territory);
+        const drawn = dress(dressing?.card === undefined ? undefined : () => dressing.card!({ card, territory, kind, map: game.map ?? "world", name, label, locale }), handDrawn);
+        if (drawn === null) chip.textContent = label;
+        else {
+          chip.classList.add("tk-card-drawn");
+          chip.setAttribute("role", "img");
+          chip.setAttribute("aria-label", label);
+          drawn.setAttribute("aria-hidden", "true");
+          chip.append(drawn);
+        }
+        cards.append(chip);
+      }
+      // The deck, face down beside the hand, with the number left in it.
+      const left = tenkaSay(words.deckLeft, { n: game.deck.length });
+      const back = dress(dressing?.back === undefined ? undefined : () => dressing.back!({ label: left, locale }), handDrawn);
+      if (back !== null) {
+        const pile = node("span", "tk-pile");
+        pile.dataset.testid = "tk-pile";
+        back.setAttribute("aria-hidden", "true");
+        pile.append(back, node("span", "tk-pile-count", left));
+        cards.append(pile);
       }
       seats.append(cards);
     }
@@ -545,6 +627,8 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     },
     destroy: () => {
       if (timer !== null) clearTimeout(timer);
+      diceDrawn = letGo(diceDrawn);
+      handDrawn = letGo(handDrawn);
       resized?.disconnect();
       root.remove();
     },

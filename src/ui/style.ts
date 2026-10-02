@@ -10,6 +10,7 @@ export const TENKA_STYLE = `
   --tk-border: rgba(10,10,10,.8); --tk-link: #1d3440; --tk-accent: #2f5d4a; --tk-accent-ink: #fff;
   --tk-ring: #111; --tk-ring-target: #fff; --tk-counter-edge: #111; --tk-counter-ink: #fff;
   --tk-attack: #c8463d; --tk-attack-ink: #fff; --tk-defend: #f4efe4; --tk-defend-ink: #1f2320;
+  --tk-die-size: 34px; --tk-card-width: 64px;
   --tk-radius: 10px; --tk-font: system-ui, -apple-system, "Segoe UI", sans-serif;
   display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); color: var(--tk-ink);
   font-family: var(--tk-font); font-size: 15px;
@@ -49,6 +50,8 @@ export const TENKA_STYLE = `
 .tk-die { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 5px; font-weight: 700; font-size: 13px; }
 .tk-attack .tk-die { background: var(--tk-attack); color: var(--tk-attack-ink); }
 .tk-defend .tk-die { background: var(--tk-defend); color: var(--tk-defend-ink); border: 1px solid var(--tk-defend-ink); }
+.tk-faces .tk-die.tk-die-drawn { width: var(--tk-die-size); height: var(--tk-die-size); border: 0; border-radius: 0; background: none; font-size: 0; user-select: none; -webkit-user-select: none; }
+.tk-die-drawn > * { display: block; }
 .tk-side, .tk-seats { display: grid; gap: 12px; align-content: start; min-width: 0; }
 .tk-players { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .tk-player { display: grid; grid-template-columns: 16px 1fr; column-gap: 8px; padding: 6px 8px; border-radius: 8px; background: var(--tk-panel); }
@@ -57,9 +60,12 @@ export const TENKA_STYLE = `
 .tk-marble { width: 14px; height: 14px; border-radius: 50%; grid-row: span 2; align-self: center; border: 1px solid rgba(0,0,0,.4); }
 .tk-name { font-weight: 600; overflow-wrap: anywhere; }
 .tk-count { font-size: 12px; opacity: .75; }
-.tk-hand { display: flex; flex-wrap: wrap; gap: 6px; }
+.tk-hand { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; }
 .tk-hand-title { width: 100%; margin: 0; font-weight: 600; }
 .tk-card { padding: 4px 8px; border-radius: 6px; background: var(--tk-panel); border: 1px solid var(--tk-line); font-size: 12px; }
+.tk-hand .tk-card-drawn { width: var(--tk-card-width); padding: 0; border: 0; border-radius: 0; background: none; line-height: 0; user-select: none; -webkit-user-select: none; }
+.tk-card-drawn svg, .tk-pile svg { display: block; width: 100%; height: auto; }
+.tk-pile { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; width: var(--tk-card-width); font-size: 12px; text-align: center; user-select: none; -webkit-user-select: none; }
 .tk-record { border-radius: 8px; background: var(--tk-panel); padding: 0 10px; min-width: 0; }
 .tk-record[open] { padding-bottom: 10px; }
 .tk-record-title { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }

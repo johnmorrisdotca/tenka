@@ -29,7 +29,10 @@ who know Risk will know how to play.
   reload to roll again. The map is the real world, drawn from public-domain
   data, and the table is finished: continent views, sea routes, a computer
   player, a written record.
-- **What it costs a project.** Nothing: no dependencies, and one import.
+- **What it costs a project.** Nothing: no dependencies, and one import. The
+  dice and cards on the table can be drawn by two sibling packages, Korokoro
+  and Toranpu, if you install them ([below](#dice-and-cards-from-korokoro-and-toranpu));
+  nothing else in Tenka ever asks for them.
 
 ## Play in 30 seconds
 
@@ -252,12 +255,18 @@ it.
   `require()` loads it too (Node 22 and later), and a `sideEffects` list that
   names only the file that defines the tag, so a bundler drops what you do not
   import.
+- **Optional peers, for one entry only.** `@johnmorrisdotca/korokoro` and
+  `@johnmorrisdotca/toranpu` are optional peer dependencies of
+  `@johnmorrisdotca/tenka/dressing` and of nothing else. The rules, the map,
+  saving, the computer player and the plain table never import them.
 - **Sizes.** The rules, the computer player and keeping a game are about 17 kB
   minified (6 kB gzipped) once a bundler has shaken the rest out; the whole
   main entry, with both languages and the exports, is 37 kB (12 kB). The
   table is 120 kB (39 kB), of which the map's outlines are 69 kB (21 kB). The
   outlines are their own entry, `/shapes`, so code that only plays the rules
-  never carries them.
+  never carries them. Dressing the table in Korokoro's dice and Toranpu's cards
+  adds about 190 kB (70 kB gzipped), nearly all of it Korokoro, to a page that
+  asks for it; Tenka's own part of that is under 10 kB.
 - **Where it runs.** Current Chrome, Edge, Firefox and Safari, on a desk or a
   phone. The rules have no DOM in them and run in Node 22 and later, Deno,
   Bun and web workers.
@@ -268,10 +277,14 @@ The rules, the map and the computer player are plain functions over plain data
 with no DOM: a game is a value, and every move returns the next one. Drawing
 the map is its own entry (`/ui` for plain DOM, `/element` for a tag, `/react`
 for React, `/shapes` for the outlines), so a page that only wants the rules loads none of it.
+Drawing the table's dice and cards with Korokoro and Toranpu is `/dressing`, the one entry that imports another package.
+Dressing the table's dice and cards in the family's own is `/dressing`, the one entry that reaches another package.
 
 ```text
 src/
 ├── element-define.ts          the "/element/define" entry: defines <tenka-table> on the page by being imported
+├── dressing.ts                the "/dressing" entry: the table's dice drawn by Korokoro and its cards by Toranpu, the one place either is imported
+├── dressingCards.ts           Tenka's cards as a Toranpu design: a territory's own outline, its name and its army's symbol
 ├── element.ts                 the "/element" entry: the <tenka-table> element, a whole table in a tag
 ├── index.ts                   the main entry: the rules, the map, saving and the computer player, with no DOM
 ├── react.tsx                  the "/react" entry: a map to draw in React
@@ -299,6 +312,7 @@ src/
 ├── version.ts                 the version of this package, as package.json has it
 └── ui/  the table that draws and plays a game
     ├── colours.ts   the colours a table is drawn in
+    ├── dressing.types.ts  what a table asks a dressing for, and what it gets back: a die, a card, a back
     ├── mapModel.ts  which outlines draw which map, and which territory an arrow key moves to
     ├── mount.ts     the table itself: mounting it on a page, and the options it takes
     ├── style.ts     the table's own styles, every colour a CSS variable so a page can re-colour it
@@ -386,6 +400,10 @@ Tenka is one of nineteen packages, each made for the same site, each at
 - **A table to play on.** The whole world or one continent at a tap, sea
   routes dashed, the dice of the last throw, the players and their cards, and
   the record of the game. Against the computer, or passed round one device.
+- **Dice and cards from the family.** Korokoro's dice tumble onto the faces the
+  game threw, and Toranpu draws each card with its territory's own outline,
+  name and army, and the deck face down in Tenka's own back: see
+  [below](#dice-and-cards-from-korokoro-and-toranpu).
 - **A tag.** `<tenka-table>` is the whole table in one element, with no
   framework.
 - **One game a day.** `tenkaDailySeed(new Date())` is the same seed for
@@ -834,6 +852,7 @@ plays a whole game in the element, and returns a handle.
 | `strings` | | Words of your own, laid over the locale's |
 | `theme` | | CSS variables set on the table itself |
 | `record` | `true` | Whether the record of the game, with saving and loading, is shown |
+| `dressing` | the plain dice and cards | How the dice and cards are drawn: [`tenkaDressing()`](#dice-and-cards-from-korokoro-and-toranpu) draws them with Korokoro and Toranpu |
 
 | Handle | What it does |
 | --- | --- |
@@ -878,7 +897,8 @@ nothing.
 
 It fires `tenka-change` after every move, with the game as `event.detail.game`
 (a bubbling `CustomEvent`), and has `game`, `table` (the handle `mountTenka`
-returns), `newGame(options?)` and `setGame(game, computers?)`. To style it,
+returns), `newGame(options?)` and `setGame(game, computers?)`. Its `dressing`
+property, which an attribute cannot carry, takes `tenkaDressing()`. To style it,
 set the table's variables on `tenka-table .tk-root`: see [Theming](#theming).
 
 ### The React components
@@ -913,6 +933,94 @@ export function Board() {
 for its `<div>`. Options are read when it mounts; give it a new `key` to start
 over with different ones.
 
+### Dice and cards from Korokoro and Toranpu
+
+The table draws its own dice and cards, plainly, with nothing to install. If
+[Korokoro](https://github.com/johnmorrisdotca/korokoro) and
+[Toranpu](https://github.com/johnmorrisdotca/toranpu) are installed it can
+draw them with theirs: Korokoro's dice, with pips, tumbling onto the faces the
+game threw (and, if you ask, the sound of real dice), and Toranpu's cards,
+each showing its own territory's outline from the map, its name, and the
+symbol of its army (a castle for land, a ship for sea, a plane for air), with
+the deck beside the hand face down in Tenka's own green back with the
+character 天. The two wild cards show all three symbols.
+
+<p align="center"><img src="docs/dressed.jpg" alt="The table dressed in Korokoro and Toranpu: an attack from Venezuela thrown as three red dice against two cream ones, and beside the players a hand of one card, Siberia, with its outline, its name and a castle for land, next to the deck face down in a green back with the character 天 and the number left in it" width="720"></p>
+
+```sh
+npm install @johnmorrisdotca/tenka @johnmorrisdotca/korokoro @johnmorrisdotca/toranpu
+```
+
+```js
+import { mountTenka } from "@johnmorrisdotca/tenka/ui";
+import { tenkaDressing } from "@johnmorrisdotca/tenka/dressing";
+
+mountTenka(document.getElementById("table"), { dressing: tenkaDressing() });
+```
+
+```jsx
+<TenkaTable dressing={tenkaDressing()} />
+```
+
+```html
+<tenka-table id="tag"></tenka-table>
+<script type="module">
+  import { tenkaDressing } from "@johnmorrisdotca/tenka/dressing";
+  document.getElementById("tag").dressing = tenkaDressing();
+</script>
+```
+
+| Option of `tenkaDressing` | What it does |
+| --- | --- |
+| `sound` | `true` for the sound of dice with each throw. Off unless asked |
+| `tumbleMs` | How long the dice tumble, in milliseconds: `600` unless said. `0` lands them at once. A device that asks for reduced motion lands them at once whatever this says |
+| `back` | The deck's back, Toranpu's `CardBackOptions` laid over Tenka's own (`TENKA_BACK`): a `colour`, an `ink`, a `mark`, your own `art`, `image` or `logo` |
+
+**It only draws.** The dice are thrown by the game's own seeded random, as
+they always were, and Korokoro is handed the face that came up
+(`tenkaThrownDie(face)` is the source it throws from, so a die tumbles and
+lands on exactly that face); the cards are the game's hands and deck. A game
+plays and replays move for move, to the same dice, whether it is dressed or
+not. A die tumbles only when a move has just thrown it, never when the table
+is drawn again for any other reason. Every die, card and the deck is a
+picture with a name a screen reader reads ("Attacker's die: 4", "Land:
+Brazil", "Deck: 41"), and none can be selected.
+
+**What is needed, and what is not.** `@johnmorrisdotca/korokoro` (1.15 or
+later) and `@johnmorrisdotca/toranpu` (2.14 or later) are *optional* peer
+dependencies, imported by `@johnmorrisdotca/tenka/dressing` and by nothing
+else: a project that never imports that entry never loads them, and Tenka
+still has no dependencies. A page with no bundler needs an import map to find
+them, as the demo's has.
+
+Your own look is a function. A `TenkaDressing` is `{ die?, card?, back? }`,
+each given what the game decided and returning an element to show (with
+`destroy` if it has a timer to stop); anything left out is drawn plainly. The
+cards are also a plain Toranpu design, for Toranpu's own elements:
+
+```ts
+import { roll } from "@johnmorrisdotca/korokoro";
+import { cardFaceSvg } from "@johnmorrisdotca/toranpu/card-faces";
+import { tenkaCardDesign, tenkaCardId, tenkaCardOfId, tenkaThrownDie } from "@johnmorrisdotca/tenka/dressing";
+
+tenkaCardId("world", 11); // → "tenka-world-11"
+tenkaCardOfId("tenka-europe-7"); // → { map: "europe", territory: 7 }
+tenkaCardOfId("tenka-wild"); // → { wild: true }
+roll({ count: 1, sides: 6 }, tenkaThrownDie(5)).faces; // → [5]
+cardFaceSvg(tenkaCardId("world", 11), { design: tenkaCardDesign() })?.includes(">Brazil</text>"); // → true
+```
+
+`registerCardDesign(tenkaCardDesign())` from Toranpu then lets `<toranpu-card
+card="tenka-world-11" design="tenka">` draw a Tenka card anywhere on a page.
+
+| Export of `/dressing` | What it is |
+| --- | --- |
+| `tenkaDressing(options?)` | The dressing to give a table |
+| `tenkaCardDesign()` | Tenka's cards as a Toranpu design, named `tenka` |
+| `tenkaCardId(map, territory)`, `tenkaCardOfId(id)` | A card's id in Toranpu's hands, and back |
+| `tenkaThrownDie(face)` | Korokoro's random source that throws this face of a d6 |
+| `TENKA_BACK` | Tenka's own back, as Toranpu's back options |
+
 ## Accessibility
 
 - **A keyboard plays it.** On the table, each territory is a button, named for
@@ -929,8 +1037,11 @@ over with different ones.
   pixels each way, which a test holds at a phone's width.
 - **Colour is not the only mark.** The armies on a territory are numbers, and
   a player's marble sits beside their name.
-- **Motion.** There is none to reduce: the table has no animation. The
-  computer's pause between moves is `computerDelayMs`, and 0 plays without it.
+- **Motion.** The plain table has no animation. Dressed in Korokoro's dice
+  ([above](#dice-and-cards-from-korokoro-and-toranpu)), the dice tumble for
+  about half a second when a throw is made, and a device that asks for reduced
+  motion gets none of it: they land at once. The computer's pause between
+  moves is `computerDelayMs`, and 0 plays without it.
 - **Not yet.** The arrow keys go by where territories lie on the screen, not
   by the neighbours the rules count, so a sea route is not followed by a key.
   The focus ring is drawn in `--tk-accent`; a page that re-colours it should
@@ -957,6 +1068,8 @@ are the `colours` option.
 | `--tk-counter-edge`, `--tk-counter-ink` | The edge of an army counter, and its number | `#111`, `#fff` | the same |
 | `--tk-attack`, `--tk-attack-ink` | The attacker's dice | `#c8463d`, `#fff` | the same |
 | `--tk-defend`, `--tk-defend-ink` | The defender's dice | `#f4efe4`, `#1f2320` | the same |
+| `--tk-die-size` | The size of a die drawn by Korokoro | `34px` | the same |
+| `--tk-card-width` | The width of a card drawn by Toranpu, and of the deck | `64px` | the same |
 | `--tk-radius` | The map's corners | `10px` | the same |
 | `--tk-font` | The table's typeface | `system-ui, …` | the same |
 
@@ -1038,7 +1151,8 @@ game === null ? "not a game these rules can replay" : tenkaToText(game); // → 
   bonus.
 - Maps of your own: the map as data, with a tool to draw one.
 - A stronger computer player that plans a whole turn.
-- The throw of the dice and armies moving in, animated on the table.
+- Armies moving in, animated on the table. (The dice already tumble, when the
+  table is dressed in Korokoro's.)
 - A Vue wrapper, beside the React one and the tag.
 
 Left out on purpose: play between devices, which needs a server (the moves

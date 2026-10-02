@@ -1,12 +1,40 @@
 // Builds the static demo for GitHub Pages into ./site: the page, written here from the family's
 // shared header and footer, with the family's stylesheet, Tenka's own, the page's script and the
 // compiled library beside it.
-import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 
 import { API_CSS, apiPage } from "./api.mjs";
 import { FAMILY_SCRIPT, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
 
 const id = "tenka";
+
+// The dressed table (`/dressing`) imports Korokoro and Toranpu by name. A static page has no bundler, so the demo carries the
+// files of each that the table reaches, found by following their imports, and an import map says where the names are.
+const VENDOR = [
+  ["@johnmorrisdotca/korokoro", "korokoro", [["", "index.js"]]],
+  ["@johnmorrisdotca/toranpu", "toranpu", [["/card-backs", "card-backs.js"], ["/card-faces", "card-faces.js"]]],
+];
+function reached(entry) {
+  const seen = new Set();
+  const todo = [resolve(entry)];
+  while (todo.length > 0) {
+    const file = todo.pop();
+    if (seen.has(file)) continue;
+    seen.add(file);
+    for (const found of readFileSync(file, "utf8").matchAll(/(?:from\s*|import\s*\(\s*|import\s+)["'](\.[^"']+)["']/g)) todo.push(resolve(dirname(file), found[1]));
+  }
+  return [...seen];
+}
+const imports = {};
+const vendored = [];
+for (const [name, folder, entries] of VENDOR) {
+  const dist = resolve("node_modules", name, "dist");
+  if (!existsSync(dist)) throw new Error(`${name} is not installed: run pnpm install`);
+  for (const [suffix, entry] of entries) imports[name + suffix] = `./vendor/${folder}/${entry}`;
+  for (const [, entry] of entries) for (const file of reached(join(dist, entry))) vendored.push([file, join("site", "vendor", folder, file.slice(dist.length + 1))]);
+}
+
 const ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%23f3efe4'%3E天%3C/text%3E%3C/svg%3E";
 
 const tries = [
@@ -30,6 +58,7 @@ const page = `<!doctype html>
     <link rel="icon" href="${ICON}" />
     <link rel="stylesheet" href="family.css" />
     <link rel="stylesheet" href="tenka.css" />
+    <script type="importmap">${JSON.stringify({ imports })}</script>
   </head>
   <body>
     <main>
@@ -85,6 +114,10 @@ rmSync("site", { recursive: true, force: true });
 mkdirSync("site", { recursive: true });
 cpSync("demo", "site", { recursive: true });
 cpSync("dist", "site/dist", { recursive: true });
+for (const [from, to] of vendored) {
+  mkdirSync(dirname(to), { recursive: true });
+  cpSync(from, to);
+}
 writeFileSync("site/index.html", page);
 // The API reference, made from the source: every export of every entry point.
 writeFileSync("site/api.css", API_CSS);

@@ -51,6 +51,8 @@ shown. ␠ marks a space at the start or end of a string.
 | `rollThrows` | , {n} throws | 、{n}回 |
 | `rollLost` | : attacker lost {a}, defender lost {d} | ：攻撃側 −{a}、防御側 −{d} |
 | `rollTook` | , taken | 、占領 |
+| `dieAttack` | Attacker's die: {n} | 攻撃側のダイス：{n} |
+| `dieDefend` | Defender's die: {n} | 防御側のダイス：{n} |
 | `counts` | {lands} lands, {armies} armies, {cards} cards | 領土{lands}・部隊{armies}・カード{cards}枚 |
 | `noCards` | No cards in hand ({name}). | 手札はありません（{name}）。 |
 | `cardsInHand` | Cards in hand ({name}) | 手札（{name}） |
@@ -59,6 +61,7 @@ shown. ␠ marks a space at the start or end of a string.
 | `kindSea` | Sea | 海 |
 | `kindAir` | Air | 空 |
 | `card` | {kind}: {land} | {kind}：{land} |
+| `deckLeft` | Deck: {n} | 山札：{n}枚 |
 | `record` | Record of the game | ゲームの記録 |
 | `recordEmpty` | No moves yet. | まだ手はありません。 |
 | `saveJson` | Save as JSON | JSONで保存 |

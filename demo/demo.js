@@ -77,6 +77,9 @@ const asked = (name, least, most) => {
   return query.has(name) && Number.isInteger(value) && value >= least && value <= most ? value : undefined;
 };
 const delay = asked("delay", 0, 5000);
+// The dice and cards are Korokoro's and Toranpu's (`/dressing`); `?dressing=off` shows the plain ones the table draws by itself.
+// A page that cannot load them is left with the plain ones.
+const dressing = query.get("dressing") === "off" ? undefined : await import("./dist/dressing.js").then((module) => module.tenkaDressing({ sound: query.get("sound") === "on" })).catch(() => undefined);
 const seed = asked("seed", 0, 0xffffffff);
 
 const setUp = { players: asked("players", 2, 6) ?? 3, rounds: [10, 20, 60].includes(asked("rounds", 10, 60)) ? asked("rounds", 10, 60) : 20, map: query.get("map") === "europe" ? "europe" : "world" };
@@ -123,6 +126,7 @@ const table = mountTenka(document.getElementById("table"), {
   seed,
   locale: language.lang,
   computerDelayMs: delay,
+  dressing,
   // The family's paper and ink, which follow light and dark on their own.
   theme: { "--tk-ink": "var(--ink)", "--tk-panel": "var(--surface)", "--tk-font": "var(--font)", "--tk-accent": "var(--felt)", "--tk-accent-ink": "var(--felt-ink)" },
   onChange: keep,
