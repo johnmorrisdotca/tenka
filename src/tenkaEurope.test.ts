@@ -129,4 +129,14 @@ describe("a game on Europe", () => {
     expect(decodeTenka(encodeTenka(world))).toEqual(world);
     expect(decodeTenka(encodeTenka(europe).replace('"europe"', '"atlantis"'))).toBeNull();
   });
+
+  it("still reads a Europe game kept before 2.0.0, when only the world changed, and refuses a world game kept then", () => {
+    const europe = startTenka(TENKA_WORLD_ROUNDS, players, 11, "auto", "europe")!;
+    const world = startTenka(TENKA_WORLD_ROUNDS, players, 11)!;
+    expect(decodeTenka(encodeTenka(europe).replace('"v":2', '"v":1'))).toEqual(europe);
+    expect(decodeTenka(encodeTenka(world).replace('"v":2', '"v":1'))).toBeNull();
+    const old = (game: TenkaGame) => tenkaToJSON(game).replace('"format": 2', '"format": 1');
+    expect(tenkaFromJSON(old(europe))).toEqual(europe);
+    expect(tenkaFromJSON(old(world))).toBeNull();
+  });
 });

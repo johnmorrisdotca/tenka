@@ -50,7 +50,7 @@ test("Enter places an army, and the keyboard is still on that territory after th
 
 test("on a continent's view the arrows stay among the territories shown", async ({ page }) => {
   await open(page);
-  await page.locator('#table .tk-zoom [data-view="oceania"]').click();
+  await page.locator('#table .tk-zoom [data-view="australia"]').click();
   const stop = page.locator(`${LANDS}[tabindex="0"]`);
   await expect(stop).toHaveCount(1);
   await stop.focus();

@@ -13,16 +13,16 @@ test("the chooser turns the page and the table to Japanese, and back", async ({ 
   expect(s.lang).toBe("ja");
   expect(s.unreviewed).toBe(true);
   expect(s.pitch).toContain("世界征服ゲーム");
-  expect(s.views).toEqual(["世界", "北アメリカ", "南アメリカ", "ヨーロッパ", "アフリカ", "アジア", "オセアニア"]);
+  expect(s.views).toEqual(["世界", "北アメリカ", "南アメリカ", "ヨーロッパ", "アフリカ", "アジア", "オーストラリア"]);
   expect(s.status).toMatch(/^第1ラウンド（全20ラウンド）。 あなた: 自分の領土に\d+部隊を置いてください。$/);
   expect(s.players[0]).toContain("領土14・部隊35・カード0枚");
-  expect(s.lands[35].name).toMatch(/^日本: \d+$/);
+  expect(s.lands[32].name).toMatch(/^日本: \d+$/);
   await tap(page, '[data-lang="en"]');
   s = await sound(page, errors);
   expect(s.lang).toBe("en");
   expect(s.unreviewed).toBe(false);
   expect(s.status).toMatch(/^Round 1 of 20\. You: place \d+ armies on your territories\.$/);
-  expect(s.lands[35].name).toMatch(/^Japan: \d+$/);
+  expect(s.lands[32].name).toMatch(/^Japan: \d+$/);
 });
 
 test("the address asks for a language, and a device remembers the one chosen", async ({ page }) => {

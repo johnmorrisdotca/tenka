@@ -21,7 +21,7 @@ import { TENKA_VERSION } from "./version.ts";
  */
 
 /** The shape of the JSON this package writes. It goes up only when a reader of the old shape would be wrong about the new one. */
-export const TENKA_EXPORT_FORMAT = 1;
+export const TENKA_EXPORT_FORMAT = 2;
 
 /** A whole JSON export of one game: what `tenkaToJSON` writes and `tenkaFromJSON` reads. */
 export type TenkaExported = {
@@ -92,6 +92,8 @@ export function tenkaFromJSON(text: string): TenkaGame | null {
   // What `encodeTenka` keeps has a `v` and no `format`: read by the reader it was written for.
   if (format === undefined) return decodeTenka(text);
   if (typeof format !== "number" || !Number.isInteger(format) || format < 1 || format > TENKA_EXPORT_FORMAT) return null;
+  // Format 1 was written before the world became the classic board's (2.0.0): its moves mean other territories now. Europe's map did not change.
+  if (format < TENKA_EXPORT_FORMAT && map !== "europe") return null;
   if (game !== undefined && game !== "tenka") return null;
   if (typeof seed !== "number" || typeof rounds !== "number") return null;
   if (placing !== "auto" && placing !== "hand") return null;

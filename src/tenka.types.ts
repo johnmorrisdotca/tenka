@@ -10,7 +10,7 @@
  */
 
 /** The world's six continents, by key. */
-export type TenkaWorldContinentKey = "northAmerica" | "southAmerica" | "europe" | "africa" | "asia" | "oceania";
+export type TenkaWorldContinentKey = "northAmerica" | "southAmerica" | "europe" | "africa" | "asia" | "australia";
 
 /** Europe's eleven regions, by key: the continents of the Europe map. */
 export type TenkaEuropeRegionKey =

@@ -87,49 +87,48 @@ shown. ␠ marks a space at the start or end of a string.
 | `cEurope` | Europe | ヨーロッパ |
 | `cAfrica` | Africa | アフリカ |
 | `cAsia` | Asia | アジア |
-| `cOceania` | Oceania | オセアニア |
+| `cAustralia` | Australia | オーストラリア |
 | `tAlaska` | Alaska | アラスカ |
-| `tWesternCanada` | Western Canada | カナダ西部 |
-| `tEasternCanada` | Eastern Canada | カナダ東部 |
-| `tArcticIslands` | Arctic Islands | 北極諸島 |
+| `tNorthwestTerritory` | Northwest Territory | ノースウェスト準州 |
 | `tGreenland` | Greenland | グリーンランド |
-| `tUsWest` | Western United States | アメリカ西部 |
-| `tUsEast` | Eastern United States | アメリカ東部 |
-| `tMexico` | Mexico and Central America | メキシコ・中央アメリカ |
-| `tColombia` | Colombia and Venezuela | コロンビア・ベネズエラ |
-| `tAndes` | The Andes | アンデス |
+| `tAlberta` | Alberta | アルバータ |
+| `tOntario` | Ontario | オンタリオ |
+| `tQuebec` | Quebec | ケベック |
+| `tWesternUnitedStates` | Western United States | アメリカ西部 |
+| `tEasternUnitedStates` | Eastern United States | アメリカ東部 |
+| `tCentralAmerica` | Central America | 中央アメリカ |
+| `tVenezuela` | Venezuela | ベネズエラ |
+| `tPeru` | Peru | ペルー |
 | `tBrazil` | Brazil | ブラジル |
-| `tSouthernCone` | Southern Cone | 南アメリカ南部 |
-| `tBritain` | Britain and Ireland | イギリス・アイルランド |
-| `tNordic` | The Nordic Countries | 北欧 |
+| `tArgentina` | Argentina | アルゼンチン |
+| `tScandinavia` | Scandinavia | スカンジナビア |
+| `tNorthernEurope` | Northern Europe | 北ヨーロッパ |
 | `tWesternEurope` | Western Europe | 西ヨーロッパ |
-| `tCentralEurope` | Central Europe | 中央ヨーロッパ |
 | `tSouthernEurope` | Southern Europe | 南ヨーロッパ |
-| `tEasternEurope` | Eastern Europe | 東ヨーロッパ |
-| `tWesternRussia` | Western Russia | ロシア西部 |
+| `tUkraine` | Ukraine | ウクライナ |
 | `tNorthAfrica` | North Africa | 北アフリカ |
-| `tEgypt` | Egypt and Sudan | エジプト・スーダン |
-| `tWestAfrica` | West Africa | 西アフリカ |
-| `tCentralAfrica` | Central Africa | 中央アフリカ |
+| `tEgypt` | Egypt | エジプト |
 | `tEastAfrica` | East Africa | 東アフリカ |
-| `tSouthernAfrica` | Southern Africa | 南部アフリカ |
+| `tCongo` | Congo | コンゴ |
+| `tSouthAfrica` | South Africa | 南アフリカ |
 | `tMadagascar` | Madagascar | マダガスカル |
-| `tMiddleEast` | The Middle East | 中東 |
-| `tArabia` | Arabia | アラビア |
-| `tCentralAsia` | Central Asia | 中央アジア |
-| `tSouthAsia` | South Asia | 南アジア |
+| `tUral` | Ural | ウラル |
 | `tSiberia` | Siberia | シベリア |
-| `tFarEast` | The Russian Far East | ロシア極東 |
+| `tYakutsk` | Yakutsk | ヤクーツク |
+| `tKamchatka` | Kamchatka | カムチャツカ |
+| `tIrkutsk` | Irkutsk | イルクーツク |
 | `tMongolia` | Mongolia | モンゴル |
-| `tChina` | China | 中国 |
-| `tKorea` | Korea | 朝鮮半島 |
 | `tJapan` | Japan | 日本 |
-| `tSoutheastAsia` | Southeast Asia | 東南アジア |
+| `tAfghanistan` | Afghanistan | アフガニスタン |
+| `tChina` | China | 中国 |
+| `tMiddleEast` | Middle East | 中東 |
+| `tIndia` | India | インド |
+| `tSiam` | Siam | シャム |
 | `tIndonesia` | Indonesia | インドネシア |
-| `tMelanesia` | Melanesia | メラネシア |
+| `tNewGuinea` | New Guinea | ニューギニア |
 | `tWesternAustralia` | Western Australia | オーストラリア西部 |
 | `tEasternAustralia` | Eastern Australia | オーストラリア東部 |
-| `tNewZealand` | New Zealand | ニュージーランド |
+| `tWesternRussia` | Western Russia | ロシア西部 |
 | `cBritishIsles` | Britain and Ireland | イギリス・アイルランド |
 | `cScandinavia` | The Nordic Countries | 北欧 |
 | `cIberia` | Iberia | イベリア |

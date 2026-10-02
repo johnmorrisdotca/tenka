@@ -6,12 +6,25 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
-Only the dashed sea lines on the maps are drawn differently. Which territories touch which, the rules and every saved game are exactly as they were.
+**This is a major release (2.0.0 when it is taken): the world map is a different map, and games kept by 1.x do not play on it.**
+
+The world map is now the classic world-conquest board's, as a graph (John, 2026-10-02: "I only want equal to the original"): the same forty-two territories in the same six continents, with exactly the same eighty-three pairs of territories that touch by land or are joined across the water, and the same continent bonuses. Only geography is used: the names are places and who borders whom is a fact, and no artwork, wording or name of any published game is.
 
 ### Changed
 
-- **Iceland is joined to Europe on the map.** It lies inside the Nordic Countries here, and the sea route from Greenland used to stop at an island with no line onward. Greenland's line now ends on Iceland, and a second line runs from Iceland to Scotland beside the Scotland to Norway one.
-- **Madagascar's two routes, to Southern Africa and to East Africa, and Oceania's four** (Indonesia to Western Australia, Melanesia to Eastern Australia, and New Zealand to both) are drawn from one territory's counter to the other's, not between the two nearest coasts, which left Madagascar's as stubs and Australia's as short strokes lost in the islands. `scripts/map.mjs` takes `anchors` for that, and `also` for a second line on the same link.
+- **The forty-two territories are the classic ones.** North America: Alaska, Northwest Territory, Greenland, Alberta, Ontario, Quebec, Western United States, Eastern United States, Central America. South America: Venezuela, Peru, Brazil, Argentina. Europe: Iceland, Scandinavia, Great Britain, Northern Europe, Western Europe, Southern Europe, Ukraine. Africa: North Africa, Egypt, East Africa, Congo, South Africa, Madagascar. Asia: Ural, Siberia, Yakutsk, Kamchatka, Irkutsk, Mongolia, Japan, Afghanistan, China, Middle East, India, Siam. Australia: Indonesia, New Guinea, Western Australia, Eastern Australia. Their keys are camel-case versions of those names (`northwestTerritory`, `greatBritain`, `middleEast`, `newGuinea`), and their Japanese names are new.
+- **The continents' bonuses are the classic ones:** North America 5 (9 territories), South America 2 (4), Europe 5 (7), Africa 3 (6, it was 4), Asia 7 (12), Australia 2 (4). Oceania is Australia: the continent key is `australia`, and the zoom button says so in both languages.
+- **The map is drawn from Natural Earth's provinces, states and regions** (admin-1, public domain, 1:50m) as well as its countries, so that Canada, the United States, Russia, China and Australia are cut along real borders: Alberta is British Columbia, Alberta and Saskatchewan; Ontario is Ontario and Manitoba; Ukraine is European Russia with the Caucasus, Ukraine, Belarus, Moldova and the Baltic states; Mongolia has Manchuria, Inner Mongolia and Korea with it, across the sea from Japan. `scripts/map-world.mjs` lays the territories out, `scripts/classic-edges.mjs` is the graph, and `scripts/map.mjs` refuses to write a map whose borders and sea links do not make exactly that graph.
+- **Sea links, twenty-five of them, join what the classic board joins and the land does not:** Alaska to Kamchatka (off both edges of the map), Greenland to the Northwest Territory, Ontario, Quebec and Iceland, Iceland to Great Britain and Scandinavia, Great Britain to Scandinavia, Northern Europe and Western Europe, Western and Southern Europe to North Africa, Southern Europe to Egypt, Brazil to North Africa, East Africa to the Middle East, Madagascar to East and South Africa, Ukraine to Afghanistan across the Caspian, Kamchatka and Mongolia to Japan, Siam to Indonesia, and Indonesia, New Guinea and Eastern and Western Australia to one another as the classic board has them. Madagascar's and Australia's are drawn from one territory's counter to the other's, so that none is a stub.
+- **Cards follow the territories**, as they did: a card for each of the forty-two, and the same two wild cards. The armies each player starts with, and every other rule, are unchanged.
+- The Europe map is exactly as it was.
+
+### What breaks
+
+- **Games kept by 1.x do not replay on the world map.** Their seeds deal other territories, and their moves name other territory numbers. A kept game (`encodeTenka`) is now version 2 and the JSON export (`tenkaToJSON`) is format 2; `decodeTenka` and `tenkaFromJSON` return `null` for a world game kept at version 1, rather than replaying it as another game. Games on the Europe map are unchanged and are still read at version 1. The demo, which keeps the game being played, starts a new one when it finds an old save.
+- **Territory keys, indices, names and counts have changed** (`TENKA_TERRITORIES`, every `key`, the strings `tAlaska`... and `cOceania`, now `cAustralia`; `"oceania"` is `"australia"` in `TenkaContinentKey` and in a map's `continents`). Alaska is still territory 0 and the Northwest Territory is territory 1, but most of the others have moved.
+- **The seeded game that pins the package** (seed 2026, three players, ten rounds) now takes 356 moves, not 357.
+- The CSV and text exports name the new territories.
 
 ## [1.3.0] - 2026-10-01
 

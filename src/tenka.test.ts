@@ -58,19 +58,19 @@ describe("reinforcements", () => {
   it("are one for every three territories, never fewer than three, and each continent held whole adds its bonus", () => {
     const owners = new Array<number>(TENKA_TERRITORY_COUNT).fill(1);
     expect(reinforcementFor(owners, 0)).toBe(3);
-    const eleven = TENKA_TERRITORIES.map((_, territory) => territory).filter((territory) => TENKA_TERRITORIES[territory].continent === "asia");
-    for (const territory of eleven) owners[territory] = 0;
-    // Eleven territories: three, and Asia's seven.
-    expect(reinforcementFor(owners, 0)).toBe(3 + 7);
-    for (const territory of continent("oceania").territories) owners[territory] = 0;
-    // Sixteen: five, Asia's seven and Oceania's two.
+    const asia = TENKA_TERRITORIES.map((_, territory) => territory).filter((territory) => TENKA_TERRITORIES[territory].continent === "asia");
+    for (const territory of asia) owners[territory] = 0;
+    // Twelve territories: four, and Asia's seven.
+    expect(reinforcementFor(owners, 0)).toBe(4 + 7);
+    for (const territory of continent("australia").territories) owners[territory] = 0;
+    // Sixteen: five, Asia's seven and Australia's two.
     expect(reinforcementFor(owners, 0)).toBe(5 + 7 + 2);
     owners[continent("asia").territories[0]] = 1;
     expect(reinforcementFor(owners, 0)).toBe(5 + 2);
   });
 
   it("are placed on the player's own territories, one at a time or all the rest at once, and then the attack begins", () => {
-    const game = { ...world({ owners: { brazil: 0, colombia: 0 }, phase: TENKA_PHASES.reinforce }), reserve: 5 };
+    const game = { ...world({ owners: { brazil: 0, venezuela: 0 }, phase: TENKA_PHASES.reinforce }), reserve: 5 };
     expect(playTenka(game, { kind: "place", territory: at("china"), armies: 1 })).toBeNull();
     expect(playTenka(game, { kind: "place", territory: at("brazil"), armies: 6 })).toBeNull();
     expect(playTenka(game, { kind: "place", territory: at("brazil"), armies: 3 })).toBeNull();
@@ -79,7 +79,7 @@ describe("reinforcements", () => {
     expect(placed.reserve).toBe(3);
     expect(placed.phase).toBe(TENKA_PHASES.reinforce);
     expect(tenkaMoves(placed).filter((move) => move.kind === "place").map((move) => (move.kind === "place" ? move.armies : 0))).toEqual([1, 3, 1, 3]);
-    const done = play(placed, { kind: "place", territory: at("colombia"), armies: 3 });
+    const done = play(placed, { kind: "place", territory: at("venezuela"), armies: 3 });
     expect(done.phase).toBe(TENKA_PHASES.attack);
     // The game given is left as it was.
     expect(game.armies[at("brazil")]).toBe(1);
@@ -112,29 +112,29 @@ describe("reinforcements", () => {
 });
 
 describe("the attack", () => {
-  const set = () => world({ owners: { brazil: 0 }, armies: { brazil: 10, westAfrica: 3 } });
+  const set = () => world({ owners: { brazil: 0 }, armies: { brazil: 10, northAfrica: 3 } });
 
   it("is from a territory of your own with two armies or more, into a neighbour by land or sea somebody else holds", () => {
     const game = set();
-    expect(playTenka(game, { kind: "attack", from: at("brazil"), to: at("westAfrica"), dice: 3 })).not.toBeNull(); // by sea
-    expect(playTenka(game, { kind: "attack", from: at("brazil"), to: at("andes"), dice: 3 })).not.toBeNull(); // by land
+    expect(playTenka(game, { kind: "attack", from: at("brazil"), to: at("northAfrica"), dice: 3 })).not.toBeNull(); // by sea
+    expect(playTenka(game, { kind: "attack", from: at("brazil"), to: at("peru"), dice: 3 })).not.toBeNull(); // by land
     expect(playTenka(game, { kind: "attack", from: at("brazil"), to: at("china"), dice: 1 })).toBeNull(); // not a neighbour
-    expect(playTenka(game, { kind: "attack", from: at("andes"), to: at("brazil"), dice: 1 })).toBeNull(); // not theirs
-    expect(playTenka(game, { kind: "attack", from: at("brazil"), to: at("andes"), dice: 4 })).toBeNull(); // four dice
-    expect(playTenka({ ...game, phase: TENKA_PHASES.reinforce }, { kind: "attack", from: at("brazil"), to: at("andes"), dice: 1 })).toBeNull();
+    expect(playTenka(game, { kind: "attack", from: at("peru"), to: at("brazil"), dice: 1 })).toBeNull(); // not theirs
+    expect(playTenka(game, { kind: "attack", from: at("brazil"), to: at("peru"), dice: 4 })).toBeNull(); // four dice
+    expect(playTenka({ ...game, phase: TENKA_PHASES.reinforce }, { kind: "attack", from: at("brazil"), to: at("peru"), dice: 1 })).toBeNull();
     const thin = world({ owners: { brazil: 0 }, armies: { brazil: 2 } });
-    expect(playTenka(thin, { kind: "attack", from: at("brazil"), to: at("andes"), dice: 2 })).toBeNull(); // one army must stay
+    expect(playTenka(thin, { kind: "attack", from: at("brazil"), to: at("peru"), dice: 2 })).toBeNull(); // one army must stay
   });
 
   it("crosses the Bering Strait both ways, where the world wraps round, and the Mediterranean to Egypt", () => {
-    const east = world({ owners: { farEast: 0 }, armies: { farEast: 5 } });
-    expect(playTenka(east, { kind: "attack", from: at("farEast"), to: at("alaska"), dice: 3 })).not.toBeNull();
+    const east = world({ owners: { kamchatka: 0 }, armies: { kamchatka: 5 } });
+    expect(playTenka(east, { kind: "attack", from: at("kamchatka"), to: at("alaska"), dice: 3 })).not.toBeNull();
     const west = world({ owners: { alaska: 0 }, armies: { alaska: 5 } });
-    expect(playTenka(west, { kind: "attack", from: at("alaska"), to: at("farEast"), dice: 3 })).not.toBeNull();
+    expect(playTenka(west, { kind: "attack", from: at("alaska"), to: at("kamchatka"), dice: 3 })).not.toBeNull();
     const south = world({ owners: { southernEurope: 0 }, armies: { southernEurope: 5 } });
     expect(playTenka(south, { kind: "attack", from: at("southernEurope"), to: at("egypt"), dice: 3 })).not.toBeNull();
-    const britain = world({ owners: { britain: 0 }, armies: { britain: 5 } });
-    expect(playTenka(britain, { kind: "attack", from: at("britain"), to: at("centralEurope"), dice: 3 })).not.toBeNull();
+    const greatBritain = world({ owners: { greatBritain: 0 }, armies: { greatBritain: 5 } });
+    expect(playTenka(greatBritain, { kind: "attack", from: at("greatBritain"), to: at("northernEurope"), dice: 3 })).not.toBeNull();
   });
 
   it("throws the game's own dice and takes off what each side lost", () => {
@@ -142,19 +142,19 @@ describe("the attack", () => {
     const thrown = throwDice(game.rng, 3);
     const defending = throwDice(thrown.state, defendDice(3));
     const lost = battleLosses(thrown.value, defending.value);
-    const after = play(game, { kind: "attack", from: at("brazil"), to: at("westAfrica"), dice: 3 });
+    const after = play(game, { kind: "attack", from: at("brazil"), to: at("northAfrica"), dice: 3 });
     expect(after.lastRoll).toMatchObject({ attackDice: thrown.value, defendDice: defending.value, attackerLost: lost.attackerLost, defenderLost: lost.defenderLost, throws: 1 });
     expect(after.armies[at("brazil")]).toBe(10 - lost.attackerLost);
-    expect(after.armies[at("westAfrica")]).toBe(3 - lost.defenderLost);
+    expect(after.armies[at("northAfrica")]).toBe(3 - lost.defenderLost);
     expect(after.rng).toBe(defending.state);
   });
 
   it("takes a territory it empties, and moves in at least as many armies as dice thrown, leaving one behind", () => {
     let game = world({ owners: { brazil: 0 }, armies: { brazil: 10 } });
     // Andes has one army: attack until it falls.
-    while (game.phase === TENKA_PHASES.attack) game = play(game, { kind: "attack", from: at("brazil"), to: at("andes"), dice: 3 });
+    while (game.phase === TENKA_PHASES.attack) game = play(game, { kind: "attack", from: at("brazil"), to: at("peru"), dice: 3 });
     expect(game.phase).toBe(TENKA_PHASES.occupy);
-    expect(game.owners[at("andes")]).toBe(0);
+    expect(game.owners[at("peru")]).toBe(0);
     expect(game.conquered).toBe(true);
     const { least } = game.occupying!;
     expect(least).toBe(3);
@@ -163,23 +163,23 @@ describe("the attack", () => {
     expect(playTenka(game, { kind: "occupy", armies: from })).toBeNull();
     expect(playTenka(game, { kind: "endAttack" })).toBeNull();
     const moved = play(game, { kind: "occupy", armies: from - 1 });
-    expect(moved.armies[at("andes")]).toBe(from - 1);
+    expect(moved.armies[at("peru")]).toBe(from - 1);
     expect(moved.armies[at("brazil")]).toBe(1);
     expect(moved.phase).toBe(TENKA_PHASES.attack);
     expect(tenkaMoves(game).map((move) => (move.kind === "occupy" ? move.armies : -1))).toEqual(Array.from({ length: from - 1 - least + 1 }, (_, step) => least + step));
   });
 
   it("can be thrown again and again until it is decided", () => {
-    const game = world({ owners: { brazil: 0 }, armies: { brazil: 30, westAfrica: 4 } });
-    const after = play(game, { kind: "blitz", from: at("brazil"), to: at("westAfrica") });
+    const game = world({ owners: { brazil: 0 }, armies: { brazil: 30, northAfrica: 4 } });
+    const after = play(game, { kind: "blitz", from: at("brazil"), to: at("northAfrica") });
     // With thirty against four the territory falls, and the run of throws is counted.
-    expect(after.owners[at("westAfrica")]).toBe(0);
+    expect(after.owners[at("northAfrica")]).toBe(0);
     expect(after.lastRoll!.took).toBe(true);
     expect(after.lastRoll!.defenderLost).toBe(4);
     expect(after.lastRoll!.throws).toBeGreaterThanOrEqual(2);
     expect(after.armies[at("brazil")]).toBe(30 - after.lastRoll!.attackerLost);
     // And a run that fails stops with one army left behind to attack with.
-    const hopeless = play(world({ owners: { brazil: 0 }, armies: { brazil: 3, westAfrica: 40 } }), { kind: "blitz", from: at("brazil"), to: at("westAfrica") });
+    const hopeless = play(world({ owners: { brazil: 0 }, armies: { brazil: 3, northAfrica: 40 } }), { kind: "blitz", from: at("brazil"), to: at("northAfrica") });
     expect(hopeless.armies[at("brazil")]).toBe(1);
     expect(hopeless.phase).toBe(TENKA_PHASES.attack);
   });
@@ -187,15 +187,15 @@ describe("the attack", () => {
 
 describe("the end of a turn", () => {
   it("fortifies once, only through the player's own territories, and passes the turn by table order", () => {
-    const game = world({ owners: { usWest: 0, usEast: 0, mexico: 0, alaska: 0, brazil: 1 }, armies: { usWest: 6 }, phase: TENKA_PHASES.fortify });
-    // Alaska touches only Western Canada (seat 2's) and the Far East by sea: not joined to the United States through their own land.
-    expect(playTenka(game, { kind: "fortify", from: at("usWest"), to: at("alaska") })).toBeNull();
-    const chosen = play(game, { kind: "fortify", from: at("usWest"), to: at("mexico") });
+    const game = world({ owners: { westernUnitedStates: 0, easternUnitedStates: 0, centralAmerica: 0, alaska: 0, brazil: 1 }, armies: { westernUnitedStates: 6 }, phase: TENKA_PHASES.fortify });
+    // Alaska touches only Alberta and the Northwest Territory (seat 2's) and Kamchatka by sea: not joined to the United States through their own land.
+    expect(playTenka(game, { kind: "fortify", from: at("westernUnitedStates"), to: at("alaska") })).toBeNull();
+    const chosen = play(game, { kind: "fortify", from: at("westernUnitedStates"), to: at("centralAmerica") });
     expect(chosen.phase).toBe(TENKA_PHASES.shift);
     expect(playTenka(chosen, { kind: "shift", armies: 6 })).toBeNull();
     const shifted = play(chosen, { kind: "shift", armies: 5 });
-    expect(shifted.armies[at("mexico")]).toBe(6);
-    expect(shifted.armies[at("usWest")]).toBe(1);
+    expect(shifted.armies[at("centralAmerica")]).toBe(6);
+    expect(shifted.armies[at("westernUnitedStates")]).toBe(1);
     expect(shifted.toPlay).toBe(1);
     expect(shifted.phase).toBe(TENKA_PHASES.reinforce);
     expect(shifted.reserve).toBe(reinforcementFor(shifted.owners, 1));
@@ -204,15 +204,15 @@ describe("the end of a turn", () => {
   });
 
   it("fortifies across the Bering Strait when both sides are the player's own", () => {
-    const game = world({ owners: { alaska: 0, farEast: 0 }, armies: { alaska: 4 }, phase: TENKA_PHASES.fortify });
-    expect(playTenka(game, { kind: "fortify", from: at("alaska"), to: at("farEast") })).not.toBeNull();
+    const game = world({ owners: { alaska: 0, kamchatka: 0 }, armies: { alaska: 4 }, phase: TENKA_PHASES.fortify });
+    expect(playTenka(game, { kind: "fortify", from: at("alaska"), to: at("kamchatka") })).not.toBeNull();
   });
 
   it("gives a card at the end of a turn that took a territory, and only one however many were taken", () => {
     let game = world({ owners: { brazil: 0 }, armies: { brazil: 20 } });
-    game = play(game, { kind: "blitz", from: at("brazil"), to: at("andes") });
+    game = play(game, { kind: "blitz", from: at("brazil"), to: at("peru") });
     game = play(game, { kind: "occupy", armies: 10 });
-    game = play(game, { kind: "blitz", from: at("brazil"), to: at("southernCone") });
+    game = play(game, { kind: "blitz", from: at("brazil"), to: at("argentina") });
     game = play(game, { kind: "occupy", armies: game.occupying!.least });
     const top = game.deck[0];
     const ended = play(game, { kind: "endAttack" }, { kind: "endTurn" });
@@ -222,8 +222,8 @@ describe("the end of a turn", () => {
   });
 
   it("knocks a player out with their last territory, and their cards pass to the taker, who trades at once at six or more", () => {
-    const game = world({ owners: { brazil: 0, andes: 1 }, armies: { brazil: 30 }, hands: [[0, 3, 6, 1], [4, 7, 2], []] });
-    const taken = play(game, { kind: "blitz", from: at("brazil"), to: at("andes") });
+    const game = world({ owners: { brazil: 0, peru: 1 }, armies: { brazil: 30 }, hands: [[0, 3, 6, 1], [4, 7, 2], []] });
+    const taken = play(game, { kind: "blitz", from: at("brazil"), to: at("peru") });
     expect(taken.out[1]).toBe(true);
     expect(taken.lastOut).toEqual({ seat: 1, by: 0 });
     expect(taken.hands[0]).toEqual([0, 3, 6, 1, 4, 7, 2]);
@@ -233,7 +233,7 @@ describe("the end of a turn", () => {
     expect(mustTrade(moved)).toBe(true);
     const once = play(moved, { kind: "trade", cards: [0, 3, 6] });
     expect(mustTrade(once)).toBe(false); // four left
-    const placed = play(once, { kind: "place", territory: at("andes"), armies: once.reserve });
+    const placed = play(once, { kind: "place", territory: at("peru"), armies: once.reserve });
     expect(placed.phase).toBe(TENKA_PHASES.attack);
     // And the player knocked out takes no more turns.
     const passed = play(placed, { kind: "endAttack" }, { kind: "endTurn" });
@@ -242,9 +242,9 @@ describe("the end of a turn", () => {
 
   it("is won by taking the whole world: every other player out, the neutral army never counted", () => {
     // A table of two: seat 1 holds only the Andes, the neutral army everything but Brazil and the Andes.
-    const base = world({ players: 2, owners: { brazil: 0, andes: 1 }, armies: { brazil: 30 } });
-    const neutral = { ...base, owners: base.owners.map((owner, territory) => (territory === at("brazil") ? 0 : territory === at("andes") ? 1 : TENKA_NEUTRAL)), out: [false, false] };
-    const won = play(neutral, { kind: "blitz", from: at("brazil"), to: at("andes") });
+    const base = world({ players: 2, owners: { brazil: 0, peru: 1 }, armies: { brazil: 30 } });
+    const neutral = { ...base, owners: base.owners.map((owner, territory) => (territory === at("brazil") ? 0 : territory === at("peru") ? 1 : TENKA_NEUTRAL)), out: [false, false] };
+    const won = play(neutral, { kind: "blitz", from: at("brazil"), to: at("peru") });
     expect(won.phase).toBe(TENKA_PHASES.over);
     expect(won.winners).toEqual([0]);
     expect(tenkaMoves(won)).toEqual([]);
@@ -287,7 +287,9 @@ describe("keeping a game", () => {
     const kept = JSON.parse(encodeTenka(startTenka(10, ["A", "B"], 1)!));
     expect(decodeTenka(null)).toBeNull();
     expect(decodeTenka("{")).toBeNull();
-    expect(decodeTenka(JSON.stringify({ ...kept, v: 2 }))).toBeNull();
+    expect(decodeTenka(JSON.stringify({ ...kept, v: 3 }))).toBeNull();
+    // A game kept before 2.0.0 (version 1) was dealt on the old world, and is refused rather than replayed as another game.
+    expect(decodeTenka(JSON.stringify({ ...kept, v: 1 }))).toBeNull();
     expect(decodeTenka(JSON.stringify({ ...kept, moves: [["z"]] }))).toBeNull();
     // Attacking before placing the turn's armies is not a move these rules can play.
     expect(decodeTenka(JSON.stringify({ ...kept, moves: [["e"]] }))).toBeNull();

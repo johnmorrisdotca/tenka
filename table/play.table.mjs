@@ -16,7 +16,7 @@ test("the table comes up with the world, the players and what to do", async ({ p
   expect(s.players.length).toBe(3);
   expect(s.players[0]).toContain("You");
   expect(s.players[0]).toContain("14 lands, 35 armies, 0 cards");
-  expect(s.views).toEqual(["World", "North America", "South America", "Europe", "Africa", "Asia", "Oceania"]);
+  expect(s.views).toEqual(["World", "North America", "South America", "Europe", "Africa", "Asia", "Australia"]);
   expect(s.seaLinks).toBeGreaterThan(20);
   // The seed dealt the first turn to the first seat.
   expect(dealt.toPlay).toBe(0);
@@ -105,7 +105,7 @@ test("each continent frames at one tap, and the world comes back", async ({ page
   const world = (await state(page)).viewBox;
   expect(world).toBe("0 0 2000 984");
   const seen = new Set([world]);
-  for (const view of ["northAmerica", "southAmerica", "europe", "africa", "asia", "oceania"]) {
+  for (const view of ["northAmerica", "southAmerica", "europe", "africa", "asia", "australia"]) {
     await look(page, view);
     const s = await sound(page, errors);
     const [, , width] = s.viewBox.split(" ").map(Number);

@@ -27,7 +27,7 @@ test("the record is written as the game goes, and saves as JSON, text and CSV", 
   const json = await saved(page, '#table [data-testid="tk-save-json"]');
   expect(json.name).toBe("tenka-7.json");
   const data = JSON.parse(json.text);
-  expect(data.format).toBe(1);
+  expect(data.format).toBe(2);
   expect(data.moves).toEqual([["p", own, 1]]);
   expect(tenkaFromJSON(json.text).armies[own]).toBe(s.lands[own].armies);
 
@@ -85,4 +85,18 @@ test("a game left half way is on the table again on return", async ({ page }) =>
   expect(back.lands).toEqual(left.lands);
   expect(back.status).toBe(left.status);
   expect(back.players).toEqual(left.players);
+});
+
+test("a world game kept before 2.0.0 is refused cleanly: the page starts a new game and says nothing is wrong", async ({ page }) => {
+  // Kept by 1.x, when the world had other territories: the moves would mean other places, so it is not replayed.
+  const old = {
+    game: { format: 1, game: "tenka", generator: "tenka 1.3.0", seed: 7, players: ["You", "Ann", "Ben"], rounds: 10, placing: "auto", moves: [["p", 1, 3]], state: { round: 1, phase: "attack", toPlay: 0, winners: [] } },
+    computers: [false, true, true],
+  };
+  await page.addInitScript((kept) => localStorage.setItem("tenka.page.game", JSON.stringify(kept)), old);
+  const errors = await open(page, "?delay=0&lang=en");
+  const now = await sound(page, errors);
+  // A new game at the page's own set-up (twenty rounds), not the kept one (ten rounds, a move made).
+  expect(now.status).toMatch(/^Round 1 of 20\./);
+  expect(now.lands).toHaveLength(42);
 });

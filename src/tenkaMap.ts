@@ -5,29 +5,28 @@ import { TENKA_TERRITORY_DATA } from "./tenkaWorld.data.ts";
 /**
  * TENKA'S WORLD, as the rules read it: forty-two territories, their
  * neighbours by land and by sea, and six continents with what holding each
- * is worth. The territories, their names and their neighbours are written by
- * `scripts/map.mjs` from Natural Earth (`tenkaWorld.data.ts`); the
- * continents' bonuses are decided here, by hand, sized to how many
- * territories a continent has and how many ways in it has to be held
- * against:
+ * is worth. The graph is the classic world-conquest board's, exactly: the
+ * same forty-two territories, the same eighty-three pairs that touch or are
+ * joined by a sea link (`scripts/classic-edges.mjs`, which `tenkaClassic.test.ts`
+ * holds the map to), the same six continents and bonuses. The territories,
+ * their names and their neighbours are written by `scripts/map.mjs` from
+ * Natural Earth (`tenkaWorld.data.ts`); the continents' bonuses are the classic
+ * ones, set here by hand:
  *
- *   North America   8 territories, 3 ways in   5
- *   South America   4 territories, 2 ways in   2
- *   Europe          7 territories, 4 ways in   5
- *   Africa          7 territories, 4 ways in   4
- *   Asia           11 territories, 6 ways in   7
- *   Oceania         5 territories, 1 way in    2
- *
- * (`tenkaMap.test.ts` counts the ways in, so a map that changes them fails
- * until this table is looked at again.)
+ *   North America   9 territories   5
+ *   South America   4 territories   2
+ *   Europe          7 territories   5
+ *   Africa          6 territories   3
+ *   Asia           12 territories   7
+ *   Australia       4 territories   2
  */
 const WORLD_CONTINENTS: readonly Omit<TenkaContinent, "territories">[] = [
   { key: "northAmerica", name: "North America", kanji: "北米", bonus: 5 },
   { key: "southAmerica", name: "South America", kanji: "南米", bonus: 2 },
   { key: "europe", name: "Europe", kanji: "欧州", bonus: 5 },
-  { key: "africa", name: "Africa", kanji: "阿州", bonus: 4 },
+  { key: "africa", name: "Africa", kanji: "阿州", bonus: 3 },
   { key: "asia", name: "Asia", kanji: "亜州", bonus: 7 },
-  { key: "oceania", name: "Oceania", kanji: "大洋州", bonus: 2 },
+  { key: "australia", name: "Australia", kanji: "豪州", bonus: 2 },
 ];
 
 /**

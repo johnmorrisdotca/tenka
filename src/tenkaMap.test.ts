@@ -32,7 +32,7 @@ describe("Tenka's world", () => {
     expect(TENKA_TERRITORY_COUNT).toBe(42);
     expect(new Set(TENKA_TERRITORIES.map((territory) => territory.key)).size).toBe(42);
     expect(new Set(TENKA_TERRITORIES.map((territory) => territory.name)).size).toBe(42);
-    expect(TENKA_CONTINENTS.map((continent) => continent.key)).toEqual(["northAmerica", "southAmerica", "europe", "africa", "asia", "oceania"]);
+    expect(TENKA_CONTINENTS.map((continent) => continent.key)).toEqual(["northAmerica", "southAmerica", "europe", "africa", "asia", "australia"]);
     expect(TENKA_CONTINENTS.reduce((sum, continent) => sum + continent.territories.length, 0)).toBe(42);
   });
 
@@ -51,23 +51,26 @@ describe("Tenka's world", () => {
     });
   });
 
-  it("has twenty-two sea links, the Bering Strait among them", () => {
+  it("has twenty-five sea links, the Bering Strait among them, and fifty-eight borders by land", () => {
     const links = TENKA_TERRITORIES.reduce((sum, territory) => sum + territory.sea.length, 0) / 2;
-    expect(links).toBe(22);
+    expect(links).toBe(25);
+    expect(TENKA_TERRITORIES.reduce((sum, territory) => sum + territory.land.length, 0) / 2).toBe(58);
     const alaska = TENKA_TERRITORIES.findIndex((territory) => territory.key === "alaska");
-    const farEast = TENKA_TERRITORIES.findIndex((territory) => territory.key === "farEast");
-    expect(TENKA_TERRITORIES[alaska].sea).toContain(farEast);
+    const kamchatka = TENKA_TERRITORIES.findIndex((territory) => territory.key === "kamchatka");
+    expect(TENKA_TERRITORIES[alaska].sea).toContain(kamchatka);
   });
 
   it("borders the way the world does: a few real land borders", () => {
     const at = (key: string) => TENKA_TERRITORIES.findIndex((territory) => territory.key === key);
     const borders = (a: string, b: string) => TENKA_TERRITORIES[at(a)].land.includes(at(b));
-    expect(borders("mexico", "colombia")).toBe(true); // Panama and Colombia
+    expect(borders("centralAmerica", "venezuela")).toBe(true); // Panama and Colombia
     expect(borders("egypt", "middleEast")).toBe(true); // Sinai
-    expect(borders("westernRussia", "middleEast")).toBe(true); // the Caucasus
-    expect(borders("southeastAsia", "indonesia")).toBe(true); // Borneo
-    expect(borders("westernCanada", "usEast")).toBe(true); // the 49th parallel, between the two cuts
-    expect(borders("britain", "westernEurope")).toBe(false); // the Channel is a sea link
+    expect(borders("ukraine", "middleEast")).toBe(true); // the Caucasus
+    expect(borders("alaska", "alberta")).toBe(true); // British Columbia and the Alaska panhandle
+    expect(borders("ural", "china")).toBe(true); // Kazakhstan and Xinjiang
+    expect(borders("scandinavia", "northernEurope")).toBe(true); // Denmark and Germany
+    expect(borders("greatBritain", "westernEurope")).toBe(false); // the Channel is a sea link
+    expect(borders("ukraine", "afghanistan")).toBe(false); // the Caspian is a sea link
   });
 
   /*
@@ -76,12 +79,12 @@ describe("Tenka's world", () => {
    * here, so the bonus is looked at again rather than left to drift.
    */
   it.each<[TenkaContinentKey, number, number, number]>([
-    ["northAmerica", 8, 3, 5],
+    ["northAmerica", 9, 3, 5],
     ["southAmerica", 4, 2, 2],
     ["europe", 7, 4, 5],
-    ["africa", 7, 4, 4],
-    ["asia", 11, 6, 7],
-    ["oceania", 5, 1, 2],
+    ["africa", 6, 3, 3],
+    ["asia", 12, 5, 7],
+    ["australia", 4, 1, 2],
   ])("%s: %i territories, %i ways in, worth %i", (key, territories, waysIn, bonus) => {
     const continent = TENKA_CONTINENTS.find((one) => one.key === key)!;
     expect(continent.territories.length).toBe(territories);
@@ -91,25 +94,25 @@ describe("Tenka's world", () => {
   });
 
   it("counts a continent held only when every territory of it is", () => {
-    const oceania = TENKA_CONTINENTS.find((one) => one.key === "oceania")!;
+    const australia = TENKA_CONTINENTS.find((one) => one.key === "australia")!;
     const owners = new Array<number>(TENKA_TERRITORY_COUNT).fill(1);
-    for (const territory of oceania.territories) owners[territory] = 0;
-    expect(continentsHeld(owners, 0).map((one) => one.key)).toEqual(["oceania"]);
-    owners[oceania.territories[0]] = 1;
+    for (const territory of australia.territories) owners[territory] = 0;
+    expect(continentsHeld(owners, 0).map((one) => one.key)).toEqual(["australia"]);
+    owners[australia.territories[0]] = 1;
     expect(continentsHeld(owners, 0)).toEqual([]);
   });
 
   it("fortifies only through a player's own territories", () => {
     const at = (key: string) => TENKA_TERRITORIES.findIndex((territory) => territory.key === key);
     const owners = new Array<number>(TENKA_TERRITORY_COUNT).fill(1);
-    for (const key of ["usWest", "usEast", "mexico", "colombia"]) owners[at(key)] = 0;
-    expect(connectedOwn(owners, at("usWest")).sort()).toEqual([at("usEast"), at("mexico"), at("colombia")].sort());
-    // Brazil is theirs too, but only through somebody else's Andes — still joined through Colombia.
+    for (const key of ["westernUnitedStates", "easternUnitedStates", "centralAmerica", "venezuela"]) owners[at(key)] = 0;
+    expect(connectedOwn(owners, at("westernUnitedStates")).sort()).toEqual([at("easternUnitedStates"), at("centralAmerica"), at("venezuela")].sort());
+    // Brazil is theirs too, but only through somebody else's Peru — still joined through Venezuela.
     owners[at("brazil")] = 0;
-    expect(connectedOwn(owners, at("usWest"))).toContain(at("brazil"));
-    // Cut Mexico, and the south is out of reach.
-    owners[at("mexico")] = 1;
-    expect(connectedOwn(owners, at("usWest"))).toEqual([at("usEast")]);
+    expect(connectedOwn(owners, at("westernUnitedStates"))).toContain(at("brazil"));
+    // Cut Central America, and the south is out of reach.
+    owners[at("centralAmerica")] = 1;
+    expect(connectedOwn(owners, at("westernUnitedStates"))).toEqual([at("easternUnitedStates")]);
   });
 
   it("draws every territory, with a counter inside the map, and weighs well under 150 KB", () => {

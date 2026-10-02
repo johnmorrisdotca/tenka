@@ -1,53 +1,67 @@
 /**
  * Builds Tenka's map of the world: forty-two territories in six continents,
- * drawn from Natural Earth and written into two small static files.
+ * the classic board's world as a graph, drawn from Natural Earth and written
+ * into two small static files.
  *
- *   node scripts/map.mjs
+ *   node scripts/map.mjs          the world
+ *   node scripts/map.mjs europe   Europe
  *
- * SOURCE AND LICENCE. Natural Earth's admin-0 countries at 1:110m
- * (naturalearthdata.com), a common source for world maps.
- * Natural Earth is in the public domain: "No permission is needed to use
- * Natural Earth. Crediting the authors is unnecessary." It is fetched here, at
- * build time, from the project's own repository on GitHub and cached in the
- * machine's temporary folder (or read from `TENKA_SOURCE` when that names a
- * copy); the site never fetches anything from anywhere to draw the map.
+ * SOURCE AND LICENCE. Natural Earth's admin-0 countries and, for the world, its
+ * admin-1 provinces, states and regions, both at 1:50m (naturalearthdata.com),
+ * a common source for maps. Natural Earth is in the public domain: "No
+ * permission is needed to use Natural Earth. Crediting the authors is
+ * unnecessary." They are fetched here, at build time, from the project's own
+ * repository on GitHub and cached in the machine's temporary folder (or read
+ * from `TENKA_SOURCE`, `TENKA_ADMIN1_SOURCE` and `TENKA_EUROPE_SOURCE` when
+ * those name a copy); the site never fetches anything from anywhere to draw
+ * the map.
  *
  * WHAT IT DOES, in order:
  *
- *  1. Every country's polygons are given to a territory (`COUNTRIES` below):
- *     most whole, some by where each polygon lies (France's Guiana is in
- *     South America), and five large mainlands CUT along a meridian — Canada
- *     at 97°W, the United States at 100°W, Russia at 59°E (the Urals) and 100°E, and
- *     Australia at 129°E (its real western border). A cut is only made where
- *     the meridian crosses the mainland exactly twice, so each half is one
- *     clean piece; the script refuses otherwise.
+ *  1. Every country's polygons are given to a territory (`map-world.mjs`):
+ *     most countries whole, some by where each polygon lies (France's Guiana is
+ *     in South America), and the five too large to be one territory (the United
+ *     States, Canada, Russia, China and Australia) by their provinces, states
+ *     and regions. Europe's mainland cuts are made along a meridian (`map-europe.mjs`);
+ *     a cut is only made where the meridian crosses the mainland exactly twice.
  *  2. Small islands a finger could never find are left off (`LEAST_AREA`),
  *     never a country's largest piece.
  *  3. Everything is projected on Miller's cylindrical projection — the flat
  *     world map of a classroom wall — from 170°W round to 192°E, so the
  *     Bering Strait is the map's seam and Chukotka stays with the rest of Russia.
- *  4. Each territory's countries are MERGED into one outline: an edge two of
- *     its own countries share is dropped, and what is left is joined up into
+ *  4. Where a province's border is the country's border, the two files draw it a
+ *     hair apart; the province's points are moved onto the country's
+ *     (`snapProvinces`) so the two make the same edges.
+ *  5. Each territory's regions are MERGED into one outline: an edge two of
+ *     its own regions share is dropped, and what is left is joined up into
  *     rings. Two territories are neighbours by land when they share an edge.
- *  5. Written out: `src/tenkaWorld.data.ts` (names,
- *     continents, land neighbours and the sea links — what the rules read) and
- *     `src/tenkaShapes.data.ts` (outlines as SVG paths, label
- *     points, the sea links' dashed lines and the continents' borders — what
- *     only the browser's board draws).
+ *  6. The world's graph is checked against `classic-edges.mjs`: every pair there
+ *     must share a border or be named in `WORLD_SEA_LINKS`, and no other pair may
+ *     touch. A map that differs is not written.
+ *  7. Written out: `src/tenkaWorld.data.ts` (names, continents, land neighbours
+ *     and the sea links — what the rules read) and `src/tenkaShapes.data.ts`
+ *     (outlines as SVG paths, simplified to under a pixel, label points, the sea
+ *     links' dashed lines and the continents' borders — what only the browser's
+ *     board draws).
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { CLASSIC_EDGES } from "./classic-edges.mjs";
 import { EUROPE_COUNTRIES, EUROPE_CUT_MERIDIANS, EUROPE_REGIONS, EUROPE_SEA_LINKS, EUROPE_TERRITORIES } from "./map-europe.mjs";
+import { WORLD_CONTINENTS, WORLD_COUNTRIES, WORLD_CUT_MERIDIANS, WORLD_REGIONS, WORLD_SEA_LINKS, WORLD_TERRITORIES } from "./map-world.mjs";
 
 /** Which map to build: `node scripts/map.mjs` for the world, `node scripts/map.mjs europe` for Europe. */
 const MAP = process.argv[2] ?? "world";
 if (MAP !== "world" && MAP !== "europe") throw new Error(`No map called ${MAP}: world or europe.`);
 const EUROPE = MAP === "europe";
-const SCALE_NAME = EUROPE ? "50m" : "110m";
+const SCALE_NAME = "50m";
 const REMOTE = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_${SCALE_NAME}_admin_0_countries.geojson`;
 const CACHE = (EUROPE ? process.env.TENKA_EUROPE_SOURCE : process.env.TENKA_SOURCE) ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_0_countries.geojson`);
+/** The world is built from the provinces and states of its largest countries too (Natural Earth's admin-1, also public domain). */
+const REMOTE_ADMIN1 = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_${SCALE_NAME}_admin_1_states_provinces.geojson`;
+const CACHE_ADMIN1 = process.env.TENKA_ADMIN1_SOURCE ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_1_states_provinces.geojson`);
 const WORLD_OUT = EUROPE ? "src/tenkaEurope.data.ts" : "src/tenkaWorld.data.ts";
 const SHAPES_OUT = EUROPE ? "src/tenkaEuropeShapes.data.ts" : "src/tenkaShapes.data.ts";
 /** What the two files export. */
@@ -66,62 +80,10 @@ const SOUTH = EUROPE ? 33.5 : -56.5;
 const LEAST_AREA = EUROPE ? 40 : 30;
 
 /** The six continents, in the order the rules list them. */
-const CONTINENTS = EUROPE ? EUROPE_REGIONS : ["northAmerica", "southAmerica", "europe", "africa", "asia", "oceania"];
+const CONTINENTS = EUROPE ? EUROPE_REGIONS : WORLD_CONTINENTS;
 
-/**
- * THE FORTY-TWO TERRITORIES, each a modern name for a real stretch of the
- * world, in continent order. `label` places the army counter by hand where
- * the middle of the largest piece would sit badly.
- */
-const TERRITORIES = EUROPE ? EUROPE_TERRITORIES : [
-  { key: "alaska", name: "Alaska", continent: "northAmerica" },
-  { key: "westernCanada", name: "Western Canada", continent: "northAmerica", label: [-115, 58] },
-  { key: "easternCanada", name: "Eastern Canada", continent: "northAmerica", label: [-78, 51] },
-  { key: "arcticIslands", name: "Arctic Islands", continent: "northAmerica", label: [-103, 73] },
-  { key: "greenland", name: "Greenland", continent: "northAmerica" },
-  { key: "usWest", name: "Western United States", continent: "northAmerica", label: [-113, 41] },
-  { key: "usEast", name: "Eastern United States", continent: "northAmerica", label: [-87, 37] },
-  { key: "mexico", name: "Mexico and Central America", continent: "northAmerica", label: [-102, 23] },
-
-  { key: "colombia", name: "Colombia and Venezuela", continent: "southAmerica", label: [-68, 5] },
-  { key: "andes", name: "The Andes", continent: "southAmerica", label: [-72, -11] },
-  { key: "brazil", name: "Brazil", continent: "southAmerica" },
-  { key: "southernCone", name: "Southern Cone", continent: "southAmerica", label: [-65, -34] },
-
-  { key: "britain", name: "Britain and Ireland", continent: "europe", label: [-1.8, 52.6] },
-  { key: "nordic", name: "The Nordic Countries", continent: "europe", label: [16, 63] },
-  { key: "westernEurope", name: "Western Europe", continent: "europe", label: [1.5, 46] },
-  { key: "centralEurope", name: "Central Europe", continent: "europe", label: [15, 50.5] },
-  { key: "southernEurope", name: "Southern Europe", continent: "europe", label: [21, 42.5] },
-  { key: "easternEurope", name: "Eastern Europe", continent: "europe", label: [29, 50] },
-  { key: "westernRussia", name: "Western Russia", continent: "europe", label: [44, 59] },
-
-  { key: "northAfrica", name: "North Africa", continent: "africa", label: [5, 28] },
-  { key: "egypt", name: "Egypt and Sudan", continent: "africa", label: [30, 21] },
-  { key: "westAfrica", name: "West Africa", continent: "africa", label: [-3, 15] },
-  { key: "centralAfrica", name: "Central Africa", continent: "africa", label: [21, 2] },
-  { key: "eastAfrica", name: "East Africa", continent: "africa", label: [38, 3] },
-  { key: "southernAfrica", name: "Southern Africa", continent: "africa", label: [25, -20] },
-  { key: "madagascar", name: "Madagascar", continent: "africa" },
-
-  { key: "middleEast", name: "The Middle East", continent: "asia", label: [48, 33] },
-  { key: "arabia", name: "Arabia", continent: "asia", label: [46, 22] },
-  { key: "centralAsia", name: "Central Asia", continent: "asia", label: [66, 45] },
-  { key: "southAsia", name: "South Asia", continent: "asia", label: [78, 21] },
-  { key: "siberia", name: "Siberia", continent: "asia", label: [85, 62] },
-  { key: "farEast", name: "The Russian Far East", continent: "asia", label: [130, 64] },
-  { key: "mongolia", name: "Mongolia", continent: "asia" },
-  { key: "china", name: "China", continent: "asia", label: [104, 32] },
-  { key: "korea", name: "Korea", continent: "asia", label: [127.3, 38.5] },
-  { key: "japan", name: "Japan", continent: "asia", label: [139, 36.5] },
-  { key: "southeastAsia", name: "Southeast Asia", continent: "asia", label: [102, 16] },
-
-  { key: "indonesia", name: "Indonesia", continent: "oceania", label: [114, -1] },
-  { key: "melanesia", name: "Melanesia", continent: "oceania", label: [145, -6] },
-  { key: "westernAustralia", name: "Western Australia", continent: "oceania", label: [122, -25] },
-  { key: "easternAustralia", name: "Eastern Australia", continent: "oceania", label: [140, -26] },
-  { key: "newZealand", name: "New Zealand", continent: "oceania", label: [172.5, -41] },
-];
+/** The territories, in continent order (Europe's are in `map-europe.mjs`, the world's in `map-world.mjs`). */
+const TERRITORIES = EUROPE ? EUROPE_TERRITORIES : WORLD_TERRITORIES;
 
 /*
  * Every country's territory, by its ISO code (Natural Earth's ADM0_A3 where
@@ -131,105 +93,10 @@ const TERRITORIES = EUROPE ? EUROPE_TERRITORIES : [
  * CUT (`{ at: [meridians], into: [territories west to east] }`), or null to
  * leave that piece off the map.
  */
-const COUNTRIES = EUROPE ? EUROPE_COUNTRIES : {
-  // North America
-  // St Lawrence Island lies west of the seam, so it lands at the map's far east edge: left off, like Hawaii, rather
-  // than given to a territory on the other side of the world (it once stretched Eastern United States across the map).
-  US: ({ lon, lat, main }) => (main ? { at: [-100], into: ["usWest", "usEast"] } : lon > 180 ? null : lon < -130 && lat > 50 ? "alaska" : lat < 25 ? null : lon < -100 ? "usWest" : "usEast"),
-  CA: ({ lon, lat, main }) => (main ? { at: [-97], into: ["westernCanada", "easternCanada"] } : lat >= 60 ? "arcticIslands" : lon < -97 ? "westernCanada" : "easternCanada"),
-  GL: "greenland",
-  MX: "mexico", GT: "mexico", BZ: "mexico", HN: "mexico", SV: "mexico", NI: "mexico", CR: "mexico", PA: "mexico",
-  CU: "mexico", JM: "mexico", HT: "mexico", DO: "mexico", PR: "mexico", BS: "mexico", TT: "mexico",
-  // South America
-  CO: "colombia", VE: "colombia", GY: "colombia", SR: "colombia",
-  EC: "andes", PE: "andes", BO: "andes",
-  BR: "brazil",
-  AR: "southernCone", CL: "southernCone", UY: "southernCone", PY: "southernCone", FK: "southernCone",
-  // Europe
-  GB: "britain", IE: "britain",
-  NO: "nordic", SE: "nordic", FI: "nordic", DK: "nordic", IS: "nordic",
-  FR: ({ lon }) => (lon < -20 ? "colombia" : "westernEurope"),
-  ES: "westernEurope", PT: "westernEurope", BE: "westernEurope", NL: "westernEurope", LU: "westernEurope",
-  DE: "centralEurope", PL: "centralEurope", CZ: "centralEurope", SK: "centralEurope", AT: "centralEurope", CH: "centralEurope", HU: "centralEurope",
-  IT: "southernEurope", SI: "southernEurope", HR: "southernEurope", BA: "southernEurope", RS: "southernEurope", ME: "southernEurope",
-  XK: "southernEurope", AL: "southernEurope", MK: "southernEurope", GR: "southernEurope", BG: "southernEurope",
-  UA: "easternEurope", BY: "easternEurope", MD: "easternEurope", RO: "easternEurope", LT: "easternEurope", LV: "easternEurope", EE: "easternEurope",
-  RU: ({ lon, main }) => (main ? { at: [59, 100], into: ["westernRussia", "siberia", "farEast"] } : lon < 59 && lon > 0 ? "westernRussia" : lon >= 59 && lon < 100 ? "siberia" : "farEast"),
-  // Africa
-  MA: "northAfrica", EH: "northAfrica", DZ: "northAfrica", TN: "northAfrica", LY: "northAfrica",
-  EG: "egypt", SD: "egypt",
-  MR: "westAfrica", SN: "westAfrica", GM: "westAfrica", GW: "westAfrica", GN: "westAfrica", SL: "westAfrica", LR: "westAfrica",
-  CI: "westAfrica", ML: "westAfrica", BF: "westAfrica", GH: "westAfrica", TG: "westAfrica", BJ: "westAfrica", NE: "westAfrica", NG: "westAfrica",
-  TD: "centralAfrica", CM: "centralAfrica", CF: "centralAfrica", GQ: "centralAfrica", GA: "centralAfrica", CG: "centralAfrica", CD: "centralAfrica",
-  ET: "eastAfrica", ER: "eastAfrica", DJ: "eastAfrica", SO: "eastAfrica", SOL: "eastAfrica", KE: "eastAfrica", UG: "eastAfrica",
-  RW: "eastAfrica", BI: "eastAfrica", TZ: "eastAfrica", SS: "eastAfrica",
-  AO: "southernAfrica", ZM: "southernAfrica", MW: "southernAfrica", MZ: "southernAfrica", ZW: "southernAfrica", NA: "southernAfrica",
-  BW: "southernAfrica", ZA: "southernAfrica", LS: "southernAfrica", SZ: "southernAfrica",
-  MG: "madagascar",
-  // Asia
-  TR: "middleEast", CY: "middleEast", CYN: "middleEast", SY: "middleEast", LB: "middleEast", IL: "middleEast", PS: "middleEast",
-  JO: "middleEast", IQ: "middleEast", GE: "middleEast", AM: "middleEast", AZ: "middleEast", IR: "middleEast",
-  SA: "arabia", YE: "arabia", OM: "arabia", AE: "arabia", QA: "arabia", KW: "arabia",
-  KZ: "centralAsia", UZ: "centralAsia", TM: "centralAsia", KG: "centralAsia", TJ: "centralAsia", AF: "centralAsia",
-  IN: "southAsia", PK: "southAsia", NP: "southAsia", BT: "southAsia", BD: "southAsia", LK: "southAsia",
-  MN: "mongolia",
-  CN: "china", TW: "china",
-  KP: "korea", KR: "korea",
-  JP: "japan",
-  MM: "southeastAsia", TH: "southeastAsia", LA: "southeastAsia", KH: "southeastAsia", VN: "southeastAsia", MY: "southeastAsia",
-  PH: "southeastAsia", BN: "southeastAsia",
-  // Oceania
-  ID: "indonesia", TL: "indonesia",
-  PG: "melanesia", SB: "melanesia", VU: "melanesia", NC: "melanesia", FJ: "melanesia",
-  AU: ({ main }) => (main ? { at: [129], into: ["westernAustralia", "easternAustralia"] } : "easternAustralia"),
-  NZ: "newZealand",
-  // Left off: a continent of ice, and the islands of the far south.
-  AQ: null, TF: null,
-};
+const COUNTRIES = EUROPE ? EUROPE_COUNTRIES : WORLD_COUNTRIES;
 
-/**
- * THE SEA LINKS: the straits and short crossings an army may cross, drawn as
- * dashed lines. Every one is named here, so none is an accident of how two
- * coastlines were drawn; `wrap` goes off one edge of the map and on at the
- * other, across the Bering Strait, and the board tags both ends with the
- * territory waiting on the other side. `from` and `to` pin a line's ends in
- * longitude and latitude where the nearest two coasts would draw it badly.
- * `anchors` draws the line from one territory's counter to the other's, for a
- * crossing so short that coast to coast would be a stub (Madagascar, the
- * islands of Oceania). `also` adds further lines for the same link, each with
- * its own `from` and `to`: Iceland is part of the Nordic Countries here, so
- * the Nordic link to Britain is also drawn from Iceland, and Greenland's from
- * Iceland too, which is how the sea is crossed between them.
- *
- * Every link between continents of the classic game is here, by the name of
- * the territory that holds that place on this map (tenkaLinks.test.ts pins
- * them): Alaska–Kamchatka is alaska–farEast, Greenland–Iceland is
- * greenland–nordic, Southern Europe–Egypt is southernEurope–egypt.
- */
-const SEA_LINKS = EUROPE ? EUROPE_SEA_LINKS : [
-  ["alaska", "farEast", { wrap: true }],
-  ["arcticIslands", "greenland"],
-  ["arcticIslands", "westernCanada"],
-  ["arcticIslands", "easternCanada"],
-  ["greenland", "easternCanada"],
-  ["greenland", "nordic", { from: [-26, 68.5], to: [-20, 65.5] }],
-  ["britain", "nordic", { from: [-3, 58], to: [6, 60], also: [{ from: [-14, 64.5], to: [-5.5, 58.5] }] }],
-  ["britain", "westernEurope"],
-  ["britain", "centralEurope"],
-  ["westernEurope", "northAfrica"],
-  ["southernEurope", "northAfrica"],
-  ["southernEurope", "egypt"],
-  ["brazil", "westAfrica"],
-  ["eastAfrica", "arabia"],
-  ["madagascar", "southernAfrica", { anchors: true }],
-  ["madagascar", "eastAfrica", { anchors: true }],
-  ["japan", "korea"],
-  ["japan", "farEast"],
-  ["indonesia", "westernAustralia", { anchors: true }],
-  ["melanesia", "easternAustralia", { anchors: true }],
-  ["easternAustralia", "newZealand", { anchors: true }],
-  ["melanesia", "newZealand", { anchors: true }],
-];
+/** The sea links: see `WORLD_SEA_LINKS` for what each option does. */
+const SEA_LINKS = EUROPE ? EUROPE_SEA_LINKS : WORLD_SEA_LINKS;
 
 // ——— Geometry ———
 
@@ -276,7 +143,7 @@ function crossing(a, b, at) {
 }
 
 /** Every meridian some mainland is cut along. */
-const CUT_MERIDIANS = EUROPE ? EUROPE_CUT_MERIDIANS : [-100, -97, 59, 100, 129];
+const CUT_MERIDIANS = EUROPE ? EUROPE_CUT_MERIDIANS : WORLD_CUT_MERIDIANS;
 
 /**
  * A ring with a point added wherever it crosses a cut meridian. Done to EVERY
@@ -343,46 +210,73 @@ function cutRing(ring, meridians, into) {
 
 // ——— Reading the source ———
 
-async function source() {
-  if (existsSync(CACHE)) return JSON.parse(readFileSync(CACHE, "utf8"));
-  const response = await fetch(REMOTE);
-  if (!response.ok) throw new Error(`Could not fetch ${REMOTE}: ${response.status}`);
+async function download(cache, remote) {
+  if (existsSync(cache)) return JSON.parse(readFileSync(cache, "utf8"));
+  const response = await fetch(remote);
+  if (!response.ok) throw new Error(`Could not fetch ${remote}: ${response.status}`);
   const text = await response.text();
-  writeFileSync(CACHE, text);
+  writeFileSync(cache, text);
   return JSON.parse(text);
 }
 
+const source = () => download(CACHE, REMOTE);
+
 const codeOf = (properties) => (properties.ISO_A2_EH && properties.ISO_A2_EH !== "-99" ? properties.ISO_A2_EH : properties.ADM0_A3);
 
+/** One polygon's rings in longitude and latitude, with the cut points added and the far east of the map moved to the right of the seam. */
+function ringsOf(polygon) {
+  return polygon.map((ring) => {
+    const kept = open(ring);
+    // East of the seam: Chukotka's tip and Fiji's eastern islands, which Natural Earth writes west of 180°.
+    return withCutPoints(kept.every(([lon]) => lon < -168) ? kept.map(([lon, lat]) => [lon + 360, lat]) : kept);
+  });
+}
+
+/** A feature's polygons, each as its rings. */
+const polygonsOf = (feature) => (feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates).map(ringsOf);
+
+/** Gives a feature's polygons to the territories its rule names, adding them to `byTerritory`. */
+let featureCount = 0;
+function place(byTerritory, code, rule, polygons, admin1) {
+  const feature = (featureCount += 1);
+  const largest = Math.max(...polygons.map((polygon) => Math.abs(ringArea(polygon[0]))));
+  for (const polygon of polygons) {
+    const main = Math.abs(ringArea(polygon[0])) === largest;
+    const centre = centreOf(polygon[0]);
+    // A piece east of the seam in the United States (the Aleutians' far end) is left off, as Hawaii is, rather than given to a territory on the other side of the world.
+    if (code === "USA" && centre.lon > 180) continue;
+    const answer = typeof rule === "string" ? rule : rule === null ? null : rule({ ...centre, main });
+    if (answer === null) continue;
+    if (typeof answer === "string") {
+      byTerritory.get(answer).push({ code, main, rings: polygon, admin1, feature });
+      continue;
+    }
+    if (polygon.length > 1) throw new Error(`${code}: a mainland with a hole cannot be cut here.`);
+    for (const piece of cutRing(polygon[0], answer.at, answer.into)) if (piece.territory !== null) byTerritory.get(piece.territory).push({ code, main: true, rings: [piece.ring], admin1, feature });
+  }
+}
+
 /** Every country's polygons given to their territories: rings in longitude and latitude, the outer ring first. */
-function assign(features) {
+function assign(features, regions) {
   const byTerritory = new Map(TERRITORIES.map((territory) => [territory.key, []]));
+  const cut = EUROPE ? {} : WORLD_REGIONS;
   for (const feature of features) {
     const code = codeOf(feature.properties);
+    // The countries cut by their own provinces are read from the provinces instead.
+    if (feature.properties.ADM0_A3 in cut) continue;
     // Europe lists only the countries on it; the world must account for every one.
     if (!(code in COUNTRIES) && EUROPE) continue;
     if (!(code in COUNTRIES)) throw new Error(`${code} (${feature.properties.NAME}) is given to no territory; add it to COUNTRIES, or null to leave it off.`);
-    const rule = COUNTRIES[code];
-    if (rule === null) continue;
-    const polygons = (feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates).map((polygon) =>
-      polygon.map((ring) => {
-        const kept = open(ring);
-        // East of the seam: Chukotka's tip and Fiji's eastern islands, which Natural Earth writes west of 180°.
-        return withCutPoints(kept.every(([lon]) => lon < -168) ? kept.map(([lon, lat]) => [lon + 360, lat]) : kept);
-      }),
-    );
-    const largest = Math.max(...polygons.map((polygon) => Math.abs(ringArea(polygon[0]))));
-    for (const polygon of polygons) {
-      const main = Math.abs(ringArea(polygon[0])) === largest;
-      const answer = typeof rule === "string" ? rule : rule({ ...centreOf(polygon[0]), main });
-      if (answer === null) continue;
-      if (typeof answer === "string") {
-        byTerritory.get(answer).push({ code, main, rings: polygon });
-        continue;
-      }
-      if (polygon.length > 1) throw new Error(`${code}: a mainland with a hole cannot be cut here.`);
-      for (const piece of cutRing(polygon[0], answer.at, answer.into)) if (piece.territory !== null) byTerritory.get(piece.territory).push({ code, main: true, rings: [piece.ring] });
-    }
+    if (COUNTRIES[code] === null) continue;
+    place(byTerritory, code, COUNTRIES[code], polygonsOf(feature), false);
+  }
+  for (const feature of regions) {
+    const { adm0_a3: code, name } = feature.properties;
+    if (!(code in cut)) continue;
+    const table = cut[code];
+    const rule = name in table ? table[name] : table.default;
+    if (rule === undefined) throw new Error(`${name} (${code}) is given to no territory; add it to WORLD_REGIONS.`);
+    place(byTerritory, code, rule, polygonsOf(feature), true);
   }
   return byTerritory;
 }
@@ -393,8 +287,13 @@ const keyOf = ([x, y]) => `${x},${y}`;
 
 /** A ring in map units: projected, rounded, with repeated points and there-and-back spikes taken out. */
 function projectRing(ring) {
+  return cleanRing(ring.map(project));
+}
+
+/** A ring of map units with repeated points and there-and-back spikes taken out. */
+function cleanRing(projected) {
   const points = [];
-  for (const point of ring.map(project)) {
+  for (const point of projected) {
     const last = points.at(-1);
     if (last !== undefined && last[0] === point[0] && last[1] === point[1]) continue;
     points.push(point);
@@ -435,18 +334,52 @@ function orientated(polygonRings) {
   });
 }
 
+/**
+ * Whether a ring is a sliver and no island: long and so narrow that it encloses
+ * less than one unit for each unit of its length. Two provinces of one
+ * territory whose files draw their border a few units apart (Quebec and
+ * Labrador) leave one, and drawn it is a hair-line across the territory.
+ */
+function thin(ring) {
+  let length = 0;
+  for (let i = 0; i < ring.length; i += 1) length += Math.hypot(ring[i][0] - ring[(i + 1) % ring.length][0], ring[i][1] - ring[(i + 1) % ring.length][1]);
+  return length > 16 && Math.abs(ringArea(ring)) / length < 1;
+}
+
+/**
+ * The edge to follow on from `edge` when several leave the point it ends at, which happens where a bay is
+ * narrower than a map unit and the coast touches itself: the sharpest turn to the right, which keeps each
+ * loop that touches there a loop of its own (the outer rings run clockwise on screen). Where one leaves, that one.
+ */
+function following(edge, options) {
+  if (options.length <= 1 || EUROPE) return options[0];
+  const [dx, dy] = [edge[1][0] - edge[0][0], edge[1][1] - edge[0][1]];
+  const turn = (next) => Math.atan2(dx * (next[1][1] - next[0][1]) - dy * (next[1][0] - next[0][0]), dx * (next[1][0] - next[0][0]) + dy * (next[1][1] - next[0][1]));
+  return options.reduce((best, next) => (turn(next) > turn(best) ? next : best));
+}
+
 /** A territory's outline: its edges with every edge its own pieces share dropped, joined back into rings. */
 function mergeOutline(pieces) {
   const all = [];
   for (const piece of pieces) {
-    const rings = orientated(piece.rings.map(projectRing).filter((ring) => ring.length >= 3));
+    const rings = orientated((piece.snapped ?? piece.rings.map(projectRing)).filter((ring) => ring.length >= 3));
     if (rings.length === 0) continue;
     if (!piece.main && Math.abs(ringArea(rings[0])) < LEAST_AREA) continue;
     all.push(...edgesOf(rings));
   }
   const counts = new Map();
   for (const [a, b] of all) counts.set(`${keyOf(a)}>${keyOf(b)}`, (counts.get(`${keyOf(a)}>${keyOf(b)}`) ?? 0) + 1);
-  const kept = all.filter(([a, b]) => !counts.has(`${keyOf(b)}>${keyOf(a)}`));
+  // An edge and its reverse cancel one for one: where one side draws an edge twice (a spit that touches itself) and the other once, one is left.
+  const cancelled = new Map();
+  const kept = all.filter(([a, b]) => {
+    const key = `${keyOf(a)}>${keyOf(b)}`;
+    const against = counts.get(`${keyOf(b)}>${keyOf(a)}`) ?? 0;
+    if (against === 0) return true;
+    // Europe's map was made when every copy went: it stays exactly as it was.
+    if (EUROPE) return false;
+    cancelled.set(key, (cancelled.get(key) ?? 0) + 1);
+    return cancelled.get(key) > against;
+  });
   // Join the edges left into rings, following each edge on from the point it ends at.
   const from = new Map();
   for (const edge of kept) {
@@ -463,11 +396,47 @@ function mergeOutline(pieces) {
     while (at !== undefined && !used.has(at)) {
       used.add(at);
       ring.push(at[0]);
-      at = (from.get(keyOf(at[1])) ?? []).find((next) => !used.has(next));
+      at = following(at, (from.get(keyOf(at[1])) ?? []).filter((next) => !used.has(next)));
     }
-    if (ring.length >= 3) rings.push(ring);
+    if (ring.length >= 3 && !(thin(ring) && !EUROPE)) rings.push(ring);
   }
-  return { rings, edges: kept };
+  // A ring inside another of the same territory is no lake or island worth drawing: where the files of two provinces draw their border apart, it is the wedge between the two.
+  const drawn = EUROPE ? rings : rings.filter((ring) => !rings.some((other) => other !== ring && Math.abs(ringArea(other)) > Math.abs(ringArea(ring)) && ring.filter((point) => inside(point, other)).length >= ring.length * 0.6));
+  return { rings: drawn, edges: kept };
+}
+
+/** How far, in map units, a drawn outline may stray from the one cut from the data: under half a pixel at a whole-world view. */
+const SIMPLIFY = EUROPE ? 0 : 0.7;
+
+/** The points of an open run kept by the Douglas and Peucker rule: those further than `SIMPLIFY` from the straight line between the ends. */
+function keepFarPoints(run) {
+  const [a, b] = [run[0], run.at(-1)];
+  const [dx, dy] = [b[0] - a[0], b[1] - a[1]];
+  const length = Math.hypot(dx, dy);
+  let far = -1;
+  let farthest = SIMPLIFY;
+  for (let i = 1; i < run.length - 1; i += 1) {
+    const d = length === 0 ? Math.hypot(run[i][0] - a[0], run[i][1] - a[1]) : Math.abs(dx * (a[1] - run[i][1]) - dy * (a[0] - run[i][0])) / length;
+    if (d > farthest) {
+      far = i;
+      farthest = d;
+    }
+  }
+  return far < 0 ? [a] : [...keepFarPoints(run.slice(0, far + 1)), ...keepFarPoints(run.slice(far))];
+}
+
+/** A closed ring with the points that add less than `SIMPLIFY` to its shape taken out; only what is drawn, never what decides who borders whom. */
+function simplified(ring) {
+  if (SIMPLIFY === 0 || ring.length < 8) return ring;
+  let second = 0;
+  for (let i = 1; i < ring.length; i += 1) {
+    if (Math.hypot(ring[i][0] - ring[0][0], ring[i][1] - ring[0][1]) > Math.hypot(ring[second][0] - ring[0][0], ring[second][1] - ring[0][1])) second = i;
+  }
+  if (second === 0) return ring;
+  const turned = [...ring.slice(second), ...ring.slice(0, second)];
+  const half = ring.length - second;
+  const kept = [...keepFarPoints(turned.slice(0, half + 1)), ...keepFarPoints([...turned.slice(half), turned[0]])];
+  return kept.length >= 3 ? kept : ring;
 }
 
 /** A ring as a compact SVG path: the first point absolute, every other relative, whole units. */
@@ -573,8 +542,79 @@ function crossingLine(p, q, towards) {
 
 // ——— Build ———
 
+/**
+ * Where a province's border is the country's border, or its neighbour
+ * province's, Natural Earth draws the one a hair away from the other (the
+ * files are made apart, and in a province file Quebec and Labrador do not
+ * share every point), which a map of two thousand units across turns into a
+ * one-unit gap or overlap. Taking the features in the order they were read,
+ * countries first, every point of a province's outline within one unit of a
+ * point of an earlier feature's outline is moved onto it, so that the two make
+ * the same edges and a border between them is seen as a border.
+ */
+function snapProvinces(byTerritory) {
+  const pieces = [...byTerritory.values()].flat();
+  const known = new Map();
+  const featureIds = [...new Set(pieces.map((piece) => piece.feature))].sort((x, y) => x - y);
+  for (const id of featureIds) {
+    const mine = pieces.filter((piece) => piece.feature === id);
+    const settled = [];
+    for (const piece of mine) {
+      piece.snapped = piece.rings.map((ring) => {
+        const moved = ring.map(project).map(([x, y]) => {
+          if (!piece.admin1) return [x, y];
+          let best = null;
+          for (let dx = -1; dx <= 1; dx += 1) {
+            for (let dy = -1; dy <= 1; dy += 1) {
+              const found = known.get(`${x + dx},${y + dy}`);
+              // Only another country's: the provinces of one country already agree where they meet.
+              if (found && found.code !== piece.code && (best === null || Math.hypot(dx, dy) < best.d)) best = { d: Math.hypot(dx, dy), found: found.point };
+            }
+          }
+          return best === null ? [x, y] : best.found;
+        });
+        settled.push(...moved.map((point) => ({ point, code: piece.code })));
+        return cleanRing(moved);
+      });
+    }
+    for (const { point, code } of settled) if (!known.has(keyOf(point)) || known.get(keyOf(point)).code === code) known.set(keyOf(point), { point, code });
+  }
+  // A point of one feature that lies on an edge of another's (a long straight border on one side, many short edges on the other) is added to that edge, so that both sides make the same edges.
+  const owners = new Map();
+  for (const piece of pieces) for (const ring of piece.snapped) for (const point of ring) owners.set(keyOf(point), [...(owners.get(keyOf(point)) ?? []), piece.feature]);
+  for (const piece of pieces) {
+    piece.snapped = piece.snapped.map((ring) => {
+      const out = [];
+      for (let i = 0; i < ring.length; i += 1) {
+        const [a, b] = [ring[i], ring[(i + 1) % ring.length]];
+        out.push(a);
+        const [dx, dy] = [b[0] - a[0], b[1] - a[1]];
+        const length2 = dx * dx + dy * dy;
+        if (length2 < 4) continue;
+        const onEdge = [];
+        for (let x = Math.min(a[0], b[0]) - 1; x <= Math.max(a[0], b[0]) + 1; x += 1) {
+          for (let y = Math.min(a[1], b[1]) - 1; y <= Math.max(a[1], b[1]) + 1; y += 1) {
+            const found = known.get(`${x},${y}`);
+            const p = found && found.point;
+            const own = p && owners.get(keyOf(p));
+            if (!own || own.includes(piece.feature) || found.code === piece.code) continue;
+            const t = ((x - a[0]) * dx + (y - a[1]) * dy) / length2;
+            if (t <= 0 || t >= 1) continue;
+            if (Math.hypot(x - (a[0] + t * dx), y - (a[1] + t * dy)) <= 0.6) onEdge.push({ t, p });
+          }
+        }
+        onEdge.sort((m, n) => m.t - n.t);
+        for (const { p } of onEdge) out.push(p);
+      }
+      return cleanRing(out);
+    });
+  }
+}
+
 const features = (await source()).features;
-const assigned = assign(features);
+const regions = EUROPE ? [] : (await download(CACHE_ADMIN1, REMOTE_ADMIN1)).features;
+const assigned = assign(features, regions);
+if (!EUROPE) snapProvinces(assigned);
 const outlines = TERRITORIES.map((territory) => {
   if (!CONTINENTS.includes(territory.continent)) throw new Error(`${territory.key} is in no continent the rules know.`);
   const pieces = assigned.get(territory.key);
@@ -630,8 +670,23 @@ for (const [a, b, options = {}] of SEA_LINKS) {
   }
 }
 
+if (!EUROPE) {
+  // The world must be the classic graph exactly: every pair of territories that touch or are joined by a sea link, and no others.
+  const pair = (a, b) => [a, b].sort().join("–");
+  const wanted = new Set(CLASSIC_EDGES.map(([a, b]) => pair(a, b)));
+  const drawn = new Set();
+  TERRITORIES.forEach((territory, at) => {
+    for (const other of [...land[at], ...sea[at]]) drawn.add(pair(territory.key, TERRITORIES[other].key));
+  });
+  const missing = [...wanted].filter((edge) => !drawn.has(edge));
+  const extra = [...drawn].filter((edge) => !wanted.has(edge));
+  if (missing.length > 0 || extra.length > 0) {
+    throw new Error(`The map is not the classic graph.\n  Missing (no shared border and no sea link): ${missing.join(", ") || "none"}\n  Extra (touch on the map, or a sea link, and not in the graph): ${extra.join(", ") || "none"}`);
+  }
+}
+
 const labels = TERRITORIES.map((_, at) => labelFor(at));
-const shapes = outlines.map((outline) => pathOf(outline.rings));
+const shapes = outlines.map((outline) => pathOf(outline.rings.map(simplified)));
 /* Each territory's extent, for a view to frame it or its continent: the far northern islands left out (`FRAME_NORTH`). */
 const northEdge = project([0, FRAME_NORTH])[1];
 const boxes = outlines.map(({ rings }) => {
@@ -651,8 +706,8 @@ const bordersPath = continentBorders.map(([a, b]) => `M${a[0]} ${a[1]}L${b[0]} $
 const header = [
   `/*`,
   ` * WRITTEN BY scripts/map.mjs, NEVER BY HAND: run it again to change the map.`,
-  ` * From Natural Earth's admin-0 countries at 1:${SCALE_NAME}, which is in the public domain`,
-  ` * (naturalearthdata.com; ${REMOTE}).`,
+  ` * From Natural Earth's admin-0 countries${EUROPE ? "" : " and admin-1 provinces, states and regions"} at 1:${SCALE_NAME}, which is in the public domain`,
+  ` * (naturalearthdata.com; ${REMOTE}${EUROPE ? "" : `; ${REMOTE_ADMIN1}`}).`,
   ` */`,
 ];
 

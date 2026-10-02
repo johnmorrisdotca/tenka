@@ -25,42 +25,42 @@ describe("a tap on the map", () => {
     const game = world(TENKA_PHASES.reinforce, ["brazil"]);
     expect(tapTerritory(game, NO_CHOICE, at("brazil")).move).toEqual({ kind: "place", territory: at("brazil"), armies: 1 });
     expect(tapTerritory(game, NO_CHOICE, at("brazil")).choice.placedOn).toBe(at("brazil"));
-    expect(tapTerritory(game, NO_CHOICE, at("andes")).move).toBeNull();
+    expect(tapTerritory(game, NO_CHOICE, at("peru")).move).toBeNull();
   });
 
   it("chooses where to attack from, lights up the neighbours it may attack, then the target", () => {
-    const game = world(TENKA_PHASES.attack, ["brazil", "colombia"], { brazil: 5 });
+    const game = world(TENKA_PHASES.attack, ["brazil", "venezuela"], { brazil: 5 });
     const from = tapTerritory(game, NO_CHOICE, at("brazil"));
     expect(from.choice.from).toBe(at("brazil"));
     expect(from.move).toBeNull();
     const marks = marksFor(game, from.choice);
     expect(marks.chosen).toBe(at("brazil"));
     // Colombia is theirs: not lit. The Andes, the Southern Cone and West Africa across the sea are.
-    expect([...marks.reach].sort()).toEqual([at("andes"), at("southernCone"), at("westAfrica")].sort());
-    const target = tapTerritory(game, from.choice, at("westAfrica"));
-    expect(target.choice.to).toBe(at("westAfrica"));
+    expect([...marks.reach].sort()).toEqual([at("peru"), at("argentina"), at("northAfrica")].sort());
+    const target = tapTerritory(game, from.choice, at("northAfrica"));
+    expect(target.choice.to).toBe(at("northAfrica"));
     // A territory with one army cannot attack; tapping the chosen one again puts it down.
-    expect(tapTerritory(game, NO_CHOICE, at("colombia")).choice.from).toBeNull();
+    expect(tapTerritory(game, NO_CHOICE, at("venezuela")).choice.from).toBeNull();
     expect(tapTerritory(game, from.choice, at("brazil")).choice).toEqual(NO_CHOICE);
   });
 
   it("fortifies to your own territories joined by your own land, with all but one moving unless told otherwise", () => {
-    const game = world(TENKA_PHASES.fortify, ["brazil", "colombia", "mexico"], { brazil: 6 });
+    const game = world(TENKA_PHASES.fortify, ["brazil", "venezuela", "centralAmerica"], { brazil: 6 });
     const from = tapTerritory(game, NO_CHOICE, at("brazil"));
-    expect([...marksFor(game, from.choice).reach].sort()).toEqual([at("colombia"), at("mexico")].sort());
-    const to = tapTerritory(game, from.choice, at("mexico"));
-    expect(to.choice).toMatchObject({ from: at("brazil"), to: at("mexico"), armies: 5 });
+    expect([...marksFor(game, from.choice).reach].sort()).toEqual([at("venezuela"), at("centralAmerica")].sort());
+    const to = tapTerritory(game, from.choice, at("centralAmerica"));
+    expect(to.choice).toMatchObject({ from: at("brazil"), to: at("centralAmerica"), armies: 5 });
     // Across somebody else's: not joined.
-    expect(tapTerritory(game, from.choice, at("andes")).choice.to).toBeNull();
+    expect(tapTerritory(game, from.choice, at("peru")).choice.to).toBeNull();
   });
 
   it("keeps a choice only while the map still allows it", () => {
     const game = world(TENKA_PHASES.attack, ["brazil"], { brazil: 5 });
-    const chosen = { ...NO_CHOICE, from: at("brazil"), to: at("andes") };
+    const chosen = { ...NO_CHOICE, from: at("brazil"), to: at("peru") };
     expect(choiceNow(game, chosen)).toEqual(chosen);
     // Brazil down to one army: nothing to attack with.
     expect(choiceNow({ ...game, armies: game.armies.map((count, territory) => (territory === at("brazil") ? 1 : count)) }, chosen)).toEqual(NO_CHOICE);
     // The Andes taken: no longer a target.
-    expect(choiceNow({ ...game, owners: game.owners.map((owner, territory) => (territory === at("andes") ? 0 : owner)) }, chosen).to).toBeNull();
+    expect(choiceNow({ ...game, owners: game.owners.map((owner, territory) => (territory === at("peru") ? 0 : owner)) }, chosen).to).toBeNull();
   });
 });

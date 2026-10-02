@@ -97,7 +97,7 @@ game.phase; // → "reinforce"
 game.reserve; // → 4
 tenkaMoves(game).length; // → 28
 
-TENKA_TERRITORIES[1]!.name; // → "Western Canada"
+TENKA_TERRITORIES[1]!.name; // → "Northwest Territory"
 game.owners[1]; // → 1
 const next = playTenka(game, { kind: "place", territory: 1, armies: 4 })!;
 next.armies[1]; // → 7
@@ -108,7 +108,7 @@ playTenka(next, { kind: "attack", from: 0, to: 1, dice: 3 }); // → null
 ```
 
 Seat 1, Ben, drew the first turn. The game given is never changed: `next` is a
-new game, and `game` still has three armies on Western Canada. A move the
+new game, and `game` still has three armies on Northwest Territory. A move the
 rules refuse is `null`: Alaska is not Ben's to attack from.
 
 ### 2. The table, in plain HTML
@@ -255,7 +255,7 @@ it.
 - **Sizes.** The rules, the computer player and keeping a game are about 17 kB
   minified (6 kB gzipped) once a bundler has shaken the rest out; the whole
   main entry, with both languages and the exports, is 37 kB (12 kB). The
-  table is 81 kB (29 kB), of which the map's outlines are 30 kB (11 kB). The
+  table is 120 kB (39 kB), of which the map's outlines are 69 kB (21 kB). The
   outlines are their own entry, `/shapes`, so code that only plays the rules
   never carries them.
 - **Where it runs.** Current Chrome, Edge, Firefox and Safari, on a desk or a
@@ -374,9 +374,10 @@ Tenka is one of sixteen packages, each made for the same site, each MIT, each at
 - **A computer player.** `sensibleTenkaMove` trades when it can, piles armies
   on a border, attacks only with the odds and fortifies to the front.
 - **Every move listed.** `tenkaMoves(game)` is what the player to move may do.
-- **A map of the real world.** Forty-two territories in six continents, drawn
-  from Natural Earth, with their neighbours by land and by sea, and the
-  crossing from Alaska to the Russian Far East drawn off both edges.
+- **A map of the real world.** Forty-two territories in six continents,
+  drawn from Natural Earth, joined as the classic board joins them: the same
+  eighty-three pairs, by land and by sea, and the same continent bonuses. The
+  crossing from Alaska to Kamchatka is drawn off both edges.
 - **A table to play on.** The whole world or one continent at a tap, sea
   routes dashed, the dice of the last throw, the players and their cards, and
   the record of the game. Against the computer, or passed round one device.
@@ -430,26 +431,26 @@ breaking a tie, and a tie on both shared.
 
 | Continent | Territories | Ways in | Armies for holding it | Key |
 | --- | --- | --- | --- | --- |
-| North America | 8 | 3 | 5 | `northAmerica` |
+| North America | 9 | 3 | 5 | `northAmerica` |
 | South America | 4 | 2 | 2 | `southAmerica` |
 | Europe | 7 | 4 | 5 | `europe` |
-| Africa | 7 | 4 | 4 | `africa` |
-| Asia | 11 | 6 | 7 | `asia` |
-| Oceania | 5 | 1 | 2 | `oceania` |
+| Africa | 6 | 3 | 3 | `africa` |
+| Asia | 12 | 5 | 7 | `asia` |
+| Australia | 4 | 1 | 2 | `australia` |
 
 ```ts
 import { TENKA_CONTINENTS, areNeighbours, tenkaNeighbours, TENKA_TERRITORIES } from "@johnmorrisdotca/tenka";
 
-TENKA_CONTINENTS.map((continent) => continent.bonus); // → [5, 2, 5, 4, 7, 2]
-TENKA_CONTINENTS.map((continent) => continent.territories.length); // → [8, 4, 7, 7, 11, 5]
+TENKA_CONTINENTS.map((continent) => continent.bonus); // → [5, 2, 5, 3, 7, 2]
+TENKA_CONTINENTS.map((continent) => continent.territories.length); // → [9, 4, 7, 6, 12, 4]
 TENKA_TERRITORIES.length; // → 42
-tenkaNeighbours(0); // → [1, 31]
-TENKA_TERRITORIES[31]!.name; // → "The Russian Far East"
-areNeighbours(0, 31); // → true
+tenkaNeighbours(0); // → [1, 3, 29]
+TENKA_TERRITORIES[29]!.name; // → "Kamchatka"
+areNeighbours(0, 29); // → true
 ```
 
-Alaska's neighbours are Western Canada by land and the Russian Far East by
-sea: the world wraps round.
+Alaska's neighbours are the Northwest Territory and Alberta by land and
+Kamchatka by sea: the world wraps round.
 
 ### Europe
 
@@ -545,10 +546,10 @@ const attacking = playTenka(start, { kind: "place", territory: 1, armies: 4 })!;
 const tapped = tapTerritory(attacking, NO_CHOICE, 1);
 tapped.move; // → null
 tapped.choice.from; // → 1
-marksFor(attacking, tapped.choice); // → { chosen: 1, reach: [0, 2, 5, 3], target: null }
+marksFor(attacking, tapped.choice); // → { chosen: 1, reach: [0, 3, 4, 2], target: null }
 ```
 
-Ben taps Western Canada to attack from: no move yet, and the four neighbours
+Ben taps the Northwest Territory to attack from: no move yet, and the four neighbours
 he could attack light up.
 
 ## Keeping a game, export and import
@@ -568,16 +569,16 @@ tenkaFromJSON(text)!.armies[1]; // → 7
 tenkaFromJSON(text.replace('["p",1,4]', '["p",0,4]')); // → null
 tenkaFromJSON("not a game"); // → null
 
-tenkaToText(game); // → "Tenka: Ann, Ben, Cho; 10 rounds; seed 2026\nRound 1\nBen places 4 on Western Canada.\n"
-tenkaToText(game, TENKA_STRINGS.ja).split("\n")[2]; // → "Benがカナダ西部に4部隊を置く。"
-tenkaToCSV(game).split("\r\n")[1]; // → "1,1,2,Ben,place,,westernCanada,4,,,,,,,,,,"
+tenkaToText(game); // → "Tenka: Ann, Ben, Cho; 10 rounds; seed 2026\nRound 1\nBen places 4 on Northwest Territory.\n"
+tenkaToText(game, TENKA_STRINGS.ja).split("\n")[2]; // → "Benがノースウェスト準州に4部隊を置く。"
+tenkaToCSV(game).split("\r\n")[1]; // → "1,1,2,Ben,place,,northwestTerritory,4,,,,,,,,,,"
 ```
 
 The JSON, as `tenkaToJSON` writes it:
 
 ```json
 {
-  "format": 1,
+  "format": 2,
   "game": "tenka",
   "generator": "tenka 1.3.0",
   "seed": 2026,
@@ -638,10 +639,19 @@ The JSON, as `tenkaToJSON` writes it:
 
 Forty-two territories, their names, their neighbours and their outlines are
 built from [Natural Earth](https://www.naturalearthdata.com/)'s admin-0
-countries at 1:110m, which is in the public domain, by `pnpm map`
-(`scripts/map.mjs`). It is drawn in Miller's projection from 170°W round to
-192°E, 2000 by 984 units, so that Alaska and the Russian Far East sit at
-opposite edges with their crossing drawn off both. `src/tenkaWorld.data.ts`
+countries and, for the countries too big to be one territory (the United
+States, Canada, Russia, China and Australia), admin-1 provinces, states and
+regions, all at 1:50m and all in the public domain, by `pnpm map`
+(`scripts/map.mjs`; `scripts/map-world.mjs` lays out the territories). The map
+is the classic board's as a graph: the same forty-two territories in the same
+six continents, the same eighty-three pairs that touch by land or are joined
+across the water, and the same continent bonuses (`scripts/classic-edges.mjs`
+is the list, and the script refuses to write a map that differs from it).
+Where the real world does not touch and the classic board says it does, the
+two are joined by a dashed sea link, such as the Caspian, the Atlantic
+(Brazil to North Africa) and the Red Sea. It is drawn in Miller's projection
+from 170°W round to 192°E, 2000 by 984 units, so that Alaska and Kamchatka sit
+at opposite edges with their crossing drawn off both. `src/tenkaWorld.data.ts`
 and `src/tenkaShapes.data.ts` are written by that script and never by hand.
 
 The outlines are their own entry, so code that only plays the rules never
@@ -652,7 +662,7 @@ import { TENKA_SHAPES } from "@johnmorrisdotca/tenka/shapes";
 
 [TENKA_SHAPES.width, TENKA_SHAPES.height]; // → [2000, 984]
 TENKA_SHAPES.outlines.length; // → 42
-TENKA_SHAPES.labels[0]; // → [95, 203]
+TENKA_SHAPES.labels[0]; // → [99, 216]
 ```
 
 Europe's are `TENKA_EUROPE_SHAPES`, built the same way by `pnpm map europe`
