@@ -6,6 +6,13 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+Only the dashed sea lines on the maps are drawn differently. Which territories touch which, the rules and every saved game are exactly as they were.
+
+### Changed
+
+- **Iceland is joined to Europe on the map.** It lies inside the Nordic Countries here, and the sea route from Greenland used to stop at an island with no line onward. Greenland's line now ends on Iceland, and a second line runs from Iceland to Scotland beside the Scotland to Norway one.
+- **Madagascar's two routes, to Southern Africa and to East Africa, and Oceania's four** (Indonesia to Western Australia, Melanesia to Eastern Australia, and New Zealand to both) are drawn from one territory's counter to the other's, not between the two nearest coasts, which left Madagascar's as stubs and Australia's as short strokes lost in the islands. `scripts/map.mjs` takes `anchors` for that, and `also` for a second line on the same link.
+
 ## [1.3.0] - 2026-10-01
 
 Nothing that was exported has changed; the rules, the maps and every saved game are exactly as they were.

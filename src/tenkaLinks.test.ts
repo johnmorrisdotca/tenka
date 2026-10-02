@@ -56,8 +56,8 @@ describe("Tenka's links between continents", () => {
 
   it("draws every sea link as a line long enough to read as a crossing, and the Bering Strait off both edges", () => {
     const links = TENKA_TERRITORIES.reduce((sum, territory) => sum + territory.sea.length, 0) / 2;
-    // One line for each link, and one more for the link that goes off one edge and on at the other.
-    expect(TENKA_SHAPES.seaLines.length).toBe(links + TENKA_SHAPES.wraps.length);
+    // One line for each link, one more for the link that goes off one edge and on at the other, and one more for Iceland to Britain.
+    expect(TENKA_SHAPES.seaLines.length).toBe(links + TENKA_SHAPES.wraps.length + 1);
     const [west, east] = [TENKA_SHAPES.seaLines.filter(([, , x2]) => x2 === 0), TENKA_SHAPES.seaLines.filter(([x1]) => x1 === TENKA_SHAPES.width)];
     expect(west.length).toBe(1);
     expect(east.length).toBe(1);
@@ -65,6 +65,30 @@ describe("Tenka's links between continents", () => {
       if (x2 === 0 || x1 === TENKA_SHAPES.width) continue;
       expect(Math.hypot(x2 - x1, y2 - y1)).toBeGreaterThanOrEqual(62);
     }
+  });
+
+  it("draws Madagascar's two links and Oceania's four as long lines between the territories' counters, never stubs", () => {
+    const counters = TENKA_SHAPES.labels;
+    const drawn = (a: string, b: string) =>
+      TENKA_SHAPES.seaLines.some(([x1, y1, x2, y2]) => {
+        const [p, q] = [counters[at(a)], counters[at(b)]];
+        const [mx, my] = [(x1 + x2) / 2, (y1 + y2) / 2];
+        return Math.hypot(mx - (p[0] + q[0]) / 2, my - (p[1] + q[1]) / 2) < 2 && Math.hypot(x2 - x1, y2 - y1) >= 90;
+      });
+    for (const [a, b] of [["madagascar", "southernAfrica"], ["madagascar", "eastAfrica"], ["indonesia", "westernAustralia"], ["melanesia", "easternAustralia"], ["easternAustralia", "newZealand"], ["melanesia", "newZealand"]]) {
+      expect(drawn(a, b), `${a}–${b}`).toBe(true);
+    }
+  });
+
+  it("draws Iceland's crossings: a line to Greenland and a line to Britain both start on Iceland", () => {
+    const ICELAND = [850, 208]; // Iceland's place on the map, in its units
+    const [greenland, britain] = [TENKA_SHAPES.boxes[at("greenland")], TENKA_SHAPES.boxes[at("britain")]];
+    const within = ([x, y]: number[], [left, top, right, bottom]: readonly number[], slack: number) => x >= left - slack && x <= right + slack && y >= top - slack && y <= bottom + slack;
+    const fromIceland = TENKA_SHAPES.seaLines
+      .map(([x1, y1, x2, y2]) => (Math.hypot(x1 - ICELAND[0], y1 - ICELAND[1]) < Math.hypot(x2 - ICELAND[0], y2 - ICELAND[1]) ? [[x1, y1], [x2, y2]] : [[x2, y2], [x1, y1]]))
+      .filter(([near]) => Math.hypot(near[0] - ICELAND[0], near[1] - ICELAND[1]) < 40);
+    expect(fromIceland.some(([, far]) => within(far, greenland, 40))).toBe(true);
+    expect(fromIceland.some(([, far]) => within(far, britain, 40))).toBe(true);
   });
 
   it("tags the wrap with Alaska at the west edge and the Russian Far East at the east, on the same row as the lines", () => {

@@ -194,6 +194,12 @@ const COUNTRIES = EUROPE ? EUROPE_COUNTRIES : {
  * other, across the Bering Strait, and the board tags both ends with the
  * territory waiting on the other side. `from` and `to` pin a line's ends in
  * longitude and latitude where the nearest two coasts would draw it badly.
+ * `anchors` draws the line from one territory's counter to the other's, for a
+ * crossing so short that coast to coast would be a stub (Madagascar, the
+ * islands of Oceania). `also` adds further lines for the same link, each with
+ * its own `from` and `to`: Iceland is part of the Nordic Countries here, so
+ * the Nordic link to Britain is also drawn from Iceland, and Greenland's from
+ * Iceland too, which is how the sea is crossed between them.
  *
  * Every link between continents of the classic game is here, by the name of
  * the territory that holds that place on this map (tenkaLinks.test.ts pins
@@ -206,8 +212,8 @@ const SEA_LINKS = EUROPE ? EUROPE_SEA_LINKS : [
   ["arcticIslands", "westernCanada"],
   ["arcticIslands", "easternCanada"],
   ["greenland", "easternCanada"],
-  ["greenland", "nordic"],
-  ["britain", "nordic", { from: [-3, 58], to: [6, 60] }],
+  ["greenland", "nordic", { from: [-26, 68.5], to: [-20, 65.5] }],
+  ["britain", "nordic", { from: [-3, 58], to: [6, 60], also: [{ from: [-14, 64.5], to: [-5.5, 58.5] }] }],
   ["britain", "westernEurope"],
   ["britain", "centralEurope"],
   ["westernEurope", "northAfrica"],
@@ -215,14 +221,14 @@ const SEA_LINKS = EUROPE ? EUROPE_SEA_LINKS : [
   ["southernEurope", "egypt"],
   ["brazil", "westAfrica"],
   ["eastAfrica", "arabia"],
-  ["madagascar", "southernAfrica"],
-  ["madagascar", "eastAfrica"],
+  ["madagascar", "southernAfrica", { anchors: true }],
+  ["madagascar", "eastAfrica", { anchors: true }],
   ["japan", "korea"],
   ["japan", "farEast"],
-  ["indonesia", "westernAustralia"],
-  ["melanesia", "easternAustralia"],
-  ["easternAustralia", "newZealand"],
-  ["melanesia", "newZealand"],
+  ["indonesia", "westernAustralia", { anchors: true }],
+  ["melanesia", "easternAustralia", { anchors: true }],
+  ["easternAustralia", "newZealand", { anchors: true }],
+  ["melanesia", "newZealand", { anchors: true }],
 ];
 
 // ——— Geometry ———
@@ -612,9 +618,12 @@ for (const [a, b, options = {}] of SEA_LINKS) {
     seaLines.push([across.p[0], across.p[1], 0, Math.round((across.p[1] + across.q[1]) / 2)]);
     seaLines.push([WIDTH, Math.round((across.p[1] + across.q[1]) / 2), across.q[0] + WIDTH, across.q[1]]);
     wraps.push([i, j, Math.round((across.p[1] + across.q[1]) / 2)]);
+  } else if (options.anchors) {
+    seaLines.push(crossingLine(labelFor(i), labelFor(j), labelFor(j)));
   } else if (options.from) {
     const [p, q] = [project(options.from), project(options.to)];
     seaLines.push(crossingLine(p, q, q));
+    for (const more of options.also ?? []) seaLines.push(crossingLine(project(more.from), project(more.to), project(more.to)));
   } else {
     const across = nearest(outlines[i].rings, outlines[j].rings);
     seaLines.push(crossingLine(across.p, across.q, labelFor(j)));
