@@ -600,7 +600,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 2,
   "game": "tenka",
-  "generator": "tenka 1.3.0",
+  "generator": "tenka 2.0.0",
   "seed": 2026,
   "players": [
     "Ann",

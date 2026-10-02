@@ -6,7 +6,9 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
-**This is a major release (2.0.0 when it is taken): both maps, the world and Europe, are different maps, and games kept by 1.x do not play on either.**
+## [2.0.0] - 2026-10-02
+
+**This is a major release: both maps, the world and Europe, are different maps, and games kept by 1.x do not play on either.**
 
 The world map is now the classic world-conquest board's, as a graph (John, 2026-10-02: "I only want equal to the original"): the same forty-two territories in the same six continents, with exactly the same eighty-three pairs of territories that touch by land or are joined across the water, and the same continent bonuses. Only geography is used: the names are places and who borders whom is a fact, and no artwork, wording or name of any published game is. Europe is the classic Europe board's the same way, below.
 
