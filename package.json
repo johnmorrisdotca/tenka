@@ -130,6 +130,7 @@
     "test": "vitest run",
     "test:table": "pnpm site && playwright test",
     "test:package": "pnpm build && node scripts/check-package.mjs",
+    "family:readme": "node scripts/family-readme.mjs",
     "test:frameworks": "pnpm build && node scripts/check-frameworks.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "site": "pnpm build && node scripts/site.mjs",
