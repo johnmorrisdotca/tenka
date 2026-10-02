@@ -92,8 +92,8 @@ export function tenkaFromJSON(text: string): TenkaGame | null {
   // What `encodeTenka` keeps has a `v` and no `format`: read by the reader it was written for.
   if (format === undefined) return decodeTenka(text);
   if (typeof format !== "number" || !Number.isInteger(format) || format < 1 || format > TENKA_EXPORT_FORMAT) return null;
-  // Format 1 was written before the world became the classic board's (2.0.0): its moves mean other territories now. Europe's map did not change.
-  if (format < TENKA_EXPORT_FORMAT && map !== "europe") return null;
+  // Format 1 was written before the world and Europe became the classic boards' (2.0.0): its moves mean other territories now.
+  if (format < TENKA_EXPORT_FORMAT) return null;
   if (game !== undefined && game !== "tenka") return null;
   if (typeof seed !== "number" || typeof rounds !== "number") return null;
   if (placing !== "auto" && placing !== "hand") return null;

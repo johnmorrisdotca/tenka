@@ -6,9 +6,9 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
-**This is a major release (2.0.0 when it is taken): the world map is a different map, and games kept by 1.x do not play on it.**
+**This is a major release (2.0.0 when it is taken): both maps, the world and Europe, are different maps, and games kept by 1.x do not play on either.**
 
-The world map is now the classic world-conquest board's, as a graph (John, 2026-10-02: "I only want equal to the original"): the same forty-two territories in the same six continents, with exactly the same eighty-three pairs of territories that touch by land or are joined across the water, and the same continent bonuses. Only geography is used: the names are places and who borders whom is a fact, and no artwork, wording or name of any published game is.
+The world map is now the classic world-conquest board's, as a graph (John, 2026-10-02: "I only want equal to the original"): the same forty-two territories in the same six continents, with exactly the same eighty-three pairs of territories that touch by land or are joined across the water, and the same continent bonuses. Only geography is used: the names are places and who borders whom is a fact, and no artwork, wording or name of any published game is. Europe is the classic Europe board's the same way, below.
 
 ### Changed
 
@@ -17,14 +17,23 @@ The world map is now the classic world-conquest board's, as a graph (John, 2026-
 - **The map is drawn from Natural Earth's provinces, states and regions** (admin-1, public domain, 1:50m) as well as its countries, so that Canada, the United States, Russia, China and Australia are cut along real borders: Alberta is British Columbia, Alberta and Saskatchewan; Ontario is Ontario and Manitoba; Ukraine is European Russia with the Caucasus, Ukraine, Belarus, Moldova and the Baltic states; Mongolia has Manchuria, Inner Mongolia and Korea with it, across the sea from Japan. `scripts/map-world.mjs` lays the territories out, `scripts/classic-edges.mjs` is the graph, and `scripts/map.mjs` refuses to write a map whose borders and sea links do not make exactly that graph.
 - **Sea links, twenty-five of them, join what the classic board joins and the land does not:** Alaska to Kamchatka (off both edges of the map), Greenland to the Northwest Territory, Ontario, Quebec and Iceland, Iceland to Great Britain and Scandinavia, Great Britain to Scandinavia, Northern Europe and Western Europe, Western and Southern Europe to North Africa, Southern Europe to Egypt, Brazil to North Africa, East Africa to the Middle East, Madagascar to East and South Africa, Ukraine to Afghanistan across the Caspian, Kamchatka and Mongolia to Japan, Siam to Indonesia, and Indonesia, New Guinea and Eastern and Western Australia to one another as the classic board has them. Madagascar's and Australia's are drawn from one territory's counter to the other's, so that none is a stub.
 - **Cards follow the territories**, as they did: a card for each of the forty-two, and the same two wild cards. The armies each player starts with, and every other rule, are unchanged.
-- The Europe map is exactly as it was.
+- The world's dashed sea lines are drawn differently: Madagascar's and Australia's run from one territory's counter to the other's (`scripts/map.mjs` takes `anchors` for that, and `also` for a second line on the same link).
 
 ### What breaks
 
-- **Games kept by 1.x do not replay on the world map.** Their seeds deal other territories, and their moves name other territory numbers. A kept game (`encodeTenka`) is now version 2 and the JSON export (`tenkaToJSON`) is format 2; `decodeTenka` and `tenkaFromJSON` return `null` for a world game kept at version 1, rather than replaying it as another game. Games on the Europe map are unchanged and are still read at version 1. The demo, which keeps the game being played, starts a new one when it finds an old save.
+- **Games kept by 1.x do not replay on either map.** Their seeds deal other territories, and their moves name other territory numbers. A kept game (`encodeTenka`) is now version 2 and the JSON export (`tenkaToJSON`) is format 2; `decodeTenka` and `tenkaFromJSON` return `null` for any game kept at version 1, world or Europe, rather than replaying it as another game. The demo, which keeps the game being played, starts a new one when it finds an old save.
 - **Territory keys, indices, names and counts have changed** (`TENKA_TERRITORIES`, every `key`, the strings `tAlaska`... and `cOceania`, now `cAustralia`; `"oceania"` is `"australia"` in `TenkaContinentKey` and in a map's `continents`). Alaska is still territory 0 and the Northwest Territory is territory 1, but most of the others have moved.
 - **The seeded game that pins the package** (seed 2026, three players, ten rounds) now takes 356 moves, not 357.
 - The CSV and text exports name the new territories.
+
+### Europe
+
+- **Europe is the classic Europe board's, as a graph, exactly.** John, 2026-10-02: the maps are to be equal to the original boards. Forty-nine named areas (Scotland, England, Wales, Ireland, Norway, Sweden, Finland, Denmark, Estonia, the Republic of Novgorod, Lithuania, Prussia, Pomerania, Polotsk, Smolensk, Friesland, Saxony, Poland, Rusland, Galicia, Lorraine, Franconia, Bohemia, Highlands, Normandy, Brittany, France, Burgundy, Swabia, Bavaria, Lombardy, Venice, Rome, the Kingdom of Sicily, Sardinia, Hungary, Serbia, Bulgaria, Greece, Turkey, León-Castile, Portugal, Navarre, Barcelona, Valencia, Granada, Morocco, Algeria and Tunisia) take the place of the thirty-seven modern ones, with eighty-two borders on land and nineteen dashed routes across the water. Every territory key is new (`scotland`, `leonCastile`, `kingdomOfSicily`…), so nothing that named a Europe territory by key or number means what it did, and the deck is fifty-one cards, not thirty-nine. Only the geography is used: no artwork, wording, logo or name of any published game.
+- **Europe's eleven regions are different, and Tenka's own** (the board has none): Britain and Ireland, the Nordic Countries, Iberia, the Maghreb, France, Germany and the Low Countries, Central Europe, Italy, the Balkans and Turkey, Poland and the Baltic, Eastern Europe. `TenkaEuropeRegionKey` loses `italyBalkans`, `danube`, `russia` and `anatolia` and gains `germany`, `italy`, `balkans` and `baltic`; the bonuses are in the README.
+- **Europe is drawn from provinces, not countries**, by `scripts/map-europe.mjs` (`pnpm map europe` runs it), so a historical area can be a stretch of several modern countries: Denmark runs on down the German coast, Venice is the Adriatic's far shore, Rusland is the Ukraine. The frame is the board's: Ireland to the Caucasus and the Maghreb's coast to the Arctic Circle, so Iceland is no longer on the Europe map.
+- **`scripts/map.mjs europe` hands over to `scripts/map-europe.mjs`**, and the Europe branches of `map.mjs` are gone; the world is built by `map.mjs` as before.
+- **`scripts/europe-edges.mjs`**, the graph written out by hand, which `pnpm map europe` holds the drawn borders to (it refuses to write a map whose borders differ) and which `tenkaEurope.test.ts` holds the finished map to a second time, written out again there by name.
+- **`scripts/europe-units.mjs`**, which gives each province of Natural Earth's admin-1 file (1:10m, public domain) to its territory, with a few straight cuts through a province (Bavaria, Lower Saxony, Leningrad).
 
 ## [1.3.0] - 2026-10-01
 

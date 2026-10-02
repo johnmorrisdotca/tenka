@@ -4,7 +4,7 @@
  * into two small static files.
  *
  *   node scripts/map.mjs          the world
- *   node scripts/map.mjs europe   Europe
+ *   node scripts/map.mjs europe   Europe (built by scripts/map-europe.mjs)
  *
  * SOURCE AND LICENCE. Natural Earth's admin-0 countries and, for the world, its
  * admin-1 provinces, states and regions, both at 1:50m (naturalearthdata.com),
@@ -12,7 +12,7 @@
  * permission is needed to use Natural Earth. Crediting the authors is
  * unnecessary." They are fetched here, at build time, from the project's own
  * repository on GitHub and cached in the machine's temporary folder (or read
- * from `TENKA_SOURCE`, `TENKA_ADMIN1_SOURCE` and `TENKA_EUROPE_SOURCE` when
+ * from `TENKA_SOURCE` and `TENKA_ADMIN1_SOURCE` when
  * those name a copy); the site never fetches anything from anywhere to draw
  * the map.
  *
@@ -22,7 +22,7 @@
  *     most countries whole, some by where each polygon lies (France's Guiana is
  *     in South America), and the five too large to be one territory (the United
  *     States, Canada, Russia, China and Australia) by their provinces, states
- *     and regions. Europe's mainland cuts are made along a meridian (`map-europe.mjs`);
+ *     and regions. Some mainlands are cut along a meridian;
  *     a cut is only made where the meridian crosses the mainland exactly twice.
  *  2. Small islands a finger could never find are left off (`LEAST_AREA`),
  *     never a country's largest piece.
@@ -49,41 +49,43 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { CLASSIC_EDGES } from "./classic-edges.mjs";
-import { EUROPE_COUNTRIES, EUROPE_CUT_MERIDIANS, EUROPE_REGIONS, EUROPE_SEA_LINKS, EUROPE_TERRITORIES } from "./map-europe.mjs";
 import { WORLD_CONTINENTS, WORLD_COUNTRIES, WORLD_CUT_MERIDIANS, WORLD_REGIONS, WORLD_SEA_LINKS, WORLD_TERRITORIES } from "./map-world.mjs";
 
-/** Which map to build: `node scripts/map.mjs` for the world, `node scripts/map.mjs europe` for Europe. */
+/** Which map to build: `node scripts/map.mjs` for the world, `node scripts/map.mjs europe` for Europe, which has a script of its own. */
 const MAP = process.argv[2] ?? "world";
-if (MAP !== "world" && MAP !== "europe") throw new Error(`No map called ${MAP}: world or europe.`);
-const EUROPE = MAP === "europe";
+if (MAP === "europe") {
+  await import("./map-europe.mjs");
+  process.exit(0);
+}
+if (MAP !== "world") throw new Error(`No map called ${MAP}: world or europe.`);
 const SCALE_NAME = "50m";
 const REMOTE = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_${SCALE_NAME}_admin_0_countries.geojson`;
-const CACHE = (EUROPE ? process.env.TENKA_EUROPE_SOURCE : process.env.TENKA_SOURCE) ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_0_countries.geojson`);
+const CACHE = process.env.TENKA_SOURCE ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_0_countries.geojson`);
 /** The world is built from the provinces and states of its largest countries too (Natural Earth's admin-1, also public domain). */
 const REMOTE_ADMIN1 = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_${SCALE_NAME}_admin_1_states_provinces.geojson`;
 const CACHE_ADMIN1 = process.env.TENKA_ADMIN1_SOURCE ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_1_states_provinces.geojson`);
-const WORLD_OUT = EUROPE ? "src/tenkaEurope.data.ts" : "src/tenkaWorld.data.ts";
-const SHAPES_OUT = EUROPE ? "src/tenkaEuropeShapes.data.ts" : "src/tenkaShapes.data.ts";
+const WORLD_OUT = "src/tenkaWorld.data.ts";
+const SHAPES_OUT = "src/tenkaShapes.data.ts";
 /** What the two files export. */
-const DATA_NAME = EUROPE ? "TENKA_EUROPE_TERRITORY_DATA" : "TENKA_TERRITORY_DATA";
-const SHAPES_NAME = EUROPE ? "TENKA_EUROPE_SHAPES" : "TENKA_SHAPES";
+const DATA_NAME = "TENKA_TERRITORY_DATA";
+const SHAPES_NAME = "TENKA_SHAPES";
 
 /** The map's width in its own units; coordinates are whole units, which is fine enough at four times zoom. */
 const WIDTH = 2000;
 /** The seam, and how far round the map runs from it. */
-const WEST = EUROPE ? -25 : -170;
-const EAST = EUROPE ? 60 : 192;
+const WEST = -170;
+const EAST = 192;
 /** The rows of the map: Greenland's northern tip to Tierra del Fuego. */
-const NORTH = EUROPE ? 71.5 : 84;
-const SOUTH = EUROPE ? 33.5 : -56.5;
+const NORTH = 84;
+const SOUTH = -56.5;
 /** The least an island's outline may enclose, in square map units, to be drawn: about four pixels square at a whole-world view. */
-const LEAST_AREA = EUROPE ? 40 : 30;
+const LEAST_AREA = 30;
 
 /** The six continents, in the order the rules list them. */
-const CONTINENTS = EUROPE ? EUROPE_REGIONS : WORLD_CONTINENTS;
+const CONTINENTS = WORLD_CONTINENTS;
 
-/** The territories, in continent order (Europe's are in `map-europe.mjs`, the world's in `map-world.mjs`). */
-const TERRITORIES = EUROPE ? EUROPE_TERRITORIES : WORLD_TERRITORIES;
+/** The territories, in continent order (in `map-world.mjs`). */
+const TERRITORIES = WORLD_TERRITORIES;
 
 /*
  * Every country's territory, by its ISO code (Natural Earth's ADM0_A3 where
@@ -93,10 +95,10 @@ const TERRITORIES = EUROPE ? EUROPE_TERRITORIES : WORLD_TERRITORIES;
  * CUT (`{ at: [meridians], into: [territories west to east] }`), or null to
  * leave that piece off the map.
  */
-const COUNTRIES = EUROPE ? EUROPE_COUNTRIES : WORLD_COUNTRIES;
+const COUNTRIES = WORLD_COUNTRIES;
 
 /** The sea links: see `WORLD_SEA_LINKS` for what each option does. */
-const SEA_LINKS = EUROPE ? EUROPE_SEA_LINKS : WORLD_SEA_LINKS;
+const SEA_LINKS = WORLD_SEA_LINKS;
 
 // ——— Geometry ———
 
@@ -143,7 +145,7 @@ function crossing(a, b, at) {
 }
 
 /** Every meridian some mainland is cut along. */
-const CUT_MERIDIANS = EUROPE ? EUROPE_CUT_MERIDIANS : WORLD_CUT_MERIDIANS;
+const CUT_MERIDIANS = WORLD_CUT_MERIDIANS;
 
 /**
  * A ring with a point added wherever it crosses a cut meridian. Done to EVERY
@@ -259,13 +261,12 @@ function place(byTerritory, code, rule, polygons, admin1) {
 /** Every country's polygons given to their territories: rings in longitude and latitude, the outer ring first. */
 function assign(features, regions) {
   const byTerritory = new Map(TERRITORIES.map((territory) => [territory.key, []]));
-  const cut = EUROPE ? {} : WORLD_REGIONS;
+  const cut = WORLD_REGIONS;
   for (const feature of features) {
     const code = codeOf(feature.properties);
     // The countries cut by their own provinces are read from the provinces instead.
     if (feature.properties.ADM0_A3 in cut) continue;
-    // Europe lists only the countries on it; the world must account for every one.
-    if (!(code in COUNTRIES) && EUROPE) continue;
+    // The world must account for every country.
     if (!(code in COUNTRIES)) throw new Error(`${code} (${feature.properties.NAME}) is given to no territory; add it to COUNTRIES, or null to leave it off.`);
     if (COUNTRIES[code] === null) continue;
     place(byTerritory, code, COUNTRIES[code], polygonsOf(feature), false);
@@ -352,7 +353,7 @@ function thin(ring) {
  * loop that touches there a loop of its own (the outer rings run clockwise on screen). Where one leaves, that one.
  */
 function following(edge, options) {
-  if (options.length <= 1 || EUROPE) return options[0];
+  if (options.length <= 1) return options[0];
   const [dx, dy] = [edge[1][0] - edge[0][0], edge[1][1] - edge[0][1]];
   const turn = (next) => Math.atan2(dx * (next[1][1] - next[0][1]) - dy * (next[1][0] - next[0][0]), dx * (next[1][0] - next[0][0]) + dy * (next[1][1] - next[0][1]));
   return options.reduce((best, next) => (turn(next) > turn(best) ? next : best));
@@ -375,8 +376,6 @@ function mergeOutline(pieces) {
     const key = `${keyOf(a)}>${keyOf(b)}`;
     const against = counts.get(`${keyOf(b)}>${keyOf(a)}`) ?? 0;
     if (against === 0) return true;
-    // Europe's map was made when every copy went: it stays exactly as it was.
-    if (EUROPE) return false;
     cancelled.set(key, (cancelled.get(key) ?? 0) + 1);
     return cancelled.get(key) > against;
   });
@@ -398,15 +397,15 @@ function mergeOutline(pieces) {
       ring.push(at[0]);
       at = following(at, (from.get(keyOf(at[1])) ?? []).filter((next) => !used.has(next)));
     }
-    if (ring.length >= 3 && !(thin(ring) && !EUROPE)) rings.push(ring);
+    if (ring.length >= 3 && !thin(ring)) rings.push(ring);
   }
   // A ring inside another of the same territory is no lake or island worth drawing: where the files of two provinces draw their border apart, it is the wedge between the two.
-  const drawn = EUROPE ? rings : rings.filter((ring) => !rings.some((other) => other !== ring && Math.abs(ringArea(other)) > Math.abs(ringArea(ring)) && ring.filter((point) => inside(point, other)).length >= ring.length * 0.6));
+  const drawn = rings.filter((ring) => !rings.some((other) => other !== ring && Math.abs(ringArea(other)) > Math.abs(ringArea(ring)) && ring.filter((point) => inside(point, other)).length >= ring.length * 0.6));
   return { rings: drawn, edges: kept };
 }
 
 /** How far, in map units, a drawn outline may stray from the one cut from the data: under half a pixel at a whole-world view. */
-const SIMPLIFY = EUROPE ? 0 : 0.7;
+const SIMPLIFY = 0.7;
 
 /** The points of an open run kept by the Douglas and Peucker rule: those further than `SIMPLIFY` from the straight line between the ends. */
 function keepFarPoints(run) {
@@ -524,7 +523,7 @@ const LEAST_CROSSING = 64;
  * frames: they carry no counter and no link, and counting them made Asia's
  * view as tall as Svalbard to Malaysia, too tall to fill a desk's width.
  */
-const FRAME_NORTH = EUROPE ? 90 : 75;
+const FRAME_NORTH = 75;
 
 /** A crossing drawn across the strait, lengthened about its middle to at least `LEAST_CROSSING`, toward `towards` where its two ends touch. */
 function crossingLine(p, q, towards) {
@@ -612,9 +611,9 @@ function snapProvinces(byTerritory) {
 }
 
 const features = (await source()).features;
-const regions = EUROPE ? [] : (await download(CACHE_ADMIN1, REMOTE_ADMIN1)).features;
+const regions = (await download(CACHE_ADMIN1, REMOTE_ADMIN1)).features;
 const assigned = assign(features, regions);
-if (!EUROPE) snapProvinces(assigned);
+snapProvinces(assigned);
 const outlines = TERRITORIES.map((territory) => {
   if (!CONTINENTS.includes(territory.continent)) throw new Error(`${territory.key} is in no continent the rules know.`);
   const pieces = assigned.get(territory.key);
@@ -670,19 +669,17 @@ for (const [a, b, options = {}] of SEA_LINKS) {
   }
 }
 
-if (!EUROPE) {
-  // The world must be the classic graph exactly: every pair of territories that touch or are joined by a sea link, and no others.
-  const pair = (a, b) => [a, b].sort().join("–");
-  const wanted = new Set(CLASSIC_EDGES.map(([a, b]) => pair(a, b)));
-  const drawn = new Set();
-  TERRITORIES.forEach((territory, at) => {
-    for (const other of [...land[at], ...sea[at]]) drawn.add(pair(territory.key, TERRITORIES[other].key));
-  });
-  const missing = [...wanted].filter((edge) => !drawn.has(edge));
-  const extra = [...drawn].filter((edge) => !wanted.has(edge));
-  if (missing.length > 0 || extra.length > 0) {
-    throw new Error(`The map is not the classic graph.\n  Missing (no shared border and no sea link): ${missing.join(", ") || "none"}\n  Extra (touch on the map, or a sea link, and not in the graph): ${extra.join(", ") || "none"}`);
-  }
+// The world must be the classic graph exactly: every pair of territories that touch or are joined by a sea link, and no others.
+const pair = (a, b) => [a, b].sort().join("–");
+const wanted = new Set(CLASSIC_EDGES.map(([a, b]) => pair(a, b)));
+const drawn = new Set();
+TERRITORIES.forEach((territory, at) => {
+  for (const other of [...land[at], ...sea[at]]) drawn.add(pair(territory.key, TERRITORIES[other].key));
+});
+const missing = [...wanted].filter((edge) => !drawn.has(edge));
+const extra = [...drawn].filter((edge) => !wanted.has(edge));
+if (missing.length > 0 || extra.length > 0) {
+  throw new Error(`The map is not the classic graph.\n  Missing (no shared border and no sea link): ${missing.join(", ") || "none"}\n  Extra (touch on the map, or a sea link, and not in the graph): ${extra.join(", ") || "none"}`);
 }
 
 const labels = TERRITORIES.map((_, at) => labelFor(at));
@@ -706,8 +703,8 @@ const bordersPath = continentBorders.map(([a, b]) => `M${a[0]} ${a[1]}L${b[0]} $
 const header = [
   `/*`,
   ` * WRITTEN BY scripts/map.mjs, NEVER BY HAND: run it again to change the map.`,
-  ` * From Natural Earth's admin-0 countries${EUROPE ? "" : " and admin-1 provinces, states and regions"} at 1:${SCALE_NAME}, which is in the public domain`,
-  ` * (naturalearthdata.com; ${REMOTE}${EUROPE ? "" : `; ${REMOTE_ADMIN1}`}).`,
+  ` * From Natural Earth's admin-0 countries and admin-1 provinces, states and regions at 1:${SCALE_NAME}, which is in the public domain`,
+  ` * (naturalearthdata.com; ${REMOTE}; ${REMOTE_ADMIN1}).`,
   ` */`,
 ];
 
@@ -717,7 +714,7 @@ writeFileSync(
     ...header,
     `import type { TenkaTerritoryData } from "./tenka.types.ts";`,
     ``,
-    `/** Tenka's ${EUROPE ? "Europe, thirty-seven" : "forty-two"} territories in ${EUROPE ? "region" : "continent"} order: each one's key, name, ${EUROPE ? "region" : "continent"}, and neighbours by land and by sea (indices into this list). */`,
+    `/** Tenka's forty-two territories in continent order: each one's key, name, continent, and neighbours by land and by sea (indices into this list). */`,
     `export const ${DATA_NAME}: readonly TenkaTerritoryData[] = [`,
     ...TERRITORIES.map(
       (territory, at) =>
@@ -735,7 +732,7 @@ writeFileSync(
     `import type { TenkaShapes } from "./tenka.types.ts";`,
     ``,
     `/**`,
-    EUROPE ? ` * How Tenka's Europe is drawn: Miller's projection from ${-WEST}°W to ${EAST}°E and ${SOUTH}°N to ${NORTH}°N, ${WIDTH} by ${HEIGHT} units.` : ` * How Tenka's world is drawn: Miller's projection from ${-WEST}°W round to ${EAST}°E, ${WIDTH} by ${HEIGHT} units.`,
+    ` * How Tenka's world is drawn: Miller's projection from ${-WEST}°W round to ${EAST}°E, ${WIDTH} by ${HEIGHT} units.`,
     ` * One outline per territory, in the order of \`${DATA_NAME}\`; where its army counter stands; its extent; the`,
     ` * sea links' dashed lines; the links that go off one edge and on at the other; and the borders between continents, drawn heavier. Read only by the board in`,
     ` * the browser, so none of it is carried by a page the server renders for the rules.`,

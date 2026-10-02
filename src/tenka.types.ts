@@ -19,12 +19,12 @@ export type TenkaEuropeRegionKey =
   | "iberia"
   | "maghreb"
   | "france"
+  | "germany"
   | "centralEurope"
-  | "italyBalkans"
-  | "danube"
-  | "easternEurope"
-  | "russia"
-  | "anatolia";
+  | "italy"
+  | "balkans"
+  | "baltic"
+  | "easternEurope";
 
 /** A continent of any map, by key: the world's continents and Europe's regions. */
 export type TenkaContinentKey = TenkaWorldContinentKey | TenkaEuropeRegionKey;

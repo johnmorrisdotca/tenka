@@ -288,7 +288,7 @@ describe("keeping a game", () => {
     expect(decodeTenka(null)).toBeNull();
     expect(decodeTenka("{")).toBeNull();
     expect(decodeTenka(JSON.stringify({ ...kept, v: 3 }))).toBeNull();
-    // A game kept before 2.0.0 (version 1) was dealt on the old world, and is refused rather than replayed as another game.
+    // A game kept before 2.0.0 (version 1) was dealt on an old map, and is refused rather than replayed as another game.
     expect(decodeTenka(JSON.stringify({ ...kept, v: 1 }))).toBeNull();
     expect(decodeTenka(JSON.stringify({ ...kept, moves: [["z"]] }))).toBeNull();
     // Attacking before placing the turn's armies is not a move these rules can play.

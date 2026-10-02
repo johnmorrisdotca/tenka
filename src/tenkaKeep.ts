@@ -20,14 +20,10 @@ import { startTenka } from "./tenkaStart.ts";
 
 /**
  * The version of what `encodeTenka` writes, so a later shape can refuse an older one rather than misread it. It is 2
- * since 2.0.0, when the world became the classic board's: a game kept at 1 on the world was dealt, and its moves
- * numbered, on a different set of territories, so it is refused rather than replayed as another game. Europe's map did not
- * change, and a Europe game kept at 1 is still read.
+ * since 2.0.0, when the world and Europe became the classic boards': a game kept at 1 was dealt, and its moves numbered, on
+ * a different set of territories, so it is refused rather than replayed as another game.
  */
 const KEPT_VERSION = 2;
-
-/** The one older version still read: 1, for a game on Europe's map, which 2.0.0 did not change. */
-const readsOldVersion = (version: unknown, map: unknown) => version === 1 && map === "europe";
 
 type Kept = (string | number)[];
 
@@ -128,7 +124,7 @@ export function decodeTenka(text: string | null): TenkaGame | null {
   }
   if (typeof kept !== "object" || kept === null) return null;
   const { v, seed, players, rounds, placing, moves, map } = kept as Record<string, unknown>;
-  if ((v !== KEPT_VERSION && !readsOldVersion(v, map)) || typeof seed !== "number" || typeof rounds !== "number") return null;
+  if (v !== KEPT_VERSION || typeof seed !== "number" || typeof rounds !== "number") return null;
   if (placing !== TENKA_PLACING.auto && placing !== TENKA_PLACING.hand) return null;
   if (!Array.isArray(players) || !players.every((name) => typeof name === "string")) return null;
   if (!Array.isArray(moves)) return null;
