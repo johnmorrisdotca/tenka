@@ -201,7 +201,7 @@ if (process.env.TENKA_BROWSER !== undefined) {
         if (other === "tag.html") {
           const tables = await tab.locator('tenka-table [data-testid="tk-root"]').count();
           const worlds = await tab.locator('tenka-table .tk-land').count();
-          if (tables !== 2 || worlds !== 42 + 37) errors.push(`the tags drew ${tables} tables and ${worlds} territories, not two tables of 42 and 37`);
+          if (tables !== 2 || worlds !== 42 + 49) errors.push(`the tags drew ${tables} tables and ${worlds} territories, not two tables of 42 and 49`);
         }
       }
       const ok = errors.length === 0 && after === armies + 1 && lands === 42 && maps === (project.maps ?? 1);
