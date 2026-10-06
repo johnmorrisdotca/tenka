@@ -44,7 +44,7 @@ const unbundled = (code) =>
   code
     .replaceAll('"@johnmorrisdotca/tenka/ui"', '"./tenka/dist/ui.js"')
     .replaceAll('"@johnmorrisdotca/tenka"', '"./tenka/dist/index.js"')
-    .replaceAll("https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tenka@1/dist/element-define.js", "./tenka/dist/element-define.js");
+    .replaceAll("https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tenka@2/dist/element-define.js", "./tenka/dist/element-define.js");
 
 const projects = {
   // The table in a component's mount hook, which is all any framework needs.

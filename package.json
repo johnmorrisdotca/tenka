@@ -1,7 +1,7 @@
 {
   "name": "@johnmorrisdotca/tenka",
-  "version": "2.1.0",
-  "description": "World conquest board game engine for two to six, in the manner of Risk: pure, seeded TypeScript rules on a map of the real world, dice battles, cards, a computer player, and a game saved and replayed as JSON, text or CSV. An SVG world map and a playable table for React, Vue, Svelte, Angular or plain HTML, in English and Japanese. Zero dependencies.",
+  "version": "2.1.1",
+  "description": "World conquest board game engine for two to six, in the manner of Risk: seeded TypeScript rules on a map of the real world, dice battles, cards, a computer player, saved games, and an SVG map and playable table. Zero dependencies.",
   "keywords": [
     "world-conquest",
     "risk",
@@ -75,11 +75,7 @@
     "url": "git+https://github.com/johnmorrisdotca/tenka.git"
   },
   "license": "MIT",
-  "author": {
-    "name": "John Morris",
-    "email": "john@johnmorris.ca",
-    "url": "https://johnmorris.ca"
-  },
+  "author": "John Morris",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -87,30 +83,37 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./shapes": {
       "types": "./dist/shapes.d.ts",
+      "import": "./dist/shapes.js",
       "default": "./dist/shapes.js"
     },
     "./ui": {
       "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js",
       "default": "./dist/ui.js"
     },
     "./react": {
       "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
       "default": "./dist/react.js"
     },
     "./dressing": {
       "types": "./dist/dressing.d.ts",
+      "import": "./dist/dressing.js",
       "default": "./dist/dressing.js"
     },
     "./element": {
       "types": "./dist/element.d.ts",
+      "import": "./dist/element.js",
       "default": "./dist/element.js"
     },
     "./element/define": {
       "types": "./dist/element-define.d.ts",
+      "import": "./dist/element-define.js",
       "default": "./dist/element-define.js"
     }
   },

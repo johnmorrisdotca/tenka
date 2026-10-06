@@ -2,7 +2,7 @@
  * Defines the `<tenka-table>` element on the page. Import it for its effect:
  *
  * ```html
- * <script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tenka@1/dist/element-define.js"></script>
+ * <script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tenka@2/dist/element-define.js"></script>
  * <tenka-table players="You, Kaze, Yama" rounds="10"></tenka-table>
  * ```
  *

@@ -6,6 +6,21 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-10-05
+
+Nothing that was exported has changed.
+
+### Added
+
+- A test holds every `@johnmorrisdotca/tenka@N` version pin in the README to this package's major version.
+
+### Changed
+
+- The family's list, in the README and in the demo's footer, names all twenty-four packages, Karakuri and Houseki included.
+- The npm description is one sentence of 250 characters or fewer, so npm and its search show it whole; it is also the repository's About text. `homepage` is the demo site and `author` is `"John Morris"`, the same in every package.
+- The GitHub Actions workflows use the current versions of the actions (checkout 7, setup-node 7, pnpm/action-setup 6; configure-pages 6, upload-pages-artifact 5 and deploy-pages 5 for Pages), which clears GitHub's Node 20 deprecation warning.
+- The README's jsDelivr example, the CDN address in the framework check and the note in `src/element-define.ts` named `@1`; they name `@2`, this package's major version.
+
 ## [2.1.0] - 2026-10-02
 
 Nothing that was exported has changed; the rules, both maps and every saved game (kept version 2, export format 2) are exactly as they were. The dice and cards the table draws can now be Korokoro's and Toranpu's; by default they are drawn as before. This is a minor release (2.1.0).
@@ -210,7 +225,8 @@ The first release.
   `@johnmorrisdotca/tenka/react`.
 - A static demo for GitHub Pages.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/johnmorrisdotca/tenka/compare/v2.1.0...v2.1.1
 [1.1.0]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.1.0
 [1.0.1]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.0.1
 [1.0.0]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.0.0

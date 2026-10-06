@@ -229,7 +229,7 @@ describe("the package", () => {
     expect(family.length).toBeGreaterThanOrEqual(16);
     const block = readme.slice(readme.indexOf("### The family"), readme.indexOf("\n## ", readme.indexOf("### The family")));
     for (const { id, name, kana } of family) expect(block, id).toContain(`- [${name}](https://github.com/johnmorrisdotca/${id}) (${kana}`);
-    const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one", "twenty-two"];
+    const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four"];
     expect(block).toContain(`one of ${words[family.length]} packages`);
     expect([...block.matchAll(/^- \[/gm)]).toHaveLength(family.length);
     expect(template).toContain(`{ id: "tenka", name: "Tenka", kana: "天下" }`);
@@ -245,14 +245,14 @@ describe("the package", () => {
   });
 
   it("its description and keywords are fit for npm", () => {
-    expect(pkg.description.length).toBeLessThanOrEqual(350);
+    expect(pkg.description.length).toBeLessThanOrEqual(250);
     expect(new Set(pkg.keywords).size).toBe(pkg.keywords.length);
     for (const keyword of pkg.keywords) expect(keyword, keyword).toMatch(/^[a-z0-9][a-z0-9-]*$/);
   });
 
-  it("exports name built files, by a condition require() reads too, and nothing is left to publishConfig", () => {
+  it("exports name built files, by the import condition and a default that require() reads too, and nothing is left to publishConfig", () => {
     for (const [entry, conditions] of Object.entries(pkg.exports)) {
-      expect(Object.keys(conditions), entry).toEqual(["types", "default"]);
+      expect(Object.keys(conditions), entry).toEqual(["types", "import", "default"]);
       for (const file of Object.values(conditions)) expect(file, entry).toMatch(/^\.\/dist\//);
     }
     expect(pkg.publishConfig.exports).toBeUndefined();
