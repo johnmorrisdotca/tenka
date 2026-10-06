@@ -17,11 +17,13 @@ import { startTenka } from "./tenkaStart.ts";
 import { TENKA_STYLE } from "./ui/style.ts";
 import { TENKA_VERSION } from "./version.ts";
 
-const readme = readFileSync("README.md", "utf8");
+// The README and the page of the API tables it links: what the package says about itself is held to the code across both.
+const readme = `${readFileSync("README.md", "utf8")}\n${readFileSync("docs/API.md", "utf8")}`;
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 
 /** Every fenced block of the README: its language and its text. */
-const blocks = [...readme.matchAll(/^```(\w*)\n([\s\S]*?)^```$/gm)].map((found) => ({ lang: found[1], text: found[2] }));
+// A fence may carry a flag after its language (`ts no-run`, `ts no-check`): such a block is one the master check types or skips, and its kind says so.
+const blocks = [...readme.matchAll(/^```([\w-]*)([^\n]*)\n([\s\S]*?)^```$/gm)].map((found) => ({ lang: `${found[1]}${found[2].trim() === "" ? "" : ` ${found[2].trim()}`}`, text: found[3] }));
 
 /** The entries of the package, as a block of the README imports them, and the source each one is. */
 const ENTRIES = {
@@ -50,8 +52,8 @@ function runnable(text) {
 
 describe("the README's examples", () => {
   it("every block is of a kind a check runs, or is a line for a terminal", () => {
-    // ts, json and csv here; html, js, jsx, vue, svelte and typescript (Angular) in scripts/check-frameworks.mjs; text is the Architecture's tree.
-    expect([...new Set(blocks.map((block) => block.lang))].sort()).toEqual(["html", "js", "json", "jsx", "sh", "svelte", "text", "ts", "typescript", "vue"]);
+    // ts, json and csv here; html, jsx, vue, svelte and ts no-check (Angular) in scripts/check-frameworks.mjs; no-run blocks need a browser; the Architecture's tree is in docs/ARCHITECTURE.md.
+    expect([...new Set(blocks.map((block) => block.lang))].sort()).toEqual(["css", "html", "js no-run", "json", "jsx", "jsx no-check", "sh", "svelte", "ts", "ts no-check", "ts no-run", "vue"]);
   });
 
   it("every TypeScript example runs, and every value it states is the value it comes to", async () => {
@@ -142,7 +144,7 @@ describe("the README's tables", () => {
       expect(rows.length).toBeGreaterThan(4);
       for (const row of rows) for (const name of codes(row[2])) expect(tenka[name], name).toBeDefined();
     }
-    for (const heading of ["### Playing", "### The map's facts", "### Cards and dice", "### Keeping and export", "### The day's seed", "### Taps and words"]) {
+    for (const heading of ["## Playing", "## The map's facts", "## Cards and dice", "## Keeping and export", "## The day's seed", "## Taps and words"]) {
       for (const [names] of table(heading)) {
         for (const code of codes(names)) expect(tenka[code.replace(/\(.*$/, "")], code).toBeDefined();
       }

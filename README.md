@@ -11,12 +11,26 @@ The rules as pure, seeded TypeScript, a computer player, a game that saves and r
   <img alt="TypeScript" src="https://img.shields.io/badge/types-TypeScript-3178c6">
 </p>
 
-<p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><strong>Play a game →</strong></a> · <a href="https://johnmorrisdotca.github.io/tenka/api.html">API reference</a></p>
+<p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><strong>Play a game →</strong></a> · <a href="https://johnmorrisdotca.github.io/tenka/api.html">API reference</a> · <a href="docs/API.md">Every export</a></p>
 
-<p align="center">
-  <img src="docs/desktop.jpg" alt="A game of three on the map of the world, under the demo's header with its language chooser, five cloth patches and Help switch: the set-up choices, an attack from Brazil begun, the players with their lands and armies, and the record of the game beside the map" width="720">
-  <img src="docs/phone.jpg" alt="Europe close up on a phone in dark mode, in Japanese: the zoom buttons with Europe chosen, the map with its sea routes dashed, and under it the players and the record of the game" width="220">
-</p>
+<table align="center">
+<tr>
+<td align="center" valign="top">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/hero-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/hero-desk-light.webp" alt="A game of three on the map of the world, on a desk, under the demo's header with its language chooser and cloth swatches: the set-up choices, the map in the players' colours with a count of armies on each territory and an attack from one territory begun, the players with their lands and armies at the side, and the record of the game under the map." width="720">
+</picture>
+<br><em>A game of three on the world map, an attack begun, on a desk.</em>
+</td>
+<td align="center" valign="top">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/hero-phone-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/hero-phone-light.webp" alt="Europe close up on a phone, in Japanese: the zoom buttons with Europe chosen, the map with its sea routes dashed, and under it the players and the record of the game." width="220">
+</picture>
+<br><em>Europe close up, on a phone, in Japanese, in the device's light or dark.</em>
+</td>
+</tr>
+</table>
 
 A strategy board game engine for the game of world conquest: place armies,
 attack your neighbours with dice, trade sets of cards for more armies, and
@@ -53,7 +67,7 @@ tenkaToText(game);   // "Tenka: Ann, Ben, Cho; 10 rounds; seed 2026\nRound 1\nBe
 
 And a table to play on, against the computer, in a page:
 
-```js
+```js no-run
 import { mountTenka } from "@johnmorrisdotca/tenka/ui";
 
 mountTenka(document.getElementById("table"), { players: ["You", "Kaze", "Yama"], rounds: 10 });
@@ -81,7 +95,118 @@ Risk is a trademark of Hasbro, Inc. Tenka is not affiliated with or endorsed
 by its owner. It is its own game: its own map, its own names, its own words,
 and the numbers of play the genre shares.
 
+## Features
+
+- **The rules as plain functions.** `startTenka` deals a game, `playTenka`
+  makes a move and returns the next game, or `null` for a move the rules
+  refuse. Nothing is changed in place, and nothing touches the DOM, a clock or
+  `Math.random`.
+- **Seeded.** Every shuffle, deal and die is drawn from the game's own random,
+  so a game replays exactly from its seed and its moves.
+- **Two to six players.** A game of two is joined by a neutral army that holds
+  a third of the world and only defends.
+- **Three lengths.** Ten rounds, twenty, or the whole world: played to the
+  last player standing, and counted after sixty rounds if nobody is.
+- **A computer player.** `sensibleTenkaMove` trades when it can, piles armies
+  on a border, attacks only with the odds and fortifies to the front.
+- **Every move listed.** `tenkaMoves(game)` is what the player to move may do.
+- **A map of the real world.** Forty-two territories in six continents,
+  drawn from Natural Earth, joined as the classic board joins them: the same
+  eighty-three pairs, by land and by sea, and the same continent bonuses. The
+  crossing from Alaska to Kamchatka is drawn off both edges.
+- **A table to play on.** The whole world or one continent at a tap, sea
+  routes dashed, the dice of the last throw, the players and their cards, and
+  the record of the game. Against the computer, or passed round one device.
+- **Dice and cards from the family.** Korokoro's dice tumble onto the faces the
+  game threw, and Toranpu draws each card with its territory's own outline,
+  name and army, and the deck face down in Tenka's own back: see
+  [below](#dice-and-cards-from-korokoro-and-toranpu).
+- **A tag.** `<tenka-table>` is the whole table in one element, with no
+  framework.
+- **One game a day.** `tenkaDailySeed(new Date())` is the same seed for
+  everybody, worldwide.
+- **Played from a keyboard.** Arrow keys between territories, Enter or Space to
+  tap; see [Accessibility](#accessibility).
+- **Export and import.** JSON that reads back in, plain text, and CSV.
+- **English and Japanese**, and any other language by a table of your own.
+- **Themeable.** Every colour is a CSS variable, light and dark.
+
+### What's in it
+
+Each picture is the table the package draws (`mountTenka`), taken from [the demo](https://johnmorrisdotca.github.io/tenka/) with `pnpm screenshots:readme`, in light and dark. The game is a seed (`?seed=7`) and the computers move at once, so the same pictures come again.
+
+<table>
+<tr>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/world-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/world-desk-light.webp" alt="The world map in three players' colours, red, blue and yellow, with a count of armies in a circle on each territory and one outlined as the start of an attack." width="400">
+</picture>
+<br><em><strong>The world</strong>: forty-two territories, the classic board's graph, drawn from public-domain data.</em>
+</td>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/europe-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/europe-desk-light.webp" alt="The map of Europe, from Scotland to Turkey, its territories in the players' colours with armies on each and dashed lines for the sea routes." width="400">
+</picture>
+<br><em><strong>Europe</strong>: a second map of forty-nine territories, played by the same rules.</em>
+</td>
+</tr>
+<tr>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/asia-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/asia-desk-light.webp" alt="The continent of Asia close up, its territories in the players' colours with armies on each." width="400">
+</picture>
+<br><em><strong>A continent view</strong>: each continent can be looked at close up.</em>
+</td>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/record-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/record-desk-light.webp" alt="The record of the game, opened: a list of what each player has done, such as armies placed and attacks made, with their results." width="400">
+</picture>
+<br><em><strong>The record</strong>: every move of the game, written.</em>
+</td>
+</tr>
+<tr>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/players-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/players-desk-light.webp" alt="The players beside the map: a coloured marble, a name, and lands and armies for each of three players, the one to move marked." width="400">
+</picture>
+<br><em><strong>The players</strong>: lands and armies, the one to move marked.</em>
+</td>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/dressed-with-dice-and-cards-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/dressed-with-dice-and-cards-desk-light.webp" alt="The table dressed in Korokoro's dice and Toranpu's cards: an attack thrown as three red dice against one cream die, a card in hand and the deck face down in green." width="400">
+</picture>
+<br><em><strong>Dressed</strong>: with Korokoro's dice and Toranpu's cards, if installed.</em>
+</td>
+</tr>
+</table>
+
 ## Use it in your project
+
+### Install
+
+```sh
+npm install @johnmorrisdotca/tenka
+```
+
+```sh
+pnpm add @johnmorrisdotca/tenka
+```
+
+```sh
+yarn add @johnmorrisdotca/tenka
+```
+
+A page with no bundler loads the table as a tag from a CDN, naming the major version so that a release that changes what you use is one you choose:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tenka@2/dist/element-define.js"></script>
+```
 
 Tenka is five things, each usable without the others: **the rules**, plain
 functions over a plain game value; **the map's shapes**, as SVG paths; **a
@@ -214,7 +339,7 @@ onBeforeUnmount(() => table?.destroy());
 
 ### 7. Angular
 
-```typescript
+```ts no-check
 import { Component, ElementRef, OnDestroy, afterNextRender, provideZonelessChangeDetection, signal, viewChild } from "@angular/core";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { mountTenka, type TenkaTableHandle } from "@johnmorrisdotca/tenka/ui";
@@ -271,153 +396,159 @@ it.
   phone. The rules have no DOM in them and run in Node 22 and later, Deno,
   Bun and web workers.
 
-## Architecture
+The cookbook, with the output of each example, is under [Examples](#examples).
 
-The rules, the map and the computer player are plain functions over plain data
-with no DOM: a game is a value, and every move returns the next one. Drawing
-the map is its own entry (`/ui` for plain DOM, `/element` for a tag, `/react`
-for React, `/shapes` for the outlines), so a page that only wants the rules loads none of it.
-Drawing the table's dice and cards with Korokoro and Toranpu is `/dressing`, the one entry that imports another package.
-Dressing the table's dice and cards in the family's own is `/dressing`, the one entry that reaches another package.
+## Examples
 
-```text
-src/
-├── element-define.ts          the "/element/define" entry: defines <tenka-table> on the page by being imported
-├── dressing.ts                the "/dressing" entry: the table's dice drawn by Korokoro and its cards by Toranpu, the one place either is imported
-├── dressingCards.ts           Tenka's cards as a Toranpu design: a territory's own outline, its name and its army's symbol
-├── element.ts                 the "/element" entry: the <tenka-table> element, a whole table in a tag
-├── index.ts                   the main entry: the rules, the map, saving and the computer player, with no DOM
-├── react.tsx                  the "/react" entry: a map to draw in React
-├── shapes.ts                  the "/shapes" entry: how the world and Europe are drawn, as outlines
-├── strings.ts                 every word Tenka shows a person, in English and Japanese
-├── tenka.constants.ts         the numbers Tenka is played by: armies, trades, lengths of a game
-├── tenka.ts                   the rules, nothing else: the classic world-conquest game for two to six players
-├── tenka.types.ts             the game, its moves and its map, as the rules speak of them
-├── tenkaCards.ts              the cards won by a conquest, and the sets that trade for armies
-├── tenkaDaily.ts              one seed a day, the same for everybody
-├── tenkaDice.ts               the dice and the seeded random they are thrown with
-├── tenkaEurope.data.ts        Europe's forty-nine territories and neighbours, written by scripts/map-europe.mjs
-├── tenkaEuropeShapes.data.ts  Europe's outlines, written by scripts/map-europe.mjs
-├── tenkaExport.ts             a game written out as JSON, plain text or CSV
-├── tenkaKeep.ts               a game as short text to keep, and read back by playing its moves again
-├── tenkaMap.ts                the world as the rules read it: territories, neighbours, continents and their bonuses
-├── tenkaMoves.ts              every move the player to move may make now
-├── tenkaPolicy.ts             the computer player: a sensible random one, which a test plays whole games with
-├── tenkaShapes.data.ts        the world's outlines, written by scripts/map.mjs
-├── tenkaStart.ts              dealing a new game from a seed, and which tables are offered
-├── tenkaTaps.ts               what a tap on the map means in each part of a turn, and what it lights up
-├── tenkaTurn.ts               how a turn begins and ends, and how a game is counted
-├── tenkaWorld.data.ts         the world's territories and neighbours, written by scripts/map.mjs from public-domain map data
-├── ui.ts                      the "/ui" entry: Tenka drawn and played in the browser, in plain DOM
-├── version.ts                 the version of this package, as package.json has it
-└── ui/  the table that draws and plays a game
-    ├── colours.ts   the colours a table is drawn in
-    ├── dressing.types.ts  what a table asks a dressing for, and what it gets back: a die, a card, a back
-    ├── mapModel.ts  which outlines draw which map, and which territory an arrow key moves to
-    ├── mount.ts     the table itself: mounting it on a page, and the options it takes
-    ├── style.ts     the table's own styles, every colour a CSS variable so a page can re-colour it
-    └── svg.ts       small helpers that build the map's SVG
+Every TypeScript and JavaScript block that can run is type-checked against the built package and run by `pnpm test:readme`, so the output after `// →` is what the code prints. The rules need no page, no network and no clock: a game is a seed and its moves.
+
+### A page with nothing else
+
+Save this as a file and open it: one script and one tag, and a game of three at a table, against the computer. The seed deals the same game to everybody who opens the address:
+
+```html
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World conquest</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tenka@2/dist/element-define.js"></script>
+<tenka-table seed="2026" rounds="10"></tenka-table>
 ```
 
-Tests sit beside the code they test (`*.test.ts`). `scripts/` makes the map
-data from public-domain outlines, builds the demo and checks the package as
-npm packs it, `demo/` is the page published on GitHub Pages, and `table/`
-taps it in real browsers.
+### Play a whole game, by the computer
 
-## The name
+`sensibleTenkaMove(game, random)` is the computer player's move; give it a seeded random and a whole match is repeatable. Here three computer players play ten rounds to the end:
 
-*Tenka* (天下) is Japanese for "all under heaven": the whole realm, the world.
-It is written with the characters for heaven (天) and below (下), and said in
-two beats, *ten-ka*. *Tenka-tori* (天下取り), "taking the realm", is what the
-warlords of Japan's sixteenth century set out to do, and it is the aim of the
-game.
+```ts
+import { playTenka, sensibleTenkaMove, startTenka, tenkaOver } from "@johnmorrisdotca/tenka";
 
-## Where it comes from, and where it is used
+let seed = 1;
+const random = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296);   // a seeded random: the same game every run
+let game = startTenka(10, ["Ann", "Ben", "Cho"], 2026)!;
+let moves = 0;
+while (!tenkaOver(game)) {
+  game = playTenka(game, sensibleTenkaMove(game, random))!;
+  moves += 1;
+}
+moves; // → 363
+game.phase; // → "over"
+game.winners; // → [1]
+```
 
-Tenka was built for [Itsutsu](https://itsutsu.com), a site for board games,
-puzzles, card games and dice games played at your own pace. *Itsutsu* (五つ) is
-Japanese for "five", after five in a row, the game the site began with. Its
-party games wanted one that a table of six could play round one phone, and
-across several, and this is [the Tenka played there](https://itsutsu.com/games/tenka).
+### What may be played now
 
-### Used by
+`tenkaMoves(game)` lists every move the player to move may make; `playTenka` returns the next game, or `null` when the rules refuse a move, and leaves the game it was given alone:
 
-- [Itsutsu](https://itsutsu.com), for its game of Tenka: its rules, its
-  computer player and its map.
+```ts
+import { continentsHeld, playTenka, reinforcementFor, startTenka, tenkaMoves, territoriesHeld } from "@johnmorrisdotca/tenka";
 
-That is the whole list so far. Using Tenka in something? Open an
-[*Add my project*](https://github.com/johnmorrisdotca/tenka/issues/new?template=add-my-project.md)
-issue and we will add you.
+const game = startTenka(10, ["Ann", "Ben", "Cho"], 2026)!;
+tenkaMoves(game).length; // → 28
+territoriesHeld(game.owners, 0); // → 14
+reinforcementFor(game.owners, 0); // → 4
+continentsHeld(game.owners, 0); // → []
+playTenka(game, { kind: "place", territory: 0, armies: 99 }); // → null
+```
 
-### The family
+### A whole game is its seed and its moves
 
-<!-- family:start (made by scripts/family-readme.mjs from scripts/family-template.mjs; change those, not this) -->
-Tenka is one of twenty-four packages, each made for the same site, each at
-[github.com/johnmorrisdotca](https://github.com/johnmorrisdotca). The code of every one is MIT.
+A game is kept as its settings and its moves, which replay exactly, on any machine, and nobody can reload to roll again. `encodeTenka` writes one line; `decodeTenka` replays it, and reads `null` for anything that is not a game these rules can play:
 
-- [Korokoro](https://github.com/johnmorrisdotca/korokoro) (コロコロ): dice, with notation, exact odds, real sounds and the dice of many games. [Demo](https://johnmorrisdotca.github.io/korokoro/).
-- [Kyuubu](https://github.com/johnmorrisdotca/kyuubu) (キューブ): a turning cube for the browser, 2×2 to 7×7, with record solves to replay. [Demo](https://johnmorrisdotca.github.io/kyuubu/).
-- [Hitotsu](https://github.com/johnmorrisdotca/hitotsu) (一つ): a colour-card shedding game for two to eight, with the house rules people play. [Demo](https://johnmorrisdotca.github.io/hitotsu/).
-- [Toranpu](https://github.com/johnmorrisdotca/toranpu) (トランプ): a deck of playing cards, card games with computer players, and solitaires. [Demo](https://johnmorrisdotca.github.io/toranpu/).
-- [Tane](https://github.com/johnmorrisdotca/tane) (種): seeded random numbers and daily seeds, the same in every browser and on every server. [Demo](https://johnmorrisdotca.github.io/tane/).
-- [Narabe](https://github.com/johnmorrisdotca/narabe) (並べ): one rules engine for abstract board games, from gomoku and Reversi to Go and checkers. [Demo](https://johnmorrisdotca.github.io/narabe/).
-- [Tenka](https://github.com/johnmorrisdotca/tenka) (天下): world conquest for two to six, on a map of the real world. [Demo](https://johnmorrisdotca.github.io/tenka/).
-- [Kumimoji](https://github.com/johnmorrisdotca/kumimoji) (組み文字): a crossword tile race, in English and Japanese kana. [Demo](https://johnmorrisdotca.github.io/kumimoji/).
-- [Tsunagi](https://github.com/johnmorrisdotca/tsunagi) (繋ぎ): a line-joining logic puzzle whose every level has exactly one answer. [Demo](https://johnmorrisdotca.github.io/tsunagi/).
-- [Jarajara](https://github.com/johnmorrisdotca/jarajara) (ジャラジャラ): mahjong tiles drawn as SVG, stacked layouts, and the matching solitaire Awase. [Demo](https://johnmorrisdotca.github.io/jarajara/).
-- [Suido](https://github.com/johnmorrisdotca/suido) (水道): a pipe puzzle: turn the pieces until the water reaches every drain. [Demo](https://johnmorrisdotca.github.io/suido/).
-- [Domino](https://github.com/johnmorrisdotca/domino) (ドミノ): dominoes and Mexican Train. [Demo](https://johnmorrisdotca.github.io/domino/).
-- [Kotoba](https://github.com/johnmorrisdotca/kotoba) (言葉): word lists and word-game rules in English, French, German and Japanese. [Demo](https://johnmorrisdotca.github.io/kotoba/).
-- [Sugoroku](https://github.com/johnmorrisdotca/sugoroku) (双六): backgammon and its variants, with the doubling cube and match play. [Demo](https://johnmorrisdotca.github.io/sugoroku/).
-- [Kazu](https://github.com/johnmorrisdotca/kazu) (数): grid number puzzles: Sudoku and its variants, Futoshiki and Skyscrapers. [Demo](https://johnmorrisdotca.github.io/kazu/).
-- [Meikyuu](https://github.com/johnmorrisdotca/meikyuu) (迷宮): mazes on squares, hexagons, triangles and circles, made from a seed and drawn through with a finger or the mouse. [Demo](https://johnmorrisdotca.github.io/meikyuu/).
-- [Hikidashi](https://github.com/johnmorrisdotca/hikidashi) (引き出し): a drawer of small Japanese text tools: era dates, kanji numerals, readings and sentence difficulty. [Demo](https://johnmorrisdotca.github.io/hikidashi/).
-- [Chizu](https://github.com/johnmorrisdotca/chizu) (地図): maps of the world and of countries' regions, in English and Japanese, with a quiz and callouts. [Demo](https://johnmorrisdotca.github.io/chizu/).
-- [Bushu](https://github.com/johnmorrisdotca/bushu) (部首): find a kanji by the parts it is made of. [Demo](https://johnmorrisdotca.github.io/bushu/).
-- [Tobiishi](https://github.com/johnmorrisdotca/tobiishi) (飛び石): peg solitaire with nine boards and seeded solvable challenges. [Demo](https://johnmorrisdotca.github.io/tobiishi/).
-- [Jirai](https://github.com/johnmorrisdotca/jirai) (地雷): minesweeper on shaped grids with verified no-guess boards. [Demo](https://johnmorrisdotca.github.io/jirai/).
-- [Gunjin](https://github.com/johnmorrisdotca/gunjin) (軍人): five hidden-rank strategy games with pass-the-device play. [Demo](https://johnmorrisdotca.github.io/gunjin/).
-- [Karakuri](https://github.com/johnmorrisdotca/karakuri) (からくり): eight hyper-casual puzzle games, some of them physics: draw a shield, pull pins, cut ropes, slide blocks, pour tubes. [Demo](https://johnmorrisdotca.github.io/karakuri/).
-- [Houseki](https://github.com/johnmorrisdotca/houseki) (宝石): gem and stone matching puzzles: falling triplets, stone collapse, colour chains and gem swap. [Demo](https://johnmorrisdotca.github.io/houseki/).
+```ts
+import { decodeTenka, encodeTenka, playTenka, startTenka } from "@johnmorrisdotca/tenka";
 
-**This package is Tenka.** The demos of all twenty-four share one header and footer, so each links the rest.
-<!-- family:end -->
+const game = playTenka(startTenka(10, ["Ann", "Ben", "Cho"], 2026)!, { kind: "place", territory: 1, armies: 4 })!;
+const kept = encodeTenka(game);
+decodeTenka(kept)?.armies[1]; // → 7
+decodeTenka("not a game"); // → null
+```
 
-## Features
+### Write a game as text, JSON or CSV
 
-- **The rules as plain functions.** `startTenka` deals a game, `playTenka`
-  makes a move and returns the next game, or `null` for a move the rules
-  refuse. Nothing is changed in place, and nothing touches the DOM, a clock or
-  `Math.random`.
-- **Seeded.** Every shuffle, deal and die is drawn from the game's own random,
-  so a game replays exactly from its seed and its moves.
-- **Two to six players.** A game of two is joined by a neutral army that holds
-  a third of the world and only defends.
-- **Three lengths.** Ten rounds, twenty, or the whole world: played to the
-  last player standing, and counted after sixty rounds if nobody is.
-- **A computer player.** `sensibleTenkaMove` trades when it can, piles armies
-  on a border, attacks only with the odds and fortifies to the front.
-- **Every move listed.** `tenkaMoves(game)` is what the player to move may do.
-- **A map of the real world.** Forty-two territories in six continents,
-  drawn from Natural Earth, joined as the classic board joins them: the same
-  eighty-three pairs, by land and by sea, and the same continent bonuses. The
-  crossing from Alaska to Kamchatka is drawn off both edges.
-- **A table to play on.** The whole world or one continent at a tap, sea
-  routes dashed, the dice of the last throw, the players and their cards, and
-  the record of the game. Against the computer, or passed round one device.
-- **Dice and cards from the family.** Korokoro's dice tumble onto the faces the
-  game threw, and Toranpu draws each card with its territory's own outline,
-  name and army, and the deck face down in Tenka's own back: see
-  [below](#dice-and-cards-from-korokoro-and-toranpu).
-- **A tag.** `<tenka-table>` is the whole table in one element, with no
-  framework.
-- **One game a day.** `tenkaDailySeed(new Date())` is the same seed for
-  everybody, worldwide.
-- **Played from a keyboard.** Arrow keys between territories, Enter or Space to
-  tap; see [Accessibility](#accessibility).
-- **Export and import.** JSON that reads back in, plain text, and CSV.
-- **English and Japanese**, and any other language by a table of your own.
-- **Themeable.** Every colour is a CSS variable, light and dark.
+The record of a game is a list of sentences in English or Japanese; the JSON is the settings and the moves; the CSV is a row to a move, for a spreadsheet:
+
+```ts
+import { playTenka, startTenka, tenkaToCSV, tenkaToJSON, tenkaToText } from "@johnmorrisdotca/tenka";
+
+const game = playTenka(startTenka(10, ["Ann", "Ben", "Cho"], 2026)!, { kind: "place", territory: 1, armies: 4 })!;
+tenkaToText(game).split("\n").slice(0, 3); // → ["Tenka: Ann, Ben, Cho; 10 rounds; seed 2026", "Round 1", "Ben places 4 on Northwest Territory."]
+JSON.parse(tenkaToJSON(game)).seed; // → 2026
+tenkaToCSV(game).split("\r\n")[0]; // → "move,round,seat,player,kind,from,to,armies,dice,attack,defend,attackerLost,defenderLost,throws,took,cards,out,winners"
+```
+
+### The day's game
+
+`tenkaDailySeed(date)` is the date as a number, so everybody who plays today deals the same game, worldwide; the same number as Tane's `dailySeed`:
+
+```ts
+import { startTenka, tenkaDailySeed, tenkaDay } from "@johnmorrisdotca/tenka";
+
+const at = new Date("2026-10-06T10:00:00Z");
+tenkaDay(at); // → "2026-10-06"
+tenkaDailySeed(at); // → 20261006
+startTenka(10, ["Ann", "Ben"], tenkaDailySeed(at))?.seed; // → 20261006
+```
+
+### The second map
+
+Europe is played by the same rules on forty-nine territories in eleven regions. Name the map when a game starts, and every rule reads it:
+
+```ts
+import { startTenka, tenkaMapOf } from "@johnmorrisdotca/tenka";
+
+const game = startTenka(10, ["Ann", "Ben"], 5, "auto", "europe")!;
+game.map; // → "europe"
+tenkaMapOf(game).territories.length; // → 49
+tenkaMapOf(game).continents.length; // → 11
+```
+
+### Press a territory
+
+`tapTerritory` says what a press on a territory means now and what to light up, so a board of your own can be played by touch without knowing a rule:
+
+```ts
+import { NO_CHOICE, marksFor, playTenka, startTenka, tapTerritory } from "@johnmorrisdotca/tenka";
+
+const attacking = playTenka(startTenka(10, ["Ann", "Ben", "Cho"], 2026)!, { kind: "place", territory: 1, armies: 4 })!;
+const tapped = tapTerritory(attacking, NO_CHOICE, 1);
+tapped.choice.from; // → 1
+marksFor(attacking, tapped.choice).reach; // → [0, 3, 4, 2]
+```
+
+### Mount the table with options
+
+`mountTenka` plays a whole game against the computer in one element, keeps it in the page, and lets a host name the players and the length:
+
+```ts no-run
+import { mountTenka } from "@johnmorrisdotca/tenka/ui";
+
+const table = mountTenka(document.getElementById("table")!, {
+  players: ["You", "Kaze", "Yama"],
+  rounds: 20,
+  seed: 2026,
+  onChange: (game) => console.log(game.round, game.phase),
+});
+table.destroy();
+```
+
+### Dice and cards of their own
+
+If Korokoro and Toranpu are installed, the table can draw its dice and cards with theirs (see [Dice and cards from Korokoro and Toranpu](#dice-and-cards-from-korokoro-and-toranpu)); the game plays the same either way:
+
+```ts no-run
+import { mountTenka } from "@johnmorrisdotca/tenka/ui";
+import { tenkaDressing } from "@johnmorrisdotca/tenka/dressing";
+
+mountTenka(document.getElementById("table")!, { dressing: tenkaDressing({ sound: true }) });
+```
+
+### A look of your own
+
+Every colour of the table is a CSS variable (the table is under [Theming](#theming)):
+
+```css
+tenka-table .tk-root { --tk-sea: #a9c7d3; --tk-ink: #14201c; }
+```
 
 ## The rules it plays
 
@@ -623,7 +754,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 2,
   "game": "tenka",
-  "generator": "tenka 2.1.1",
+  "generator": "tenka 2.1.2",
   "seed": 2026,
   "players": [
     "Ann",
@@ -680,22 +811,7 @@ The JSON, as `tenkaToJSON` writes it:
 
 ## The map
 
-Forty-two territories, their names, their neighbours and their outlines are
-built from [Natural Earth](https://www.naturalearthdata.com/)'s admin-0
-countries and, for the countries too big to be one territory (the United
-States, Canada, Russia, China and Australia), admin-1 provinces, states and
-regions, all at 1:50m and all in the public domain, by `pnpm map`
-(`scripts/map.mjs`; `scripts/map-world.mjs` lays out the territories). The map
-is the classic board's as a graph: the same forty-two territories in the same
-six continents, the same eighty-three pairs that touch by land or are joined
-across the water, and the same continent bonuses (`scripts/classic-edges.mjs`
-is the list, and the script refuses to write a map that differs from it).
-Where the real world does not touch and the classic board says it does, the
-two are joined by a dashed sea link, such as the Caspian, the Atlantic
-(Brazil to North Africa) and the Red Sea. It is drawn in Miller's projection
-from 170°W round to 192°E, 2000 by 984 units, so that Alaska and Kamchatka sit
-at opposite edges with their crossing drawn off both. `src/tenkaWorld.data.ts`
-and `src/tenkaShapes.data.ts` are written by that script and never by hand.
+Forty-two territories, their names, their neighbours and their outlines are built from [Natural Earth](https://www.naturalearthdata.com/)'s public-domain 1:50m data by `pnpm map` (`scripts/map.mjs`), and are the classic board's graph: the same forty-two territories in six continents, the same eighty-three pairs that touch by land or are joined across the water, and the same continent bonuses. It is drawn in Miller's projection, 2000 by 984 units, so that Alaska and Kamchatka sit at opposite edges with their crossing drawn off both. How it is built, and the list the script holds it to, are in [docs/MAP.md](docs/MAP.md).
 
 The outlines are their own entry, so code that only plays the rules never
 carries them:
@@ -719,226 +835,7 @@ counter stands (`labels`), its extent (`boxes`), the dashed `seaLines`, the
 links that go off one edge and on at the other (`wraps`), and the
 `continentBorders`, one path drawn heavier.
 
-## API
-
-The [API reference](https://johnmorrisdotca.github.io/tenka/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
-
-Every function, type and constant has a doc comment, so an editor shows this
-as you type. The entries:
-
-| Entry | What it holds |
-| --- | --- |
-| `@johnmorrisdotca/tenka` | The rules, the map's facts, the computer player, keeping and export, taps, and the words |
-| `@johnmorrisdotca/tenka/shapes` | `TENKA_SHAPES`, the outline of every territory |
-| `@johnmorrisdotca/tenka/ui` | `mountTenka`, the whole table in plain DOM, and the map as SVG |
-| `@johnmorrisdotca/tenka/element` | `TenkaTable`, the `<tenka-table>` element's class, to extend or to define under another name |
-| `@johnmorrisdotca/tenka/element/define` | Defines `<tenka-table>` on the page by being imported; exports nothing |
-| `@johnmorrisdotca/tenka/react` | `TenkaMap` and `TenkaTable` |
-
-### Playing
-
-| Export | What it does |
-| --- | --- |
-| `startTenka(rounds, players, seed, placing?, map?)` | A new game, all of it drawn from the seed; `null` for a table the game is not offered for. `placing` is `"auto"` (starting armies scattered) or `"hand"` (placed one at a time round the table); `map` is `"world"` (the default) or `"europe"` |
-| `playTenka(game, move)` | The game after the move, or `null` when the rules refuse it |
-| `tenkaMoves(game)` | Every move the player to move may make now |
-| `attacksOpen(game)` | Every attack open now, with each number of dice, and each as a blitz |
-| `sensibleTenkaMove(game, random)` | The computer player's move; `random` is `Math.random` or a seeded function |
-| `tenkaOver(game)` | Whether the game is over |
-| `mustTrade(game)` | Whether the player to move must trade cards first |
-| `tenkaAgain(game, seed)` | The same table again with a new seed |
-| `isTenkaTable(rounds, count)`, `isTenkaSeed(seed)` | Whether a table or a seed is one `startTenka` takes |
-| `reinforcementFor(owners, seat)` | The armies a turn brings |
-| `territoriesHeld(owners, owner)`, `armiesHeld(game, owner)` | How many territories, and armies, an owner has |
-| `tenkaPlayerName(game, seat)`, `cleanTenkaName(name)` | A seat's name as the table reads it; a name tidied and cut to 20 characters |
-| `nextSeatIn(game, seat)` | The next player still in |
-| `beginTurn`, `endOfTurn`, `counted`, `finished` | The steps every move passes through, for rules built on these |
-
-### The map's facts
-
-| Export | What it is |
-| --- | --- |
-| `TENKA_MAPS`, `TENKA_MAP_LIST` | Every map, by key (`world`, `europe`): its `territories`, `continents` and each territory's `neighbours` |
-| `tenkaMapOf(game)` | The map a game is played on: the world for a game that names none |
-| `boardOf(map)` | The map an argument names, and the world for anything else (an array's index, handed in by `map`) |
-| `TENKA_TERRITORIES`, `TENKA_TERRITORY_COUNT` | The world's forty-two territories: `key`, `name`, `continent`, and neighbours by `land` and by `sea` |
-| `TENKA_CONTINENTS`, `tenkaContinent(key)` | The six continents: `key`, `name`, `kanji`, `bonus`, `territories` |
-| `tenkaNeighbours(territory)`, `areNeighbours(a, b)` | Where an army may go from a territory |
-| `isTerritory(n)` | Whether a number is a territory's |
-| `continentsHeld(owners, seat)` | The continents a player holds whole |
-| `connectedOwn(owners, from)` | Where one fortifying move may take armies |
-
-Each of these takes the map as a last argument, the world when it is left out:
-`tenkaNeighbours(5, tenkaMapOf(game))`.
-
-### Cards and dice
-
-| Export | What it does |
-| --- | --- |
-| `TENKA_DECK` | Every card of the world: 0 to 41 the territories', 42 and 43 wild |
-| `tenkaDeckFor(map)` | Every card of a game on that map: one for each territory, then the two wild |
-| `cardKind(card, map?)`, `cardTerritory(card, map?)`, `isWild(card, map?)` | What a card shows |
-| `isSet(cards, map?)`, `setsIn(hand, map?)` | Whether three cards make a set; every set in a hand |
-| `tradeValue(trades)` | What the next set is worth |
-| `throwDice(state, count)` | Dice from the game's random, highest first, and the state after them |
-| `battleLosses(attack, defend)` | Who loses what |
-| `mostAttackDice(armies)`, `defendDice(armies)` | The dice each side may throw |
-| `nextRandom(state)`, `randomBelow(state, below)`, `shuffled(state, items)` | The game's random: Mulberry32, one 32-bit number of state |
-
-### Keeping and export
-
-| Export | What it does |
-| --- | --- |
-| `tenkaToJSON(game)`, `tenkaFromJSON(text)` | A game as JSON, and back, or `null` |
-| `tenkaExported(game)` | The JSON export's object (`TenkaExported`) |
-| `tenkaToText(game, strings?)` | A game as plain text, a line to a move |
-| `tenkaToCSV(game)`, `TENKA_CSV_COLUMNS` | A game as CSV, a row to a move |
-| `tenkaRecord(game)` | Each move with what came of it (`TenkaRecordEntry[]`) |
-| `encodeTenka(game)`, `decodeTenka(text)` | A game on one line for a browser's storage, and back |
-| `replayTenka(table, moves)` | A game made again from its table and its moves |
-| `writeTenkaMove(move)`, `readTenkaMove(list)` | One move as a short list, and back |
-| `TENKA_EXPORT_FORMAT`, `TENKA_VERSION` | The JSON's format number, and this package's version |
-
-### The day's seed
-
-| Export | What it does |
-| --- | --- |
-| `tenkaDay(date)` | The day a moment falls on, in UTC, written `YYYY-MM-DD` |
-| `tenkaDailySeed(date)` | That day's seed: the date as a number, so 2026-10-01 is `20261001` |
-
-```ts
-import { startTenka, tenkaDailySeed } from "@johnmorrisdotca/tenka";
-
-tenkaDailySeed(new Date("2026-10-01T12:00:00Z")); // → 20261001
-startTenka(10, ["Ann", "Ben"], tenkaDailySeed(new Date("2026-10-01T23:00:00Z")))!.toPlay; // → startTenka(10, ["Ann", "Ben"], 20261001)!.toPlay
-```
-
-The day is the UTC date, so it changes at one moment for the whole world, and
-everybody who starts from it with the same players and length is dealt the same
-game. It is the same number as Tane's `dailySeed`, so a page that uses both
-agrees; Tenka does not need Tane. What a player does with the deal is their own.
-
-### Taps and words
-
-| Export | What it does |
-| --- | --- |
-| `tapTerritory(game, choice, territory)` | What a press means now: the next choice, and a move if it is one |
-| `marksFor(game, choice)` | What the map lights up |
-| `choiceNow(game, choice)`, `NO_CHOICE` | A choice read against the game as it now stands; nothing chosen |
-| `TENKA_STRINGS`, `tenkaStrings(locale, own?)` | Every word in English and Japanese; a table for a locale with your own laid over it |
-| `tenkaSay(line, values)` | A line with its braces filled in |
-| `territoryNameIn(strings, key)`, `continentNameIn(strings, key)` | A territory's or a continent's name in a table of strings |
-
-The constants are in the tables under [The rules it plays](#the-rules-it-plays)
-and [Limits](#limits), with `TENKA_PHASES`, `TENKA_MOVES`, `TENKA_PLACING`,
-`TENKA_CARD_KINDS`, `TENKA_WILD` and `TENKA_NEUTRAL` for comparing by name.
-The types are `TenkaGame`, `TenkaMove`, `TenkaMoveKind`, `TenkaPhase`,
-`TenkaPlacing`, `TenkaSeat`, `TenkaOwner`, `TenkaCard`, `TenkaCardKind`,
-`TenkaRoll`, `TenkaTrade`, `TenkaChoice`, `TenkaMapMarks`, `TenkaContinent`,
-`TenkaContinentKey`, `TenkaTerritoryData`, `TenkaShapes`, `TenkaExported`,
-`TenkaRecordEntry`, `TenkaStrings` and `TenkaLocale`.
-
-### The table
-
-`mountTenka(element, options?)` from `@johnmorrisdotca/tenka/ui` draws and
-plays a whole game in the element, and returns a handle.
-
-| Option | Default | What it does |
-| --- | --- | --- |
-| `players` | You, Kaze, Yama | The names round the table, in seat order: two to six |
-| `computers` | every seat but the first | Which seats the computer plays. All `false` passes one device round |
-| `rounds` | `60` | Rounds before the count: 10, 20, or 60 for the whole world |
-| `seed` | a new one each game | The seed every deal and die is drawn from |
-| `map` | `"world"` | The map: `"world"` or `"europe"` |
-| `colours` | `TENKA_SEAT_COLOURS` | A CSS colour for each seat |
-| `computerDelayMs` | `450` | How long the computer waits before each of its moves |
-| `onChange` | | Called with the game after every move |
-| `locale` | the page's `lang` | `"en"` or `"ja"` |
-| `strings` | | Words of your own, laid over the locale's |
-| `theme` | | CSS variables set on the table itself |
-| `record` | `true` | Whether the record of the game, with saving and loading, is shown |
-| `dressing` | the plain dice and cards | How the dice and cards are drawn: [`tenkaDressing()`](#dice-and-cards-from-korokoro-and-toranpu) draws them with Korokoro and Toranpu |
-
-| Handle | What it does |
-| --- | --- |
-| `game()` | The game as it stands |
-| `newGame(options?)` | A new game at the same table; `players`, `computers`, `rounds`, `seed` and `map` may change |
-| `setGame(game, computers?)` | Put a game on the table: one read back by `tenkaFromJSON` |
-| `setLocale(locale, strings?)` | Change the table's language |
-| `destroy()` | Take the table off the page and stop its timers |
-
-To draw the map yourself, the same entry has `tenkaMapModel(game, marks?,
-colours?)`, which works out every territory's colour, counter and ring;
-`tenkaMapSvg(model, { label?, view?, pixels?, describe?, keys? })`, which draws
-it as an `<svg>` whose shapes and counters carry `data-territory` and whose
-territories are named buttons for a screen reader (`describe` words what is
-read for each, `keys` is the drawing's description);
-`landInDirection(territory, arrow, map?, view?)`, the territory an arrow key
-moves to; `continentView(key)`, the
-part of the map that frames a continent; `nearestLand(x, y, reach)`, for a
-press on the sea beside an island (each of the two takes the map's key last);
-`TENKA_MAP_SHAPES` and `tenkaShapesOf(map)`, how each map is drawn; and `TENKA_SEAT_COLOURS`,
-`TENKA_NEUTRAL_COLOUR`, `ownerColour(owner, colours?)`, `NO_MARKS` and
-`TENKA_STYLE`, the table's stylesheet as a string.
-
-### The element
-
-`<tenka-table>` is `mountTenka` as a tag: `@johnmorrisdotca/tenka/element/define`
-defines it, and `@johnmorrisdotca/tenka/element` holds the class alone. Each
-attribute is read again when it changes, and a change to any but `lang` deals a
-new game. A table the rules do not offer (one player, say, or 15 rounds) draws
-nothing.
-
-| Attribute | Default | What it does |
-| --- | --- | --- |
-| `players` | You, Kaze, Yama | The names round the table, in seat order, separated by commas: two to six |
-| `computers` | every seat but the first | `true` or `false` for each seat, separated by commas, or `none` for people taking turns on one device, or `all` |
-| `rounds` | `60` | 10, 20, or 60 for the whole world |
-| `seed` | a new one each game | A whole number to deal from, or `daily` for the day's seed |
-| `map` | `world` | `world` or `europe` |
-| `lang` | the page's | `en` or `ja` |
-| `record` | on | `off` leaves the record of the game out |
-| `delay` | `450` | How long the computer waits before each of its moves, in milliseconds |
-
-It fires `tenka-change` after every move, with the game as `event.detail.game`
-(a bubbling `CustomEvent`), and has `game`, `table` (the handle `mountTenka`
-returns), `newGame(options?)` and `setGame(game, computers?)`. Its `dressing`
-property, which an attribute cannot carry, takes `tenkaDressing()`. To style it,
-set the table's variables on `tenka-table .tk-root`: see [Theming](#theming).
-
-### The React components
-
-```jsx
-import { useState } from "react";
-import { NO_CHOICE, marksFor, playTenka, startTenka, tapTerritory } from "@johnmorrisdotca/tenka";
-import { TenkaMap } from "@johnmorrisdotca/tenka/react";
-
-export function Board() {
-  const [game, setGame] = useState(() => startTenka(10, ["Ann", "Ben", "Cho"], 2026));
-  const [choice, setChoice] = useState(NO_CHOICE);
-  const press = (territory) => {
-    const tapped = tapTerritory(game, choice, territory);
-    setChoice(tapped.choice);
-    if (tapped.move !== null) setGame(playTenka(game, tapped.move) ?? game);
-  };
-  return <TenkaMap game={game} marks={marksFor(game, choice)} onTerritory={press} style={{ width: "100%" }} />;
-}
-```
-
-| `TenkaMap` prop | What it does |
-| --- | --- |
-| `game` | The game to draw: `owners` and `armies` are read |
-| `marks` | What to light up: from `marksFor(game, choice)` |
-| `colours` | A colour for each seat |
-| `onTerritory` | Called with a territory's number when it or its counter is pressed, or when Enter or Space is pressed on a territory reached by Tab. Without it the map is a picture |
-| `label` | The map's accessible name |
-| anything else | Passed to the `<svg>` |
-
-`TenkaTable` takes every option of `mountTenka` as a prop, and anything else
-for its `<div>`. Options are read when it mounts; give it a new `key` to start
-over with different ones.
-
-### Dice and cards from Korokoro and Toranpu
+## Dice and cards from Korokoro and Toranpu
 
 The table draws its own dice and cards, plainly, with nothing to install. If
 [Korokoro](https://github.com/johnmorrisdotca/korokoro) and
@@ -950,20 +847,24 @@ symbol of its army (a castle for land, a ship for sea, a plane for air), with
 the deck beside the hand face down in Tenka's own green back with the
 character 天. The two wild cards show all three symbols.
 
-<p align="center"><img src="docs/dressed.jpg" alt="The table dressed in Korokoro and Toranpu: an attack from Venezuela thrown as three red dice against two cream ones, and beside the players a hand of one card, Siberia, with its outline, its name and a castle for land, next to the deck face down in a green back with the character 天 and the number left in it" width="720"></p>
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/dressed-with-dice-and-cards-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/dressed-with-dice-and-cards-desk-light.webp" alt="The table dressed in Korokoro and Toranpu: an attack from Venezuela thrown as three red dice against one cream die, and beside the players a hand of one card, Siberia, with its outline, its name and a castle for land, next to the deck face down in a green back with the character 天 and the number left in it." width="720">
+</picture>
+<br><em>The table dressed in Korokoro's dice and Toranpu's cards.</em>
 
 ```sh
 npm install @johnmorrisdotca/tenka @johnmorrisdotca/korokoro @johnmorrisdotca/toranpu
 ```
 
-```js
+```js no-run
 import { mountTenka } from "@johnmorrisdotca/tenka/ui";
 import { tenkaDressing } from "@johnmorrisdotca/tenka/dressing";
 
 mountTenka(document.getElementById("table"), { dressing: tenkaDressing() });
 ```
 
-```jsx
+```jsx no-check
 <TenkaTable dressing={tenkaDressing()} />
 ```
 
@@ -1026,31 +927,70 @@ card="tenka-world-11" design="tenka">` draw a Tenka card anywhere on a page.
 | `tenkaThrownDie(face)` | Korokoro's random source that throws this face of a d6 |
 | `TENKA_BACK` | Tenka's own back, as Toranpu's back options |
 
-## Accessibility
+## API
 
-- **A keyboard plays it.** On the table, each territory is a button, named for
-  a screen reader with its holder and its armies ("Brazil, Ann, armies 4").
-  Tab lands on one of them, the arrow keys move to the nearest territory in
-  that direction among those on the screen, and Enter or Space taps it, as a
-  finger would. The keyboard stays where it was after each move, and the map's
-  description says so. The choice buttons, the slider and the record are
-  ordinary controls.
-- **What is happening is said.** The line above the map, which says whose turn
-  it is and what to do, is a polite live region, so each turn is read out
-  without moving focus.
-- **Targets are big enough.** Every button, slider and summary is at least 44
-  pixels each way, which a test holds at a phone's width.
-- **Colour is not the only mark.** The armies on a territory are numbers, and
-  a player's marble sits beside their name.
-- **Motion.** The plain table has no animation. Dressed in Korokoro's dice
-  ([above](#dice-and-cards-from-korokoro-and-toranpu)), the dice tumble for
-  about half a second when a throw is made, and a device that asks for reduced
-  motion gets none of it: they land at once. The computer's pause between
-  moves is `computerDelayMs`, and 0 plays without it.
-- **Not yet.** The arrow keys go by where territories lie on the screen, not
-  by the neighbours the rules count, so a sea route is not followed by a key.
-  The focus ring is drawn in `--tk-accent`; a page that re-colours it should
-  check its contrast.
+The [API reference](https://johnmorrisdotca.github.io/tenka/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
+
+Every function, type and constant has a doc comment, so an editor shows this
+as you type. The entries:
+
+| Entry | What it holds |
+| --- | --- |
+| `@johnmorrisdotca/tenka` | The rules, the map's facts, the computer player, keeping and export, taps, and the words |
+| `@johnmorrisdotca/tenka/shapes` | `TENKA_SHAPES`, the outline of every territory |
+| `@johnmorrisdotca/tenka/ui` | `mountTenka`, the whole table in plain DOM, and the map as SVG |
+| `@johnmorrisdotca/tenka/element` | `TenkaTable`, the `<tenka-table>` element's class, to extend or to define under another name |
+| `@johnmorrisdotca/tenka/element/define` | Defines `<tenka-table>` on the page by being imported; exports nothing |
+| `@johnmorrisdotca/tenka/react` | `TenkaMap` and `TenkaTable` |
+
+### The calls to learn first
+
+| Call | What it does |
+| --- | --- |
+| `startTenka(rounds, players, seed, placing?, map?)` | A new game, all of it drawn from the seed |
+| `playTenka(game, move)` | The game after a move, or `null` when the rules refuse it |
+| `tenkaMoves(game)` | Every move the player to move may make now |
+| `sensibleTenkaMove(game, random)` | The computer player's move |
+| `tenkaOver(game)` | Whether the game is over |
+| `tenkaToJSON(game)`, `tenkaFromJSON(text)`, `encodeTenka`, `decodeTenka` | A game kept, and read back by replaying it |
+| `tapTerritory(game, choice, territory)`, `marksFor(game, choice)` | What a press on the map means, and what to light up |
+| `mountTenka(element, options?)` and `<tenka-table>` | The table, in one call or one tag |
+
+### The long tables
+
+The tables of every export for playing, the map's facts, cards and dice, keeping and export, the day's seed, taps and words, the table's options and handle, and the element's attributes and events are in [docs/API.md](docs/API.md), and every export of every entry point, with its signature and doc comment, is in the [API reference](https://johnmorrisdotca.github.io/tenka/api.html).
+
+### The React components
+
+```jsx
+import { useState } from "react";
+import { NO_CHOICE, marksFor, playTenka, startTenka, tapTerritory } from "@johnmorrisdotca/tenka";
+import { TenkaMap } from "@johnmorrisdotca/tenka/react";
+
+export function Board() {
+  const [game, setGame] = useState(() => startTenka(10, ["Ann", "Ben", "Cho"], 2026));
+  const [choice, setChoice] = useState(NO_CHOICE);
+  const press = (territory) => {
+    const tapped = tapTerritory(game, choice, territory);
+    setChoice(tapped.choice);
+    if (tapped.move !== null) setGame(playTenka(game, tapped.move) ?? game);
+  };
+  return <TenkaMap game={game} marks={marksFor(game, choice)} onTerritory={press} style={{ width: "100%" }} />;
+}
+```
+
+| `TenkaMap` prop | What it does |
+| --- | --- |
+| `game` | The game to draw: `owners` and `armies` are read |
+| `marks` | What to light up: from `marksFor(game, choice)` |
+| `colours` | A colour for each seat |
+| `onTerritory` | Called with a territory's number when it or its counter is pressed, or when Enter or Space is pressed on a territory reached by Tab. Without it the map is a picture |
+| `label` | The map's accessible name |
+| anything else | Passed to the `<svg>` |
+
+`TenkaTable` takes every option of `mountTenka` as a prop, and anything else
+for its `<div>`. Options are read when it mounts; give it a new `key` to start
+over with different ones.
 
 ## Theming
 
@@ -1080,7 +1020,7 @@ are the `colours` option.
 
 A night-sea table with six colours of its own:
 
-```js
+```js no-run
 import { mountTenka } from "@johnmorrisdotca/tenka/ui";
 
 mountTenka(document.getElementById("table"), {
@@ -1092,6 +1032,55 @@ mountTenka(document.getElementById("table"), {
 Drawing the map yourself, the same classes are there to style: `.tk-map`,
 `.tk-sea`, `.tk-land`, `.tk-borders`, `.tk-sea-link`, `.tk-ring`,
 `.tk-ring-chosen`, `.tk-ring-reach`, `.tk-ring-target` and `.tk-counter`.
+
+## Limits
+
+| Limit | Value | Constant |
+| --- | --- | --- |
+| Players | 2 to 6 | `TENKA_FEWEST_PLAYERS`, `TENKA_MOST_PLAYERS` |
+| Rounds | 10, 20 or 60 | `TENKA_LENGTHS` |
+| A seed | a whole number from 0 to 4,294,967,295 | `TENKA_SEED_MOST` |
+| A player's name | 20 characters, spaces run together | `TENKA_NAME_MOST` |
+| Territories | 42 | `TENKA_TERRITORY_COUNT` |
+| Cards | 44 | `TENKA_DECK` |
+
+`startTenka` returns `null` for anything outside them. One map, and one set of
+rules: see the roadmap.
+
+## Accessibility
+
+- **A keyboard plays it.** On the table, each territory is a button, named for
+  a screen reader with its holder and its armies ("Brazil, Ann, armies 4").
+  Tab lands on one of them, the arrow keys move to the nearest territory in
+  that direction among those on the screen, and Enter or Space taps it, as a
+  finger would. The keyboard stays where it was after each move, and the map's
+  description says so. The choice buttons, the slider and the record are
+  ordinary controls.
+- **What is happening is said.** The line above the map, which says whose turn
+  it is and what to do, is a polite live region, so each turn is read out
+  without moving focus.
+- **Targets are big enough.** Every button, slider and summary is at least 44
+  pixels each way, which a test holds at a phone's width.
+- **Colour is not the only mark.** The armies on a territory are numbers, and
+  a player's marble sits beside their name.
+- **Motion.** The plain table has no animation. Dressed in Korokoro's dice
+  ([above](#dice-and-cards-from-korokoro-and-toranpu)), the dice tumble for
+  about half a second when a throw is made, and a device that asks for reduced
+  motion gets none of it: they land at once. The computer's pause between
+  moves is `computerDelayMs`, and 0 plays without it.
+- **Not yet.** The arrow keys go by where territories lie on the screen, not
+  by the neighbours the rules count, so a sea route is not followed by a key.
+  The focus ring is drawn in `--tk-accent`; a page that re-colours it should
+  check its contrast.
+
+## Browser support
+
+Any current browser: Chrome, Edge, Firefox and Safari, on a desk or a phone.
+It needs ES2020 and, for the table, inline SVG and `ResizeObserver` (without
+which the map is drawn once and not again on a change of width). The table is
+tested in Chromium and in WebKit, Safari's engine, at phone size with touch
+and on a desktop. The rules run in Node 22 and later, Deno, Bun and web
+workers, and load by `import` and by `require()`.
 
 ## Languages
 
@@ -1113,29 +1102,6 @@ tenkaStrings("en", { endTurn: "Terminar turno" }).endTurn; // → "Terminar turn
 ```
 
 The names players type are kept as typed, in any script.
-
-## Limits
-
-| Limit | Value | Constant |
-| --- | --- | --- |
-| Players | 2 to 6 | `TENKA_FEWEST_PLAYERS`, `TENKA_MOST_PLAYERS` |
-| Rounds | 10, 20 or 60 | `TENKA_LENGTHS` |
-| A seed | a whole number from 0 to 4,294,967,295 | `TENKA_SEED_MOST` |
-| A player's name | 20 characters, spaces run together | `TENKA_NAME_MOST` |
-| Territories | 42 | `TENKA_TERRITORY_COUNT` |
-| Cards | 44 | `TENKA_DECK` |
-
-`startTenka` returns `null` for anything outside them. One map, and one set of
-rules: see the roadmap.
-
-## Browser support
-
-Any current browser: Chrome, Edge, Firefox and Safari, on a desk or a phone.
-It needs ES2020 and, for the table, inline SVG and `ResizeObserver` (without
-which the map is drawn once and not again on a change of width). The table is
-tested in Chromium and in WebKit, Safari's engine, at phone size with touch
-and on a desktop. The rules run in Node 22 and later, Deno, Bun and web
-workers, and load by `import` and by `require()`.
 
 ## The command line
 
@@ -1167,23 +1133,106 @@ static page and costs nothing to host.
 
 Ideas and pull requests are welcome.
 
-## Contributing
+## Architecture
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md). In short:
+The rules, the map and the computer player are plain functions over plain data
+with no DOM: a game is a value, and every move returns the next one. Drawing
+the map is its own entry (`/ui` for plain DOM, `/element` for a tag, `/react`
+for React, `/shapes` for the outlines), so a page that only wants the rules loads none of it.
+Drawing the table's dice and cards with Korokoro and Toranpu is `/dressing`, the one entry that imports another package.
+Dressing the table's dice and cards in the family's own is `/dressing`, the one entry that reaches another package.
+
+The file-by-file tree, with a line on each source file, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): the rules (`tenka`, `tenkaTurn`, `tenkaMoves`, `tenkaCards`, `tenkaDice`), the maps and their outlines (`tenkaMap`, `*.data`, `shapes`), keeping a game (`tenkaExport`, `tenkaKeep`), the taps and the computer player (`tenkaTaps`, `tenkaPolicy`), and the three faces (`ui`, `element`, `react`). Tests sit beside the code they test (`*.test.ts`). `scripts/` makes the map
+data from public-domain outlines, builds the demo and checks the package as
+npm packs it, `demo/` is the page published on GitHub Pages, and `table/`
+taps it in real browsers.
+
+## The name
+
+*Tenka* (天下) is Japanese for "all under heaven": the whole realm, the world.
+It is written with the characters for heaven (天) and below (下), and said in
+two beats, *ten-ka*. *Tenka-tori* (天下取り), "taking the realm", is what the
+warlords of Japan's sixteenth century set out to do, and it is the aim of the
+game.
+
+## Where it comes from, and where it is used
+
+Tenka was built for [Itsutsu](https://itsutsu.com), a site for board games,
+puzzles, card games and dice games played at your own pace. *Itsutsu* (五つ) is
+Japanese for "five", after five in a row, the game the site began with. Its
+party games wanted one that a table of six could play round one phone, and
+across several, and this is [the Tenka played there](https://itsutsu.com/games/tenka).
+
+### Used by
+
+- [Itsutsu](https://itsutsu.com), for its game of Tenka: its rules, its
+  computer player and its map.
+
+That is the whole list so far. Using Tenka in something? Open an
+[*Add my project*](https://github.com/johnmorrisdotca/tenka/issues/new?template=add-my-project.md)
+issue and we will add you.
+
+### The family
+
+<!-- family:start (made by scripts/family-readme.mjs from scripts/family-template.mjs; change those, not this) -->
+Tenka is one of twenty-four packages, each made for the same site, each at
+[github.com/johnmorrisdotca](https://github.com/johnmorrisdotca). The code of every one is MIT.
+
+- [Korokoro](https://github.com/johnmorrisdotca/korokoro) (コロコロ): dice, with notation, exact odds, real sounds and the dice of many games. [Demo](https://johnmorrisdotca.github.io/korokoro/).
+- [Kyuubu](https://github.com/johnmorrisdotca/kyuubu) (キューブ): a turning cube for the browser, 2×2 to 7×7, with record solves to replay. [Demo](https://johnmorrisdotca.github.io/kyuubu/).
+- [Hitotsu](https://github.com/johnmorrisdotca/hitotsu) (一つ): a colour-card shedding game for two to eight, with the house rules people play. [Demo](https://johnmorrisdotca.github.io/hitotsu/).
+- [Toranpu](https://github.com/johnmorrisdotca/toranpu) (トランプ): a deck of playing cards, card games with computer players, and solitaires. [Demo](https://johnmorrisdotca.github.io/toranpu/).
+- [Tane](https://github.com/johnmorrisdotca/tane) (種): seeded random numbers and daily seeds, the same in every browser and on every server. [Demo](https://johnmorrisdotca.github.io/tane/).
+- [Narabe](https://github.com/johnmorrisdotca/narabe) (並べ): one rules engine for abstract board games, from gomoku and Reversi to Go and checkers. [Demo](https://johnmorrisdotca.github.io/narabe/).
+- [Tenka](https://github.com/johnmorrisdotca/tenka) (天下): world conquest for two to six, on a map of the real world. [Demo](https://johnmorrisdotca.github.io/tenka/).
+- [Kumimoji](https://github.com/johnmorrisdotca/kumimoji) (組み文字): a crossword tile race, in English and Japanese kana. [Demo](https://johnmorrisdotca.github.io/kumimoji/).
+- [Tsunagi](https://github.com/johnmorrisdotca/tsunagi) (繋ぎ): a line-joining logic puzzle whose every level has exactly one answer. [Demo](https://johnmorrisdotca.github.io/tsunagi/).
+- [Jarajara](https://github.com/johnmorrisdotca/jarajara) (ジャラジャラ): mahjong tiles drawn as SVG, stacked layouts, and the matching solitaire Awase. [Demo](https://johnmorrisdotca.github.io/jarajara/).
+- [Suido](https://github.com/johnmorrisdotca/suido) (水道): a pipe puzzle: turn the pieces until the water reaches every drain. [Demo](https://johnmorrisdotca.github.io/suido/).
+- [Domino](https://github.com/johnmorrisdotca/domino) (ドミノ): dominoes and Mexican Train. [Demo](https://johnmorrisdotca.github.io/domino/).
+- [Kotoba](https://github.com/johnmorrisdotca/kotoba) (言葉): word lists and word-game rules in English, French, German and Japanese. [Demo](https://johnmorrisdotca.github.io/kotoba/).
+- [Sugoroku](https://github.com/johnmorrisdotca/sugoroku) (双六): backgammon and its variants, with the doubling cube and match play. [Demo](https://johnmorrisdotca.github.io/sugoroku/).
+- [Kazu](https://github.com/johnmorrisdotca/kazu) (数): grid number puzzles: Sudoku and its variants, Futoshiki and Skyscrapers. [Demo](https://johnmorrisdotca.github.io/kazu/).
+- [Meikyuu](https://github.com/johnmorrisdotca/meikyuu) (迷宮): mazes on squares, hexagons, triangles and circles, made from a seed and drawn through with a finger or the mouse. [Demo](https://johnmorrisdotca.github.io/meikyuu/).
+- [Hikidashi](https://github.com/johnmorrisdotca/hikidashi) (引き出し): a drawer of small Japanese text tools: era dates, kanji numerals, readings and sentence difficulty. [Demo](https://johnmorrisdotca.github.io/hikidashi/).
+- [Chizu](https://github.com/johnmorrisdotca/chizu) (地図): maps of the world and of countries' regions, in English and Japanese, with a quiz and callouts. [Demo](https://johnmorrisdotca.github.io/chizu/).
+- [Bushu](https://github.com/johnmorrisdotca/bushu) (部首): find a kanji by the parts it is made of. [Demo](https://johnmorrisdotca.github.io/bushu/).
+- [Tobiishi](https://github.com/johnmorrisdotca/tobiishi) (飛び石): peg solitaire with nine boards and seeded solvable challenges. [Demo](https://johnmorrisdotca.github.io/tobiishi/).
+- [Jirai](https://github.com/johnmorrisdotca/jirai) (地雷): minesweeper on shaped grids with verified no-guess boards. [Demo](https://johnmorrisdotca.github.io/jirai/).
+- [Gunjin](https://github.com/johnmorrisdotca/gunjin) (軍人): five hidden-rank strategy games with pass-the-device play. [Demo](https://johnmorrisdotca.github.io/gunjin/).
+- [Karakuri](https://github.com/johnmorrisdotca/karakuri) (からくり): eight hyper-casual puzzle games, some of them physics: draw a shield, pull pins, cut ropes, slide blocks, pour tubes. [Demo](https://johnmorrisdotca.github.io/karakuri/).
+- [Houseki](https://github.com/johnmorrisdotca/houseki) (宝石): gem and stone matching puzzles: falling triplets, stone collapse, colour chains and gem swap. [Demo](https://johnmorrisdotca.github.io/houseki/).
+
+**This package is Tenka.** The demos of all twenty-four share one header and footer, so each links the rest.
+<!-- family:end -->
+
+## Development
 
 ```sh
-pnpm install
-pnpm check        # lint, types and tests
-pnpm test:table   # the demo in real browsers, by taps
-pnpm site         # build the demo into ./site, then serve it
-pnpm pictures     # take the README's two pictures from the built demo
+pnpm install --frozen-lockfile
+pnpm check             # lint, types and tests, including the checks on the README's tables and examples
+pnpm test:table        # the demo in real browsers, by taps
+pnpm test:package      # pack it as npm does, install it and import every entry
+pnpm test:frameworks   # the framework examples, built from the packed tarball and played
+pnpm test:readme       # every TypeScript and JavaScript example in this README, type-checked and run
+pnpm site              # build the demo into ./site
+pnpm map               # make the map's territories and outlines again from Natural Earth
+pnpm screenshots:readme  # retake the README's pictures into docs/images (builds the demo first)
 ```
+
+The pictures are taken on the maintainer's Mac and are retaken only when the look changes; they are in `docs/images` and are not in the package that npm installs.
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md). In short: run `pnpm check` before you push (see [Development](#development)).
 
 Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make a game, a saved game or the map take far too long, or markup that gets out of the drawing, is for the [security policy](./SECURITY.md), not a public issue.
 
 ## Changes
 
 See [CHANGELOG.md](./CHANGELOG.md).
+
+The latest release is 2.1.2: the README takes the family's full layout, with pictures of the table and examples that are run.
 
 ## Licence
 

@@ -90,7 +90,7 @@ const projects = {
       },
       "tsconfig.json": { compilerOptions: { target: "ES2022", module: "ES2022", moduleResolution: "bundler", strict: true, experimentalDecorators: true, skipLibCheck: true, lib: ["ES2022", "dom"] }, files: ["src/main.ts"] },
       "src/index.html": page(`<app-root></app-root>`),
-      "src/main.ts": example("### 7. Angular", "typescript"),
+      "src/main.ts": example("### 7. Angular", "ts no-check"),
     },
   },
   // The table as a component, and the map alone under a board of the page's own.
@@ -129,8 +129,8 @@ createRoot(document.getElementById("app")).render(
       "package.json": { name: "check-plain", private: true, dependencies: { "@johnmorrisdotca/tenka": tenka } },
       "index.html": page(unbundled(example("### 2. The table, in plain HTML", "html"))),
       // The two other examples that mount a table: the one in "Play in 30 seconds", and the themed one.
-      "quick.html": page(`<div id="table"></div><script type="module">${unbundled(example("## Play in 30 seconds", "js"))}</script>`),
-      "themed.html": page(`<div id="table"></div><script type="module">${unbundled(example("## Theming", "js"))}</script>`),
+      "quick.html": page(`<div id="table"></div><script type="module">${unbundled(example("## Play in 30 seconds", "js no-run"))}</script>`),
+      "themed.html": page(`<div id="table"></div><script type="module">${unbundled(example("## Theming", "js no-run"))}</script>`),
       // The tag, as the README writes it: two tables on one page, with no script of the page's own.
       "tag.html": page(unbundled(example("### 3. As a tag", "html"))),
     },
