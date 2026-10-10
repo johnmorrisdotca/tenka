@@ -132,6 +132,7 @@ plays a whole game in the element, and returns a handle.
 | `newGame(options?)` | A new game at the same table; `players`, `computers`, `rounds`, `seed` and `map` may change |
 | `setGame(game, computers?)` | Put a game on the table: one read back by `tenkaFromJSON` |
 | `setLocale(locale, strings?)` | Change the table's language |
+| `set(options)` | Update words, palettes, record, delay, callbacks and card/dice drawings without redealing |
 | `destroy()` | Take the table off the page and stop its timers |
 
 To draw the map yourself, the same entry has `tenkaMapModel(game, marks?,
@@ -152,9 +153,8 @@ press on the sea beside an island (each of the two takes the map's key last);
 
 `<tenka-table>` is `mountTenka` as a tag: `@johnmorrisdotca/tenka/element/define`
 defines it, and `@johnmorrisdotca/tenka/element` holds the class alone. Each
-attribute is read again when it changes, and a change to any but `lang` deals a
-new game. A table the rules do not offer (one player, say, or 15 rounds) draws
-nothing.
+attribute reflects as a property. Game settings deal again; language, appearance,
+record, delay, callbacks and drawings preserve play. Invalid choices show a status.
 
 | Attribute | Default | What it does |
 | --- | --- | --- |
@@ -166,9 +166,17 @@ nothing.
 | `lang` | the page's | `en` or `ja` |
 | `record` | on | `off` leaves the record of the game out |
 | `delay` | `450` | How long the computer waits before each of its moves, in milliseconds |
+| `seats` | `3` | Two to six generic seats when names are omitted |
+| `daily` | off | UTC date, today or off; takes priority over seed |
+| `size` | host width | Display small, medium or large (320/480/640 pixels) |
+| `width` | | Explicit width in pixels, fitting a narrower host |
+| `theme` | auto | auto, light or dark |
+| `label` | | Optional spoken table label |
 
 It fires `tenka-change` after every move, with the game as `event.detail.game`
-(a bubbling `CustomEvent`), and has `game`, `table` (the handle `mountTenka`
+(a bubbling, composed JSON-safe `CustomEvent`; player names use generic seat labels), and has `game`, `table` (the handle `mountTenka`
 returns), `newGame(options?)` and `setGame(game, computers?)`. Its `dressing`
-property, which an attribute cannot carry, takes `tenkaDressing()`. To style it,
+property, which an attribute cannot carry, takes `tenkaDressing()` and preserves play.
+The `options` property accepts every native table option. `defineTable(tag?)` registers
+the default or a custom tag. To style it,
 set the table's variables on `tenka-table .tk-root`: see [Theming](#theming).

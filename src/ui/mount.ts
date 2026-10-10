@@ -16,7 +16,14 @@ import type { TenkaDressing, TenkaDrawn } from "./dressing.types.ts";
 import { TENKA_STYLE } from "./style.ts";
 import { tenkaMapSvg } from "./svg.ts";
 
-/** What `mountTenka` may be given. Everything is optional: with nothing, it is a game of three against two computer players, to the last player standing. */
+/** Native table settings; defaults to three players, with two computers.
+ * @example
+ * ```ts
+ * import type { TenkaTableOptions } from "@johnmorrisdotca/tenka/ui";
+ * const options: TenkaTableOptions = { seed: 7, record: false };
+ * console.log(options.seed);
+ * ```
+ */
 export type TenkaTableOptions = {
   /** The names round the table, in seat order: two to six. */
   players?: readonly string[];
@@ -46,7 +53,14 @@ export type TenkaTableOptions = {
   dressing?: TenkaDressing;
 };
 
-/** What `mountTenka` hands back: the game being played, and the ways to change it from outside. */
+/** Native game access, restoration, redealing and presentation updates.
+ * @example
+ * ```ts
+ * import type { TenkaTableHandle } from "@johnmorrisdotca/tenka/ui";
+ * const update = (table: TenkaTableHandle) => table.set({ locale: "ja" });
+ * console.log(typeof update);
+ * ```
+ */
 export type TenkaTableHandle = {
   /** The game as it stands. */
   game: () => TenkaGame;
@@ -56,6 +70,8 @@ export type TenkaTableHandle = {
   setGame: (game: TenkaGame, computers?: readonly boolean[]) => void;
   /** Change the table's language, and with it any words of your own. */
   setLocale: (locale: TenkaLocale, strings?: Partial<TenkaStrings>) => void;
+  /** Update presentation and callbacks without redealing or replacing the current game. */
+  set: (options: Pick<TenkaTableOptions, "locale" | "strings" | "theme" | "record" | "dressing" | "colours" | "computerDelayMs" | "onChange">) => void;
   /** Take the table off the page and stop its timers. */
   destroy: () => void;
 };
@@ -101,6 +117,15 @@ function save(name: string, type: string, text: string): void {
  * from, then where to, and choose from the buttons under the map. Under the
  * players is the record of the game, which saves as JSON, text or CSV and
  * loads a saved game back.
+ * @param target - The host element, including a host in a shadow root.
+ * @param options - Native game and presentation settings.
+ * @returns The table handle; destroy it when the host is removed.
+ * @example
+ * ```ts
+ * import { mountTenka } from "@johnmorrisdotca/tenka/ui";
+ * const show = (host: HTMLElement) => mountTenka(host, { seed: 7, record: false });
+ * console.log(typeof show);
+ * ```
  */
 export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {}): TenkaTableHandle {
   const pageLocale = (): TenkaLocale => (typeof document !== "undefined" && document.documentElement.lang.toLowerCase().startsWith("ja") ? "ja" : "en");
@@ -113,10 +138,10 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   let computers = options.computers ?? players.map((_, seat) => seat !== 0);
   let rounds = options.rounds ?? TENKA_WORLD_ROUNDS;
   let map: TenkaMapKey = options.map ?? "world";
-  const colours = options.colours;
-  const delay = options.computerDelayMs ?? 450;
-  const showRecord = options.record !== false;
-  const dressing = options.dressing;
+  let colours = options.colours;
+  let delay = options.computerDelayMs ?? 450;
+  let showRecord = options.record !== false;
+  let dressing = options.dressing;
 
   const begin = (seed: number): TenkaGame => {
     const game = startTenka(rounds, players, seed, undefined, map);
@@ -385,7 +410,8 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
         const die = node("span", "tk-die");
         die.dataset.face = String(value);
         const label = tenkaSay(side === "attack" ? words.dieAttack : words.dieDefend, { n: value });
-        const drawn = dress(dressing?.die === undefined ? undefined : () => dressing.die!(value, { side, tumble, index: index++, count, label, locale }), diceDrawn);
+        const drawDie = dressing;
+        const drawn = dress(drawDie?.die === undefined ? undefined : () => drawDie.die!(value, { side, tumble, index: index++, count, label, locale }), diceDrawn);
         if (drawn === null) die.textContent = String(value);
         else {
           // The picture is the whole of what a screen reader gets, so what is inside it is left out.
@@ -433,7 +459,8 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
         const chip = node("span", `tk-card tk-${kind}`);
         chip.dataset.card = String(card);
         if (territory !== null) chip.dataset.territory = String(territory);
-        const drawn = dress(dressing?.card === undefined ? undefined : () => dressing.card!({ card, territory, kind, map: game.map ?? "world", name, label, locale }), handDrawn);
+        const drawCard = dressing;
+        const drawn = dress(drawCard?.card === undefined ? undefined : () => drawCard.card!({ card, territory, kind, map: game.map ?? "world", name, label, locale }), handDrawn);
         if (drawn === null) chip.textContent = label;
         else {
           chip.classList.add("tk-card-drawn");
@@ -446,7 +473,8 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       }
       // The deck, face down beside the hand, with the number left in it.
       const left = tenkaSay(words.deckLeft, { n: game.deck.length });
-      const back = dress(dressing?.back === undefined ? undefined : () => dressing.back!({ label: left, locale }), handDrawn);
+      const drawBack = dressing;
+      const back = dress(drawBack?.back === undefined ? undefined : () => drawBack.back!({ label: left, locale }), handDrawn);
       if (back !== null) {
         const pile = node("span", "tk-pile");
         pile.dataset.testid = "tk-pile";
@@ -549,7 +577,9 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     const model = tenkaMapModel(game, marks, colours);
     const drawn = { ...model, lands: model.lands.map((land) => ({ ...land, name: landName(land.territory) })) };
     // The map is drawn again after every move; a keyboard stays where it was.
-    const kept = board.contains(document.activeElement) && onLand !== null;
+    const hostRoot = target.getRootNode();
+    const active = typeof ShadowRoot !== "undefined" && hostRoot instanceof ShadowRoot ? hostRoot.activeElement : target.ownerDocument.activeElement;
+    const kept = board.contains(active) && onLand !== null;
     const view = continentView(focus, game.map);
     const describe = (land: { name: string; owner: number; armies: number }) => tenkaSay(words.landSay, { land: land.name, owner: land.owner < 0 ? words.neutral : who(land.owner), n: land.armies });
     board.replaceChildren(tenkaMapSvg(drawn, { view, pixels: board.clientWidth || undefined, label: words.mapLabel, describe, keys: words.mapKeys }));
@@ -624,6 +654,21 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
         game = { ...game, players };
       }
       render();
+    },
+    set: (next) => {
+      if (next.theme !== undefined) {
+        for (const name of Object.keys(options.theme ?? {})) if (!(name in next.theme)) root.style.removeProperty(name);
+        for (const [name, value] of Object.entries(next.theme)) root.style.setProperty(name, value);
+      }
+      if ("record" in next) {
+        showRecord = next.record !== false;
+        if (showRecord) side.append(record); else record.remove();
+      }
+      if ("colours" in next) colours = next.colours;
+      if ("dressing" in next) dressing = next.dressing;
+      if ("computerDelayMs" in next) delay = next.computerDelayMs ?? 450;
+      options = { ...options, ...next };
+      handle.setLocale(next.locale ?? locale, next.strings ?? {});
     },
     destroy: () => {
       if (timer !== null) clearTimeout(timer);

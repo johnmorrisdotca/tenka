@@ -14,6 +14,7 @@
 export type TenkaLocale = "en" | "ja";
 
 const EN = {
+  embedError: "The table could not be shown. Check its settings.",
   you: "You",
   player: "Player {n}",
   mapLabel: "Map of the world",
@@ -203,10 +204,18 @@ const EN = {
   tGalicia: "Galicia",
 };
 
-/** Every word the package shows, by name: one table of these for each language. */
+/** Every table word, including local embed error feedback.
+ * @example
+ * ```ts
+ * import type { TenkaStrings } from "@johnmorrisdotca/tenka";
+ * const words: Partial<TenkaStrings> = { embedError: "Check the table settings." };
+ * console.log(words.embedError);
+ * ```
+ */
 export type TenkaStrings = { [Name in keyof typeof EN]: string };
 
 const JA: TenkaStrings = {
+  embedError: "テーブルを表示できません。設定を確認してください。",
   you: "あなた",
   player: "プレイヤー{n}",
   mapLabel: "世界地図",

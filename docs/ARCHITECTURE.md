@@ -14,6 +14,7 @@ src/
 ├── element-define.ts          the "/element/define" entry: defines <tenka-table> on the page by being imported
 ├── dressing.ts                the "/dressing" entry: the table's dice drawn by Korokoro and its cards by Toranpu, the one place either is imported
 ├── dressingCards.ts           Tenka's cards as a Toranpu design: a territory's own outline, its name and its army's symbol
+├── embed-day.ts               shared UTC embed-day validation and off aliases
 ├── element.ts                 the "/element" entry: the <tenka-table> element, a whole table in a tag
 ├── index.ts                   the main entry: the rules, the map, saving and the computer player, with no DOM
 ├── react.tsx                  the "/react" entry: a map to draw in React

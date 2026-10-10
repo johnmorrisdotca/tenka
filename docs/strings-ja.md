@@ -8,6 +8,7 @@ shown. ␠ marks a space at the start or end of a string.
 
 | Name | English | Japanese |
 | --- | --- | --- |
+| `embedError` | The table could not be shown. Check its settings. | テーブルを表示できません。設定を確認してください。 |
 | `you` | You | あなた |
 | `player` | Player {n} | プレイヤー{n} |
 | `mapLabel` | Map of the world | 世界地図 |

@@ -5,7 +5,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import { dirname, join, resolve } from "node:path";
 
 import { API_CSS, apiPage } from "./api.mjs";
-import { FAMILY_SCRIPT, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
+import { FAMILY_SCRIPT, FAMILY_EMBED_BUILDER_WORDS, familyEmbedBuilder, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
 
 const id = "tenka";
 
@@ -62,7 +62,7 @@ const page = `<!doctype html>
   </head>
   <body>
     <main>
-      ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }] })}
+      ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }, { href: "builder.html", say: "pageBuilder" }] })}
       <div class="setup fam-row">
         <div class="fam-row" data-help-en="How many sit at the table: you and the computers. It takes effect when you press New game." data-help-ja="卓につく人数です（あなたとコンピューター）。「新しいゲーム」を押すと反映されます。">
           <span class="fam-label" data-say="players"></span>
@@ -123,3 +123,9 @@ writeFileSync("site/index.html", page);
 writeFileSync("site/api.css", API_CSS);
 writeFileSync("site/api.html", apiPage({ id, name: "Tenka", icon: ICON }));
 console.log("site/ is ready: serve it, or let the Pages workflow publish it.");
+
+writeFileSync("site/family-embed-builder.js", `export const FAMILY_EMBED_BUILDER_WORDS = ${JSON.stringify(FAMILY_EMBED_BUILDER_WORDS)};\nexport ${familyEmbedBuilder.toString()};\n`);
+const builderParts = { builderHead: familyHead({ id, title: "Tenka · build a table embed", description: "Choose a map and a seed, preview a conquest table and copy the embed code." }), builderHeader: familyHeader({ id, links: [{ href: "./", say: "toGallery" }] }), unreviewed: familyUnreviewed({ id }), footer: familyFooter({ id }), script: `<script>${FAMILY_SCRIPT}</script>` };
+writeFileSync("site/builder.html", readFileSync("demo/builder.html", "utf8").replace(/<!-- family:([A-Za-z]+) -->/g, (_match, key) => builderParts[key]));
+cpSync("demo/embed", "site/embed", { recursive: true });
+for (const file of ["builder.js", "builder.css"]) cpSync(`demo/${file}`, `site/${file}`);

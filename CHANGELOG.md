@@ -6,6 +6,11 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+- Add shared builder and validated no-storage iframe, reflected table/display settings, UTC daily dates, generic seat counts and complete native host options.
+- Preserve games while updating language, palette, record, delay or custom card/dice drawings; keep restoration methods and native handle access.
+- Compose JSON-safe load/change/finish/error events with generic seat labels; local getters/callbacks retain original names. Preserve map keyboard focus in shadow roots.
+
+
 
 
 ### Added

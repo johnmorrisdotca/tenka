@@ -258,6 +258,10 @@ rules refuse is `null`: Alaska is not Ben's to attack from.
 Without a bundler, import from the files as they are published:
 `./node_modules/@johnmorrisdotca/tenka/dist/ui.js`, or a copy of `dist/`.
 
+[Build an embed](https://johnmorrisdotca.github.io/tenka/builder.html) with a live
+preview and code for a custom element, iframe or framework. See the
+[embed guide](docs/embeds.md) for reflected settings, daily seeds and frame events.
+
 ### 3. As a tag
 
 ```html
@@ -918,7 +922,7 @@ as you type. The entries:
 | `@johnmorrisdotca/tenka/shapes` | `TENKA_SHAPES`, the outline of every territory |
 | `@johnmorrisdotca/tenka/ui` | `mountTenka`, the whole table in plain DOM, and the map as SVG |
 | `@johnmorrisdotca/tenka/element` | `TenkaTable`, the `<tenka-table>` element's class, to extend or to define under another name |
-| `@johnmorrisdotca/tenka/element/define` | Defines `<tenka-table>` on the page by being imported; exports nothing |
+| `@johnmorrisdotca/tenka/element/define` | Defines `<tenka-table>` on import and re-exports the element helpers |
 | `@johnmorrisdotca/tenka/react` | `TenkaMap` and `TenkaTable` |
 
 ### The calls to learn first
@@ -1196,14 +1200,14 @@ Tenka is one of twenty-eight packages, each made for the same site, each at
 
 **Geography & data**
 
-- [address-plus](https://github.com/johnmorrisdotca/address-plus) (アドレスプラス): parse and format addresses in the United States, Canada and Japan. [Demo](https://johnmorrisdotca.github.io/address-plus/).
+- [address-plus](https://github.com/johnmorrisdotca/address-plus) (アドレスプラス): parse and format addresses in the United States, Canada, Japan, Australia and the United Kingdom. [Demo](https://johnmorrisdotca.github.io/address-plus/).
 - [Chizu](https://github.com/johnmorrisdotca/chizu) (地図): maps of the world and of countries' regions, in English and Japanese, with a quiz and callouts. [Demo](https://johnmorrisdotca.github.io/chizu/).
 - [Hata](https://github.com/johnmorrisdotca/hata) (旗): country and regional flags as SVG, at their true proportions and keyed by ISO code. [Demo](https://johnmorrisdotca.github.io/hata/).
 - [Kuni](https://github.com/johnmorrisdotca/kuni) (国): countries and their regions, with ISO codes and names in English and Japanese. [Demo](https://johnmorrisdotca.github.io/kuni/).
 
 **Developer tools**
 
-- [REST in Pieces](https://github.com/spxis/rest-in-pieces) (レスト・イン・ピーシズ): seeded test data and REST APIs for frontend development, with latency and error drills. [Demo](https://spxis.github.io/rest-in-pieces/).
+- [REST in Pieces](https://github.com/spxis/rest-in-pieces) (レスト・イン・ピーシーズ): seeded test data and REST APIs for frontend development, with latency and error drills. [Demo](https://spxis.github.io/rest-in-pieces/).
 
 
 **This package is Tenka.** The demos of all twenty-eight share one header and footer, so each links the rest.
