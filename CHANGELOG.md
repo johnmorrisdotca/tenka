@@ -10,9 +10,6 @@ All notable changes to this project are written down here. The format follows
 - Preserve games while updating language, palette, record, delay or custom card/dice drawings; keep restoration methods and native handle access.
 - Compose JSON-safe load/change/finish/error events with generic seat labels; local getters/callbacks retain original names. Preserve map keyboard focus in shadow roots.
 
-
-
-
 ### Added
 
 - Share a package-independent embed builder for option controls, preview adapters, code tabs and shareable links.
@@ -20,6 +17,8 @@ All notable changes to this project are written down here. The format follows
 ### Changed
 
 - Group the package family by kind, alphabetize each group, and include the geography packages and REST in Pieces in the shared footer and README.
+
+- Update the shared family description for addresses in all seven supported countries, including France and Germany.
 
 ## [2.1.2] - 2026-10-06
 
