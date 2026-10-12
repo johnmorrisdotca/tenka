@@ -20,10 +20,28 @@ import { TENKA_VERSION } from "./version.ts";
  * text if any one of them could not have been made.
  */
 
-/** The shape of the JSON this package writes. It goes up only when a reader of the old shape would be wrong about the new one. */
+/** The shape of the JSON this package writes. It goes up only when a reader of the old shape would be wrong about the new one.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_EXPORT_FORMAT } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_EXPORT_FORMAT);
+ * ```
+ */
 export const TENKA_EXPORT_FORMAT = 2;
 
-/** A whole JSON export of one game: what `tenkaToJSON` writes and `tenkaFromJSON` reads. */
+/** A whole JSON export of one game: what `tenkaToJSON` writes and `tenkaFromJSON` reads.
+ *
+ * @example
+ * ```ts
+ * import { startTenka, tenkaExported } from "@johnmorrisdotca/tenka";
+ * import type { TenkaExported } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const value: TenkaExported = tenkaExported(game);
+ * console.log(value);
+ * ```
+ */
 export type TenkaExported = {
   /** The shape's number: `TENKA_EXPORT_FORMAT`. */
   format: typeof TENKA_EXPORT_FORMAT;
@@ -47,7 +65,18 @@ export type TenkaExported = {
   state: { round: number; phase: TenkaPhase; toPlay: TenkaSeat; winners: TenkaSeat[] };
 };
 
-/** A game as the JSON export's object: its table, its moves, and where it stands. */
+/** A game as the JSON export's object: its table, its moves, and where it stands.
+ *
+ * @param game - The current native game state.
+ * @returns A game as the JSON export's object: its table, its moves, and where it stands.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaExported } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaExported(game).format);
+ * ```
+ */
 export function tenkaExported(game: TenkaGame): TenkaExported {
   return {
     format: TENKA_EXPORT_FORMAT,
@@ -63,7 +92,18 @@ export function tenkaExported(game: TenkaGame): TenkaExported {
   };
 }
 
-/** A game as JSON, two spaces deep, with the format's number first. `tenkaFromJSON` reads it back. */
+/** A game as JSON, two spaces deep, with the format's number first. `tenkaFromJSON` reads it back.
+ *
+ * @param game - The current native game state.
+ * @returns A game as JSON, two spaces deep, with the format's number first. `tenkaFromJSON` reads it back.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaToJSON } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaToJSON(game));
+ * ```
+ */
 export function tenkaToJSON(game: TenkaGame): string {
   const { moves, state, ...table } = tenkaExported(game);
   // One move to a line: a long game stays readable and a diff of two saves shows the moves that differ.
@@ -79,6 +119,16 @@ export function tenkaToJSON(game: TenkaGame): string {
  * made. Null when the text is not JSON, is of a later format than this
  * version reads, is another game's, or holds a move that could not have been
  * made when it was.
+ *
+ * @param text - The encoded game text to validate and replay.
+ * @returns The reconstructed game, or null for malformed, unsupported, foreign or illegal saved data.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaFromJSON, tenkaToJSON } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaFromJSON(tenkaToJSON(game))?.seed);
+ * ```
  */
 export function tenkaFromJSON(text: string): TenkaGame | null {
   let data: unknown;
@@ -105,7 +155,16 @@ export function tenkaFromJSON(text: string): TenkaGame | null {
   return replayTenka({ seed, players: players as string[], rounds, placing, map: (map as TenkaMapKey | undefined) ?? "world" }, read as TenkaMove[]);
 }
 
-/** One move of a game's record, with what came of it: what the text and the CSV are written from. */
+/** One move of a game's record, with what came of it: what the text and the CSV are written from.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaRecordEntry } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaRecordEntry = {n:1,round:1,seat:0,move:{kind:"endTurn"}};
+ * console.log(value);
+ * ```
+ */
 export type TenkaRecordEntry = {
   /** The move's number, from 1. */
   n: number;
@@ -136,6 +195,16 @@ export type TenkaRecordEntry = {
  * move brought: made by playing the game again from its seed. A game whose
  * moves do not replay from its table (one put together by hand, in a test)
  * is recorded as far as they do.
+ *
+ * @param game - The current native game state.
+ * @returns THE RECORD OF A GAME, move by move, with the dice and everything else each move brought: made by playing the game again from its seed. A game whose moves do not replay from its table (one put together by hand, in a test) is recorded as far as they do.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaRecord } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaRecord(game).length);
+ * ```
  */
 export function tenkaRecord(game: TenkaGame): TenkaRecordEntry[] {
   const entries: TenkaRecordEntry[] = [];
@@ -225,6 +294,17 @@ function entryText(game: TenkaGame, entry: TenkaRecordEntry, strings: TenkaStrin
  * what where, every throw of the dice, every territory taken, and how it
  * ended. In English unless given another table of strings
  * (`TENKA_STRINGS.ja`). Lines end with a line feed.
+ *
+ * @param game - The current native game state.
+ * @param strings - The localized words used to format names or the record.
+ * @returns A game as plain text, a line to a move, for a chat or a log: who placed what where, every throw of the dice, every territory taken, and how it ended. In English unless given another table of strings (`TENKA_STRINGS.ja`). Lines end with a line feed.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaToText } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaToText(game));
+ * ```
  */
 export function tenkaToText(game: TenkaGame, strings: TenkaStrings = TENKA_STRINGS.en): string {
   const lines = [tenkaSay(strings.logTitle, { players: game.players.map((_, seat) => nameOf(game, seat, strings)).join(strings.listComma), rounds: game.rounds, seed: game.seed })];
@@ -240,7 +320,14 @@ export function tenkaToText(game: TenkaGame, strings: TenkaStrings = TENKA_STRIN
   return `${lines.join("\n")}\n`;
 }
 
-/** The columns of the CSV export, in order. */
+/** The columns of the CSV export, in order.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_CSV_COLUMNS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_CSV_COLUMNS);
+ * ```
+ */
 export const TENKA_CSV_COLUMNS: readonly string[] = ["move", "round", "seat", "player", "kind", "from", "to", "armies", "dice", "attack", "defend", "attackerLost", "defenderLost", "throws", "took", "cards", "out", "winners"];
 
 /** A cell as RFC 4180 has it, and safe to open: text a spreadsheet would run as a formula is given a leading apostrophe. */
@@ -257,6 +344,16 @@ function cell(value: string | number | undefined): string {
  * dice as they fell, highest first and spaced. Lines end CRLF, as RFC 4180
  * has them, and a player's name that a spreadsheet would run as a formula is
  * made safe with a leading apostrophe.
+ *
+ * @param game - The current native game state.
+ * @returns A game as CSV, a row to a move, for a spreadsheet: `TENKA_CSV_COLUMNS`. Territories are written by key (`alaska`, `westernCanada`), seats from 1, dice as they fell, highest first and spaced. Lines end CRLF, as RFC 4180 has them, and a player's name that a spreadsheet would run as a formula is made safe with a leading apostrophe.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaToCSV } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaToCSV(game));
+ * ```
  */
 export function tenkaToCSV(game: TenkaGame): string {
   const key = (territory: number | undefined) => (territory === undefined ? undefined : (tenkaMapOf(game).territories[territory]?.key ?? String(territory)));

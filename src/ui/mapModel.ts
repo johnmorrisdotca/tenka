@@ -3,19 +3,57 @@ import { TENKA_EUROPE_SHAPES } from "../tenkaEuropeShapes.data.ts";
 import { TENKA_SHAPES } from "../tenkaShapes.data.ts";
 import type { TenkaContinentKey, TenkaGame, TenkaMapKey, TenkaMapMarks, TenkaShapes } from "../tenka.types.ts";
 
-/** How each map is drawn. */
+/** How each map is drawn.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_MAP_SHAPES } from "@johnmorrisdotca/tenka/ui";
+ * console.log(TENKA_MAP_SHAPES);
+ * ```
+ */
 export const TENKA_MAP_SHAPES: Readonly<Record<TenkaMapKey, TenkaShapes>> = { world: TENKA_SHAPES, europe: TENKA_EUROPE_SHAPES };
 
-/** How a game's map is drawn: the world unless the game says otherwise. */
+/** How a game's map is drawn: the world unless the game says otherwise.
+ *
+ * @param map - The native world or Europe map to use.
+ * @returns How a game's map is drawn: the world unless the game says otherwise.
+ * @example
+ * ```ts
+ * import { tenkaShapesOf } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(tenkaShapesOf("europe").outlines.length);
+ * ```
+ */
 export function tenkaShapesOf(map: TenkaMapKey | undefined): TenkaShapes {
   return TENKA_MAP_SHAPES[map ?? "world"] ?? TENKA_SHAPES;
 }
 import { ownerColour } from "./colours.ts";
 
-/** How a territory is ringed: the one chosen, one it can reach, or the target. */
+/** How a territory is ringed: the one chosen, one it can reach, or the target.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaRing } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaRing = "chosen";
+ * console.log(value);
+ * ```
+ */
 export type TenkaRing = "chosen" | "reach" | "target" | null;
 
-/** One territory as a drawing needs it. */
+/** One territory as a drawing needs it.
+ *
+ * @example
+ * ```ts
+ * import { startTenka } from "@johnmorrisdotca/tenka";
+ * import type { TenkaLand } from "@johnmorrisdotca/tenka/ui";
+ * import { tenkaMapModel } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const value: TenkaLand = tenkaMapModel(game).lands[0];
+ * console.log(value);
+ * ```
+ */
 export type TenkaLand = {
   /** Its number. */
   territory: number;
@@ -37,7 +75,19 @@ export type TenkaLand = {
   owner: number;
 };
 
-/** The whole world as a drawing needs it, in map units: `tenkaMapModel` makes one, `tenkaMapSvg` and `TenkaMap` draw it. */
+/** The whole world as a drawing needs it, in map units: `tenkaMapModel` makes one, `tenkaMapSvg` and `TenkaMap` draw it.
+ *
+ * @example
+ * ```ts
+ * import { startTenka } from "@johnmorrisdotca/tenka";
+ * import type { TenkaMapModel } from "@johnmorrisdotca/tenka/ui";
+ * import { tenkaMapModel } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const value: TenkaMapModel = tenkaMapModel(game);
+ * console.log(value);
+ * ```
+ */
 export type TenkaMapModel = {
   width: number;
   height: number;
@@ -46,7 +96,14 @@ export type TenkaMapModel = {
   continentBorders: string;
 };
 
-/** Nothing lit up. */
+/** Nothing lit up.
+ *
+ * @example
+ * ```ts
+ * import { NO_MARKS } from "@johnmorrisdotca/tenka/ui";
+ * console.log(NO_MARKS);
+ * ```
+ */
 export const NO_MARKS: TenkaMapMarks = { chosen: null, reach: [], target: null };
 
 /**
@@ -54,6 +111,19 @@ export const NO_MARKS: TenkaMapMarks = { chosen: null, reach: [], target: null }
  * outline in its owner's colour, its counter's place and armies, and its
  * ring. Shared by the plain-DOM table and the React map, so both draw the
  * same world from the same few rules.
+ *
+ * @param game - The current native game state.
+ * @param marks - The chosen, reachable and target territory highlights.
+ * @param colours - The seat colour palette.
+ * @returns EVERYTHING A DRAWING OF THE WORLD NEEDS, for one game: each territory's outline in its owner's colour, its counter's place and armies, and its ring. Shared by the plain-DOM table and the React map, so both draw the same world from the same few rules.
+ * @example
+ * ```ts
+ * import { startTenka } from "@johnmorrisdotca/tenka";
+ * import { tenkaMapModel } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaMapModel(game).lands.length);
+ * ```
  */
 export function tenkaMapModel(game: Pick<TenkaGame, "owners" | "armies" | "map">, marks: TenkaMapMarks = NO_MARKS, colours?: readonly string[]): TenkaMapModel {
   const reach = new Set(marks.reach);
@@ -78,7 +148,20 @@ export function tenkaMapModel(game: Pick<TenkaGame, "owners" | "armies" | "map">
   return { width: shapes.width, height: shapes.height, lands, seaLines: shapes.seaLines, continentBorders: shapes.continentBorders };
 }
 
-/** The territory whose counter is nearest a point of the map, within `reach` map units, or null. */
+/** The territory whose counter is nearest a point of the map, within `reach` map units, or null.
+ *
+ * @param x - The horizontal map-unit coordinate.
+ * @param y - The vertical map-unit coordinate.
+ * @param reach - The maximum map-unit distance to consider.
+ * @param map - The native world or Europe map to use.
+ * @returns The nearest territory within reach, or null when none qualifies.
+ * @example
+ * ```ts
+ * import { nearestLand } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(nearestLand(200,200,100));
+ * ```
+ */
 export function nearestLand(x: number, y: number, reach: number, map: TenkaMapKey = "world"): number | null {
   let best: number | null = null;
   let bestDistance = reach;
@@ -92,10 +175,29 @@ export function nearestLand(x: number, y: number, reach: number, map: TenkaMapKe
   return best;
 }
 
-/** A part of the map to show, in map units: left, top, width, height (an SVG viewBox). */
+/** A part of the map to show, in map units: left, top, width, height (an SVG viewBox).
+ *
+ * @example
+ * ```ts
+ * import type { TenkaView } from "@johnmorrisdotca/tenka/ui";
+ * import { continentView } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaView = continentView(null);
+ * console.log(value);
+ * ```
+ */
 export type TenkaView = readonly [number, number, number, number];
 
-/** A way to move between territories from a keyboard. */
+/** A way to move between territories from a keyboard.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaArrow } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaArrow = "right";
+ * console.log(value);
+ * ```
+ */
 export type TenkaArrow = "left" | "right" | "up" | "down";
 
 /**
@@ -103,6 +205,18 @@ export type TenkaArrow = "left" | "right" | "up" | "down";
  * direction, a little straighter being better than a little nearer, and only
  * among those inside `view` (the whole map when none is given), so that the
  * focus never leaves what is on the screen. Null when nothing lies that way.
+ *
+ * @param from - The source territory index.
+ * @param arrow - The keyboard navigation direction.
+ * @param map - The native world or Europe map to use.
+ * @param view - The visible map bounds; the full map when omitted.
+ * @returns The nearest territory in the direction and view, or null when none is available.
+ * @example
+ * ```ts
+ * import { landInDirection } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(landInDirection(0,"right"));
+ * ```
  */
 export function landInDirection(from: number, arrow: TenkaArrow, map: TenkaMapKey = "world", view?: TenkaView): number | null {
   const labels = tenkaShapesOf(map).labels;
@@ -129,6 +243,16 @@ export function landInDirection(from: number, arrow: TenkaArrow, map: TenkaMapKe
 /**
  * The part of the map that frames a continent, with a margin, widened to the
  * map's own shape so it fills the same box; the whole world for null.
+ *
+ * @param key - The continent identifier, or null to show the whole map.
+ * @param map - The native world or Europe map to use.
+ * @returns The part of the map that frames a continent, with a margin, widened to the map's own shape so it fills the same box; the whole world for null.
+ * @example
+ * ```ts
+ * import { continentView } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(continentView("europe"));
+ * ```
  */
 export function continentView(key: TenkaContinentKey | null, map: TenkaMapKey = "world"): TenkaView {
   const shapes = tenkaShapesOf(map);

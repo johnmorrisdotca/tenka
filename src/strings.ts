@@ -10,7 +10,16 @@
  * made from this file.
  */
 
-/** The languages the package speaks: English and Japanese. */
+/** The languages the package speaks: English and Japanese.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaLocale } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaLocale = "ja";
+ * console.log(value);
+ * ```
+ */
 export type TenkaLocale = "en" | "ja";
 
 const EN = {
@@ -405,15 +414,44 @@ const JA: TenkaStrings = {
   tGalicia: "ガリツィア",
 };
 
-/** The package's words in each language it speaks: `TENKA_STRINGS.en`, `TENKA_STRINGS.ja`. */
+/** The package's words in each language it speaks: `TENKA_STRINGS.en`, `TENKA_STRINGS.ja`.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_STRINGS } from "@johnmorrisdotca/tenka/ui";
+ * console.log(TENKA_STRINGS);
+ * ```
+ */
 export const TENKA_STRINGS: Readonly<Record<TenkaLocale, TenkaStrings>> = { en: EN, ja: JA };
 
-/** A line from a table of strings with its braces filled in: `tenkaSay(strings.moveIn, { n: 3 })` is "Move 3 in". A brace with no value is left as it is. */
+/** A line from a table of strings with its braces filled in: `tenkaSay(strings.moveIn, { n: 3 })` is "Move 3 in". A brace with no value is left as it is.
+ *
+ * @param line - Text with named replacement braces.
+ * @param values - Replacement text or numbers keyed by brace name.
+ * @returns A line from a table of strings with its braces filled in: `tenkaSay(strings.moveIn, { n: 3 })` is "Move 3 in". A brace with no value is left as it is.
+ * @example
+ * ```ts
+ * import { tenkaSay } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(tenkaSay("Seat {seat}",{seat:2}));
+ * ```
+ */
 export function tenkaSay(line: string, values: Readonly<Record<string, string | number>> = {}): string {
   return line.replace(/\{(\w+)\}/g, (whole, name: string) => (name in values ? String(values[name]) : whole));
 }
 
-/** The table of strings for a locale with a page's own words laid over it. An unknown locale is English. */
+/** The table of strings for a locale with a page's own words laid over it. An unknown locale is English.
+ *
+ * @param locale - The requested language tag.
+ * @param own - Optional overrides for the built-in words.
+ * @returns The table of strings for a locale with a page's own words laid over it. An unknown locale is English.
+ * @example
+ * ```ts
+ * import { tenkaStrings } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(tenkaStrings("ja").newGame);
+ * ```
+ */
 export function tenkaStrings(locale: TenkaLocale | string | undefined, own: Partial<TenkaStrings> = {}): TenkaStrings {
   const base = typeof locale === "string" && locale.toLowerCase().startsWith("ja") ? JA : EN;
   return { ...base, ...own };
@@ -421,12 +459,34 @@ export function tenkaStrings(locale: TenkaLocale | string | undefined, own: Part
 
 const upperFirst = (key: string): string => key.charAt(0).toUpperCase() + key.slice(1);
 
-/** A territory's name in a table of strings, by its key (`TENKA_TERRITORIES[n].key`, such as `"alaska"`); "" for a key that is no territory's. */
+/** A territory's name in a table of strings, by its key (`TENKA_TERRITORIES[n].key`, such as `"alaska"`); "" for a key that is no territory's.
+ *
+ * @param strings - The localized words used to format names or the record.
+ * @param key - The continent identifier, or null to show the whole map.
+ * @returns A territory's name in a table of strings, by its key (`TENKA_TERRITORIES[n].key`, such as `"alaska"`); "" for a key that is no territory's.
+ * @example
+ * ```ts
+ * import { TENKA_STRINGS, territoryNameIn } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(territoryNameIn(TENKA_STRINGS.en,"alaska"));
+ * ```
+ */
 export function territoryNameIn(strings: TenkaStrings, key: string): string {
   return (strings as Record<string, string>)[`t${upperFirst(key)}`] ?? "";
 }
 
-/** A continent's name in a table of strings, by its key (`"northAmerica"`, `"asia"`…). */
+/** A continent's name in a table of strings, by its key (`"northAmerica"`, `"asia"`…).
+ *
+ * @param strings - The localized words used to format names or the record.
+ * @param key - The continent identifier, or null to show the whole map.
+ * @returns A continent's name in a table of strings, by its key (`"northAmerica"`, `"asia"`…).
+ * @example
+ * ```ts
+ * import { TENKA_STRINGS, continentNameIn } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(continentNameIn(TENKA_STRINGS.en,"europe"));
+ * ```
+ */
 export function continentNameIn(strings: TenkaStrings, key: string): string {
   return (strings as Record<string, string>)[`c${upperFirst(key)}`] ?? "";
 }

@@ -3,6 +3,12 @@
  * variable so a page can wear it in its own colours (set them on the element
  * or any ancestor, or pass them as `theme`). Light and dark follow the
  * reader's system. Everything to be tapped is at least 44px.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_STYLE } from "@johnmorrisdotca/tenka/ui";
+ * console.log(TENKA_STYLE);
+ * ```
  */
 export const TENKA_STYLE = `
 .tk-root {

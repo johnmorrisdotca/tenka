@@ -37,6 +37,17 @@ function onTheFront(game: TenkaGame, territory: number): boolean {
  * `random` is any function returning a number from 0 up to 1, such as
  * `Math.random`; give it a seeded one and the computer plays the same game
  * every time.
+ *
+ * @param game - The current native game state.
+ * @param random - A random source returning values in [0,1).
+ * @returns The computer player's move: one the rules accept, chosen as a person might. `random` is any function returning a number from 0 up to 1, such as `Math.random`; give it a seeded one and the computer plays the same game every time.
+ * @example
+ * ```ts
+ * import { sensibleTenkaMove, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(sensibleTenkaMove(game,()=>0.5));
+ * ```
  */
 export function sensibleTenkaMove(game: TenkaGame, random: () => number): TenkaMove {
   const own = game.owners.flatMap((owner, territory) => (owner === game.toPlay ? [territory] : []));

@@ -10,7 +10,17 @@ import { TENKA_ATTACK_DICE, TENKA_DEFEND_DICE } from "./tenka.constants.ts";
  * it fell, and nobody can reload a page to roll again.
  */
 
-/** The next number from the random at `state`, in [0, 1), and the state after it. */
+/** The next number from the random at `state`, in [0, 1), and the state after it.
+ *
+ * @param state - The seeded random generator state before the draw.
+ * @returns The next number from the random at `state`, in [0, 1), and the state after it.
+ * @example
+ * ```ts
+ * import { nextRandom } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(nextRandom(42));
+ * ```
+ */
 export function nextRandom(state: number): { value: number; state: number } {
   const next = (state + 0x6d2b79f5) >>> 0;
   let mixed = Math.imul(next ^ (next >>> 15), 1 | next);
@@ -18,13 +28,35 @@ export function nextRandom(state: number): { value: number; state: number } {
   return { value: ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296, state: next };
 }
 
-/** A whole number from 0 to `below - 1`, and the state after it. */
+/** A whole number from 0 to `below - 1`, and the state after it.
+ *
+ * @param state - The seeded random generator state before the draw.
+ * @param below - The exclusive positive upper bound.
+ * @returns A whole number from 0 to `below - 1`, and the state after it.
+ * @example
+ * ```ts
+ * import { randomBelow } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(randomBelow(42,6));
+ * ```
+ */
 export function randomBelow(state: number, below: number): { value: number; state: number } {
   const drawn = nextRandom(state);
   return { value: Math.floor(drawn.value * below), state: drawn.state };
 }
 
-/** A list in a random order (Fisher and Yates), and the state after it; the list given is left alone. */
+/** A list in a random order (Fisher and Yates), and the state after it; the list given is left alone.
+ *
+ * @param state - The seeded random generator state before the draw.
+ * @param items - The items to shuffle without changing their input order.
+ * @returns A list in a random order (Fisher and Yates), and the state after it; the list given is left alone.
+ * @example
+ * ```ts
+ * import { shuffled } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(shuffled(42,["A","B","C"]));
+ * ```
+ */
 export function shuffled<T>(state: number, items: readonly T[]): { value: T[]; state: number } {
   const out = [...items];
   let at = state;
@@ -36,7 +68,18 @@ export function shuffled<T>(state: number, items: readonly T[]): { value: T[]; s
   return { value: out, state: at };
 }
 
-/** `count` dice, highest first, and the state after them. */
+/** `count` dice, highest first, and the state after them.
+ *
+ * @param state - The seeded random generator state before the draw.
+ * @param count - The player or item count requested.
+ * @returns `count` dice, highest first, and the state after them.
+ * @example
+ * ```ts
+ * import { throwDice } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(throwDice(42,3));
+ * ```
+ */
 export function throwDice(state: number, count: number): { value: number[]; state: number } {
   const dice: number[] = [];
   let at = state;
@@ -48,12 +91,32 @@ export function throwDice(state: number, count: number): { value: number[]; stat
   return { value: dice.sort((a, b) => b - a), state: at };
 }
 
-/** The most dice an attacker may throw from a territory holding `armies`: one army always stays behind. */
+/** The most dice an attacker may throw from a territory holding `armies`: one army always stays behind.
+ *
+ * @param armies - The armies present on a territory.
+ * @returns The most dice an attacker may throw from a territory holding `armies`: one army always stays behind.
+ * @example
+ * ```ts
+ * import { mostAttackDice } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(mostAttackDice(4));
+ * ```
+ */
 export function mostAttackDice(armies: number): number {
   return Math.max(0, Math.min(TENKA_ATTACK_DICE, armies - 1));
 }
 
-/** The dice a defender holding `armies` throws: as many as allowed, since more never hurts the defence. */
+/** The dice a defender holding `armies` throws: as many as allowed, since more never hurts the defence.
+ *
+ * @param armies - The armies present on a territory.
+ * @returns The dice a defender holding `armies` throws: as many as allowed, since more never hurts the defence.
+ * @example
+ * ```ts
+ * import { defendDice } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(defendDice(2));
+ * ```
+ */
 export function defendDice(armies: number): number {
   return Math.max(0, Math.min(TENKA_DEFEND_DICE, armies));
 }
@@ -63,6 +126,16 @@ export function defendDice(armies: number): number {
  * highest, as many pairs as the side with fewer dice threw. The higher die
  * wins its pair; a tie goes to the defender. Each lost pair is one army.
  * Both lists are highest first.
+ *
+ * @param attack - The attacker’s sorted dice results.
+ * @param defend - The defender’s sorted dice results.
+ * @returns WHO LOSES WHAT: the highest die of each side compared, then the next highest, as many pairs as the side with fewer dice threw. The higher die wins its pair; a tie goes to the defender. Each lost pair is one army. Both lists are highest first.
+ * @example
+ * ```ts
+ * import { battleLosses } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(battleLosses([6,3,1],[4,2]));
+ * ```
  */
 export function battleLosses(attack: readonly number[], defend: readonly number[]): { attackerLost: number; defenderLost: number } {
   let attackerLost = 0;

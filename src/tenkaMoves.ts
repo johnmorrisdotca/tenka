@@ -25,6 +25,16 @@ function span(from: number, to: number): number[] {
  * Every attack open now: from each territory of theirs with armies to spare,
  * on each neighbour somebody else holds, with each number of dice — and the
  * same attack again and again until it is decided.
+ *
+ * @param game - The current native game state.
+ * @returns Every attack open now: from each territory of theirs with armies to spare, on each neighbour somebody else holds, with each number of dice — and the same attack again and again until it is decided.
+ * @example
+ * ```ts
+ * import { attacksOpen, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(attacksOpen(game).length);
+ * ```
  */
 export function attacksOpen(game: TenkaGame): TenkaMove[] {
   if (game.phase !== TENKA_PHASES.attack) return [];
@@ -42,6 +52,16 @@ export function attacksOpen(game: TenkaGame): TenkaMove[] {
  * Every move the player to move may make now, each one `playTenka` accepts.
  * Placing is listed as one army or all still waiting, on each territory held,
  * since any spread is a run of those. None once the game is over.
+ *
+ * @param game - The current native game state.
+ * @returns Every move the player to move may make now, each one `playTenka` accepts. Placing is listed as one army or all still waiting, on each territory held, since any spread is a run of those. None once the game is over.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaMoves } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaMoves(game).slice(0,2));
+ * ```
  */
 export function tenkaMoves(game: TenkaGame): TenkaMove[] {
   switch (game.phase) {

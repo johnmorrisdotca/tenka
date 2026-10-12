@@ -25,6 +25,20 @@ const RING = { chosen: { stroke: "#111", width: 3 }, target: { stroke: "#fff", w
  * button to a screen reader and can be focused (not by Tab: `tabindex` is -1,
  * for the page to choose which one Tab lands on); `describe` words what a
  * reader hears for each, and `keys` is the drawing's description.
+ *
+ * @param model - The map model containing outlines and army counters.
+ * @param options - The component, table or display options.
+ * @returns An SVG DOM element representing the model and its labels.
+ * @example
+ * ```ts no-run
+ * import { startTenka } from "@johnmorrisdotca/tenka";
+ * import { tenkaMapModel, tenkaMapSvg } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const svg = tenkaMapSvg(tenkaMapModel(game),{label:"World conquest"});
+ * document.body.append(svg);
+ * console.log(svg.tagName);
+ * ```
  */
 export function tenkaMapSvg(
   model: TenkaMapModel,

@@ -178,6 +178,17 @@ function shift(game: TenkaGame, armies: number): TenkaGame | null {
  * The game after the player to move makes `move`, or null when they may not:
  * a move for another phase, a territory not theirs, a neighbour that is not
  * one, dice they have not the armies for, a set that is not a set.
+ *
+ * @param game - The current native game state.
+ * @param move - The native move to apply or encode.
+ * @returns The new game, or null when the move is not legal in the current phase.
+ * @example
+ * ```ts
+ * import { playTenka, startTenka, tenkaMoves } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(playTenka(game,tenkaMoves(game)[0])?.moves.length);
+ * ```
  */
 export function playTenka(game: TenkaGame, move: TenkaMove): TenkaGame | null {
   if (game.phase === TENKA_PHASES.over) return null;
@@ -216,12 +227,34 @@ export function playTenka(game: TenkaGame, move: TenkaMove): TenkaGame | null {
   return next === null ? null : recorded(next, move);
 }
 
-/** Whether the game is over. */
+/** Whether the game is over.
+ *
+ * @param game - The current native game state.
+ * @returns Whether the game is over.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaOver } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaOver(game));
+ * ```
+ */
 export function tenkaOver(game: TenkaGame): boolean {
   return game.phase === TENKA_PHASES.over;
 }
 
-/** Whether the player to move must trade cards before anything else: five or more in hand while reinforcing. */
+/** Whether the player to move must trade cards before anything else: five or more in hand while reinforcing.
+ *
+ * @param game - The current native game state.
+ * @returns Whether the player to move must trade cards before anything else: five or more in hand while reinforcing.
+ * @example
+ * ```ts
+ * import { mustTrade, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(mustTrade(game));
+ * ```
+ */
 export function mustTrade(game: TenkaGame): boolean {
   return game.phase === TENKA_PHASES.reinforce && game.hands[game.toPlay].length >= TENKA_MUST_TRADE_AT;
 }

@@ -9,10 +9,28 @@
  * `TENKA_NEUTRAL`, which is nobody's seat.
  */
 
-/** The world's six continents, by key. */
+/** The world's six continents, by key.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaWorldContinentKey } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaWorldContinentKey = "northAmerica";
+ * console.log(value);
+ * ```
+ */
 export type TenkaWorldContinentKey = "northAmerica" | "southAmerica" | "europe" | "africa" | "asia" | "australia";
 
-/** Europe's eleven regions, by key: the continents of the Europe map. */
+/** Europe's eleven regions, by key: the continents of the Europe map.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaEuropeRegionKey } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaEuropeRegionKey = "britishIsles";
+ * console.log(value);
+ * ```
+ */
 export type TenkaEuropeRegionKey =
   | "britishIsles"
   | "scandinavia"
@@ -26,10 +44,29 @@ export type TenkaEuropeRegionKey =
   | "baltic"
   | "easternEurope";
 
-/** A continent of any map, by key: the world's continents and Europe's regions. */
+/** A continent of any map, by key: the world's continents and Europe's regions.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaContinentKey } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaContinentKey = "europe";
+ * console.log(value);
+ * ```
+ */
 export type TenkaContinentKey = TenkaWorldContinentKey | TenkaEuropeRegionKey;
 
-/** One territory as the map script writes it: neighbours by land and by sea are indices into the same list. */
+/** One territory as the map script writes it: neighbours by land and by sea are indices into the same list.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaTerritoryData } from "@johnmorrisdotca/tenka";
+ * import { TENKA_MAPS } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaTerritoryData = TENKA_MAPS.world.territories[0];
+ * console.log(value);
+ * ```
+ */
 export type TenkaTerritoryData = {
   key: string;
   name: string;
@@ -38,10 +75,29 @@ export type TenkaTerritoryData = {
   sea: readonly number[];
 };
 
-/** The maps a game may be played on. */
+/** The maps a game may be played on.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaMapKey } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaMapKey = "europe";
+ * console.log(value);
+ * ```
+ */
 export type TenkaMapKey = "world" | "europe";
 
-/** A map as the rules read it: its territories, its continents and each territory's neighbours by land and by sea. */
+/** A map as the rules read it: its territories, its continents and each territory's neighbours by land and by sea.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaMap } from "@johnmorrisdotca/tenka";
+ * import { TENKA_MAPS } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaMap = TENKA_MAPS.world;
+ * console.log(value);
+ * ```
+ */
 export type TenkaMap = {
   key: TenkaMapKey;
   name: string;
@@ -51,7 +107,17 @@ export type TenkaMap = {
   neighbours: readonly (readonly number[])[];
 };
 
-/** A continent: its name, the armies holding all of it is worth each turn, and its territories. */
+/** A continent: its name, the armies holding all of it is worth each turn, and its territories.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaContinent } from "@johnmorrisdotca/tenka";
+ * import { TENKA_MAPS } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaContinent = TENKA_MAPS.world.continents[0];
+ * console.log(value);
+ * ```
+ */
 export type TenkaContinent = {
   key: TenkaContinentKey;
   name: string;
@@ -60,7 +126,17 @@ export type TenkaContinent = {
   territories: readonly number[];
 };
 
-/** How the world is drawn, in map units (`tenkaShapes.data.ts`, written by scripts/map.mjs). */
+/** How the world is drawn, in map units (`tenkaShapes.data.ts`, written by scripts/map.mjs).
+ *
+ * @example
+ * ```ts
+ * import type { TenkaShapes } from "@johnmorrisdotca/tenka/shapes";
+ * import { TENKA_SHAPES } from "@johnmorrisdotca/tenka/shapes";
+ *
+ * const value: TenkaShapes = TENKA_SHAPES;
+ * console.log(value);
+ * ```
+ */
 export type TenkaShapes = {
   width: number;
   height: number;
@@ -78,16 +154,53 @@ export type TenkaShapes = {
   outlines: readonly string[];
 };
 
-/** A player's place round the table: 0 for the first name given, up to 5. */
+/** A player's place round the table: 0 for the first name given, up to 5.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaSeat } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaSeat = 0;
+ * console.log(value);
+ * ```
+ */
 export type TenkaSeat = number;
 
-/** Who holds a territory: a seat, or `TENKA_NEUTRAL`. */
+/** Who holds a territory: a seat, or `TENKA_NEUTRAL`.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaOwner } from "@johnmorrisdotca/tenka";
+ * import { TENKA_NEUTRAL } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaOwner = TENKA_NEUTRAL;
+ * console.log(value);
+ * ```
+ */
 export type TenkaOwner = number;
 
-/** A territory's card (0–41) or a wild card (42, 43). */
+/** A territory's card (0–41) or a wild card (42, 43).
+ *
+ * @example
+ * ```ts
+ * import type { TenkaCard } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaCard = 0;
+ * console.log(value);
+ * ```
+ */
 export type TenkaCard = number;
 
-/** What a card shows: one of three kinds, or a wild card that stands for any of them. */
+/** What a card shows: one of three kinds, or a wild card that stands for any of them.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaCardKind } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaCardKind = "wild";
+ * console.log(value);
+ * ```
+ */
 export type TenkaCardKind = "land" | "sea" | "air" | "wild";
 
 /**
@@ -97,10 +210,27 @@ export type TenkaCardKind = "land" | "sea" | "air" | "wild";
  * `occupy` choosing how many move into a territory just taken; `fortify`
  * choosing one move between two of your own connected territories, and
  * `shift` how many armies it moves; `over` the end.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaPhase } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaPhase = "reinforce";
+ * console.log(value);
+ * ```
  */
 export type TenkaPhase = "setUp" | "reinforce" | "attack" | "occupy" | "fortify" | "shift" | "over";
 
-/** Starting armies placed at random, or by hand in turn. */
+/** Starting armies placed at random, or by hand in turn.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaPlacing } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaPlacing = "hand";
+ * console.log(value);
+ * ```
+ */
 export type TenkaPlacing = "auto" | "hand";
 
 /**
@@ -109,6 +239,14 @@ export type TenkaPlacing = "auto" | "hand";
  * up), `attack`, `blitz` and `endAttack` while attacking, `occupy` after
  * taking a territory, `fortify` and `endTurn` while fortifying, and `shift`
  * once a fortifying move is chosen. `tenkaMoves(game)` lists the ones open.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaMove } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaMove = {kind:"endTurn"};
+ * console.log(value);
+ * ```
  */
 export type TenkaMove =
   | { kind: "place"; territory: number; armies: number }
@@ -122,10 +260,29 @@ export type TenkaMove =
   | { kind: "shift"; armies: number }
   | { kind: "endTurn" };
 
-/** The kinds of move, by name. */
+/** The kinds of move, by name.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaMoveKind } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaMoveKind = "attack";
+ * console.log(value);
+ * ```
+ */
 export type TenkaMoveKind = TenkaMove["kind"];
 
-/** One roll of the dice — or the last of a run of them (`blitz`) — what each side threw, highest first, and what each lost in all. */
+/** One roll of the dice — or the last of a run of them (`blitz`) — what each side threw, highest first, and what each lost in all.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaRoll } from "@johnmorrisdotca/tenka";
+ * import { defendDice } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaRoll = {from:0,to:1,attacker:0,defender:1,attackDice:[6],defendDice:[3],attackerLost:0,defenderLost:1,throws:1,took:true};
+ * console.log(value);
+ * ```
+ */
 export type TenkaRoll = {
   from: number;
   to: number;
@@ -142,7 +299,16 @@ export type TenkaRoll = {
   took: boolean;
 };
 
-/** The last set of cards traded in, for the table to see: by whom, for how many, and the territory that got two more. */
+/** The last set of cards traded in, for the table to see: by whom, for how many, and the territory that got two more.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaTrade } from "@johnmorrisdotca/tenka";
+ *
+ * const value: TenkaTrade = {seat:0,cards:[0,1,2],armies:4,bonusTerritory:null};
+ * console.log(value);
+ * ```
+ */
 export type TenkaTrade = { seat: TenkaSeat; cards: readonly TenkaCard[]; armies: number; bonusTerritory: number | null };
 
 /**
@@ -151,6 +317,16 @@ export type TenkaTrade = { seat: TenkaSeat; cards: readonly TenkaCard[]; armies:
  * else is read again from them, dice and all, since every die is drawn from
  * the game's own seeded random (`rng`). A kept game can never hold a world
  * its moves do not make.
+ *
+ * @example
+ * ```ts
+ * import { startTenka } from "@johnmorrisdotca/tenka";
+ * import type { TenkaGame } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const value: TenkaGame = game;
+ * console.log(value);
+ * ```
  */
 export type TenkaGame = {
   /** The map it is played on; left out for the world, so a game saved before there was a choice reads as it did. */
@@ -208,7 +384,17 @@ export type TenkaGame = {
   winners: readonly TenkaSeat[];
 };
 
-/** A choice made on the map and not yet a move: where from, where to, and how many armies (`tapTerritory`). */
+/** A choice made on the map and not yet a move: where from, where to, and how many armies (`tapTerritory`).
+ *
+ * @example
+ * ```ts
+ * import type { TenkaChoice } from "@johnmorrisdotca/tenka";
+ *
+ * const choice = {from:null,to:null,armies:1,placedOn:null};
+ * const value: TenkaChoice = choice;
+ * console.log(value);
+ * ```
+ */
 export type TenkaChoice = {
   from: number | null;
   to: number | null;
@@ -218,7 +404,19 @@ export type TenkaChoice = {
   placedOn: number | null;
 };
 
-/** What the map lights up for a choice (`marksFor`): the territory chosen, what it can reach, and the target. */
+/** What the map lights up for a choice (`marksFor`): the territory chosen, what it can reach, and the target.
+ *
+ * @example
+ * ```ts
+ * import { marksFor, startTenka } from "@johnmorrisdotca/tenka";
+ * import type { TenkaMapMarks } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const choice = {from:null,to:null,armies:1,placedOn:null};
+ * const value: TenkaMapMarks = marksFor(game,choice);
+ * console.log(value);
+ * ```
+ */
 export type TenkaMapMarks = {
   chosen: number | null;
   reach: readonly number[];

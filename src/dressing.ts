@@ -30,7 +30,16 @@ import type { TenkaCardHow, TenkaDieHow, TenkaDrawn, TenkaDressing } from "./ui/
 export { tenkaCardDesign, tenkaCardId, tenkaCardOfId } from "./dressingCards.ts";
 export type { TenkaBackHow, TenkaCardHow, TenkaDieHow, TenkaDrawn, TenkaDressing } from "./ui/dressing.types.ts";
 
-/** What `tenkaDressing` may be given. Everything is optional. */
+/** What `tenkaDressing` may be given. Everything is optional.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaDressingOptions } from "@johnmorrisdotca/tenka/dressing";
+ *
+ * const value: TenkaDressingOptions = {sound:false,tumbleMs:200};
+ * console.log(value);
+ * ```
+ */
 export type TenkaDressingOptions = {
   /** Whether a throw makes the sound of dice: off unless asked, because a page that has not asked for noise gets none. */
   sound?: boolean;
@@ -40,7 +49,14 @@ export type TenkaDressingOptions = {
   back?: CardBackOptions;
 };
 
-/** Tenka's own back, as the deck shows it. */
+/** Tenka's own back, as the deck shows it.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_BACK } from "@johnmorrisdotca/tenka/dressing";
+ * console.log(TENKA_BACK);
+ * ```
+ */
 export const TENKA_BACK: CardBackOptions = { colour: "#2f5d4a", ink: "#e9dfc3", paper: "#fffdf8", mark: "天" };
 
 const DEFAULT_TUMBLE_MS = 600;
@@ -48,6 +64,15 @@ const DEFAULT_TUMBLE_MS = 600;
 /**
  * A random source for Korokoro that comes up with `face` on a die of six: how a die is made to tumble onto the face
  * the game has already thrown. Korokoro picks a face from the source it is given, and this one picks the one asked for.
+ *
+ * @param face - The die face to reproduce.
+ * @returns A random source for Korokoro that comes up with `face` on a die of six: how a die is made to tumble onto the face the game has already thrown. Korokoro picks a face from the source it is given, and this one picks the one asked for.
+ * @example
+ * ```ts
+ * import { tenkaThrownDie } from "@johnmorrisdotca/tenka/dressing";
+ *
+ * console.log(tenkaThrownDie(4).next());
+ * ```
  */
 export function tenkaThrownDie(face: number): RandomSource {
   return { seed: null, next: () => face - 1 };
@@ -63,6 +88,15 @@ function elementOf(markup: string): Element {
 /**
  * Tenka's dice and cards, drawn by the packages that draw them best: give the result to `mountTenka`, to the React
  * `TenkaTable`, or to a `<tenka-table>`'s `dressing`.
+ *
+ * @param options - The component, table or display options.
+ * @returns Tenka's dice and cards, drawn by the packages that draw them best: give the result to `mountTenka`, to the React `TenkaTable`, or to a `<tenka-table>`'s `dressing`.
+ * @example
+ * ```ts
+ * import { tenkaDressing } from "@johnmorrisdotca/tenka/dressing";
+ *
+ * console.log(Object.keys(tenkaDressing({sound:false})));
+ * ```
  */
 export function tenkaDressing(options: TenkaDressingOptions = {}): TenkaDressing {
   const tumbleMs = Math.max(0, options.tumbleMs ?? DEFAULT_TUMBLE_MS);

@@ -67,16 +67,41 @@ function mapOf(key: TenkaMapKey, name: string, kanji: string, territories: reado
   return { key, name, kanji, territories, continents, neighbours: territories.map((territory) => [...territory.land, ...territory.sea]) };
 }
 
-/** Every map a game may be played on, by key. */
+/** Every map a game may be played on, by key.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_MAPS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_MAPS);
+ * ```
+ */
 export const TENKA_MAPS: Readonly<Record<TenkaMapKey, TenkaMap>> = {
   world: mapOf("world", "The World", "世界", TENKA_TERRITORY_DATA, WORLD_CONTINENTS),
   europe: mapOf("europe", "Europe", "欧州", TENKA_EUROPE_TERRITORY_DATA, EUROPE_REGIONS),
 };
 
-/** The maps in the order a set-up offers them: the world first, the usual one. */
+/** The maps in the order a set-up offers them: the world first, the usual one.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_MAP_LIST } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_MAP_LIST);
+ * ```
+ */
 export const TENKA_MAP_LIST: readonly TenkaMapKey[] = ["world", "europe"];
 
-/** The map a game is played on: the one it was started on, and the world for a game saved before there was a choice. */
+/** The map a game is played on: the one it was started on, and the world for a game saved before there was a choice.
+ *
+ * @param game - The current native game state.
+ * @returns The map a game is played on: the one it was started on, and the world for a game saved before there was a choice.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaMapOf } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaMapOf(game).key);
+ * ```
+ */
 export function tenkaMapOf(game: Pick<TenkaGame, "map"> | TenkaMapKey | undefined): TenkaMap {
   const key = typeof game === "string" ? game : game?.map;
   return TENKA_MAPS[key ?? "world"] ?? TENKA_MAPS.world;
@@ -87,46 +112,147 @@ const WORLD = TENKA_MAPS.world;
 /**
  * The map an argument names, and the world for anything that is not one: these functions are handed to an
  * array's `map` and `filter` (`deck.map(cardKind)`), which pass an index where the map would go.
+ *
+ * @param map - The native world or Europe map to use.
+ * @returns The map an argument names, and the world for anything that is not one: these functions are handed to an array's `map` and `filter` (`deck.map(cardKind)`), which pass an index where the map would go.
+ * @example
+ * ```ts
+ * import { boardOf } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(boardOf("europe").key);
+ * ```
  */
 export function boardOf(map: unknown): TenkaMap {
   return typeof map === "object" && map !== null && "territories" in map && "neighbours" in map ? (map as TenkaMap) : WORLD;
 }
 
-/** The world's territories: the map a game is played on unless it says otherwise. */
+/** The world's territories: the map a game is played on unless it says otherwise.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_TERRITORIES } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_TERRITORIES);
+ * ```
+ */
 export const TENKA_TERRITORIES = WORLD.territories;
 
-/** How many territories the world has: forty-two. */
+/** How many territories the world has: forty-two.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_TERRITORY_COUNT } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_TERRITORY_COUNT);
+ * ```
+ */
 export const TENKA_TERRITORY_COUNT = TENKA_TERRITORIES.length;
 
-/** The world's six continents, each with the territories in it. */
+/** The world's six continents, each with the territories in it.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_CONTINENTS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_CONTINENTS);
+ * ```
+ */
 export const TENKA_CONTINENTS: readonly TenkaContinent[] = WORLD.continents;
 
-/** A continent of a map by its key. */
+/** A continent of a map by its key.
+ *
+ * @param key - The continent identifier, or null to show the whole map.
+ * @param map - The native world or Europe map to use.
+ * @returns A continent of a map by its key.
+ * @example
+ * ```ts
+ * import { tenkaContinent } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(tenkaContinent("europe").bonus);
+ * ```
+ */
 export function tenkaContinent(key: TenkaContinentKey, map: TenkaMap = WORLD): TenkaContinent {
   return boardOf(map).continents.find((continent) => continent.key === key)!;
 }
 
-/** A territory's neighbours, by land and by sea. */
+/** A territory's neighbours, by land and by sea.
+ *
+ * @param territory - The native territory index.
+ * @param map - The native world or Europe map to use.
+ * @returns A territory's neighbours, by land and by sea.
+ * @example
+ * ```ts
+ * import { tenkaNeighbours } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(tenkaNeighbours(0));
+ * ```
+ */
 export function tenkaNeighbours(territory: number, map: TenkaMap = WORLD): readonly number[] {
   return boardOf(map).neighbours[territory] ?? [];
 }
 
-/** Whether two territories are neighbours, by land or by sea. */
+/** Whether two territories are neighbours, by land or by sea.
+ *
+ * @param a - The first territory index.
+ * @param b - The second territory index.
+ * @param map - The native world or Europe map to use.
+ * @returns Whether two territories are neighbours, by land or by sea.
+ * @example
+ * ```ts
+ * import { areNeighbours } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(areNeighbours(0,1));
+ * ```
+ */
 export function areNeighbours(a: number, b: number, map: TenkaMap = WORLD): boolean {
   return tenkaNeighbours(a, map).includes(b);
 }
 
-/** Whether a number is a territory of the map. */
+/** Whether a number is a territory of the map.
+ *
+ * @param territory - The native territory index.
+ * @param map - The native world or Europe map to use.
+ * @returns Whether a number is a territory of the map.
+ * @example
+ * ```ts
+ * import { isTerritory } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(isTerritory(42));
+ * ```
+ */
 export function isTerritory(territory: number, map: TenkaMap = WORLD): boolean {
   return Number.isInteger(territory) && territory >= 0 && territory < boardOf(map).territories.length;
 }
 
-/** The continents a seat holds every territory of. */
+/** The continents a seat holds every territory of.
+ *
+ * @param owners - The territory owners in native map order.
+ * @param seat - The zero-based player seat.
+ * @param map - The native world or Europe map to use.
+ * @returns The continents a seat holds every territory of.
+ * @example
+ * ```ts
+ * import { continentsHeld, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(continentsHeld(game.owners,0).map(c=>c.key));
+ * ```
+ */
 export function continentsHeld(owners: readonly TenkaOwner[], seat: TenkaOwner, map: TenkaMap = WORLD): TenkaContinent[] {
   return boardOf(map).continents.filter((continent) => continent.territories.every((territory) => owners[territory] === seat));
 }
 
-/** Every territory of the same owner reachable from this one through that owner's own territories, in order; never the territory itself. */
+/** Every territory of the same owner reachable from this one through that owner's own territories, in order; never the territory itself.
+ *
+ * @param owners - The territory owners in native map order.
+ * @param from - The source territory index.
+ * @param map - The native world or Europe map to use.
+ * @returns Every territory of the same owner reachable from this one through that owner's own territories, in order; never the territory itself.
+ * @example
+ * ```ts
+ * import { connectedOwn, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(connectedOwn(game.owners,game.owners.findIndex(owner=>owner===0)));
+ * ```
+ */
 export function connectedOwn(owners: readonly TenkaOwner[], from: number, map: TenkaMap = WORLD): number[] {
   const seat = owners[from];
   const seen = new Set<number>([from]);

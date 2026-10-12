@@ -1,7 +1,16 @@
 import type { TenkaCardKind, TenkaMapKey } from "../tenka.types.ts";
 import type { TenkaLocale } from "../strings.ts";
 
-/** Something a dressing drew: the element to put on the table, and what to do when the table takes it away again (stop a timer, say). */
+/** Something a dressing drew: the element to put on the table, and what to do when the table takes it away again (stop a timer, say).
+ *
+ * @example
+ * ```ts no-run
+ * import type { TenkaDrawn } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaDrawn = {element:document.createElement("span")};
+ * console.log(value);
+ * ```
+ */
 export type TenkaDrawn = {
   /** What goes on the table. */
   readonly element: Element;
@@ -9,7 +18,16 @@ export type TenkaDrawn = {
   readonly destroy?: () => void;
 };
 
-/** What a dressing is told about a die it is asked to draw. */
+/** What a dressing is told about a die it is asked to draw.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaDieHow } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaDieHow = {side:"attack",tumble:false,index:0,count:3,label:"Attack die",locale:"en"};
+ * console.log(value);
+ * ```
+ */
 export type TenkaDieHow = {
   /** Whose die it is: the attacker's or the defender's. */
   side: "attack" | "defend";
@@ -25,7 +43,16 @@ export type TenkaDieHow = {
   locale: TenkaLocale;
 };
 
-/** What a dressing is told about a card it is asked to draw. */
+/** What a dressing is told about a card it is asked to draw.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaCardHow } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaCardHow = {card:0,territory:0,kind:"land",map:"world",name:"Alaska",label:"Alaska",locale:"en"};
+ * console.log(value);
+ * ```
+ */
 export type TenkaCardHow = {
   /** The card's number: 0 and up the territories', then the two wild cards. */
   card: number;
@@ -43,7 +70,16 @@ export type TenkaCardHow = {
   locale: TenkaLocale;
 };
 
-/** What a dressing is told about the back it is asked to draw. */
+/** What a dressing is told about the back it is asked to draw.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaBackHow } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaBackHow = {label:"Card back",locale:"en"};
+ * console.log(value);
+ * ```
+ */
 export type TenkaBackHow = {
   /** What a screen reader says: the deck and how many cards are left in it. */
   label: string;
@@ -60,6 +96,14 @@ export type TenkaBackHow = {
  * replays move for move whatever it is dressed in. Anything left out is drawn
  * the plain way. `tenkaDressing` from `@johnmorrisdotca/tenka/dressing` makes
  * one out of Korokoro's dice and Toranpu's cards.
+ *
+ * @example
+ * ```ts no-run
+ * import type { TenkaDressing } from "@johnmorrisdotca/tenka/ui";
+ *
+ * const value: TenkaDressing = {back:()=>({element:document.createElement("span")})};
+ * console.log(value);
+ * ```
  */
 export type TenkaDressing = {
   /** One die of the last throw, showing `face` (1 to 6). */

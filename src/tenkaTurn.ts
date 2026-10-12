@@ -9,25 +9,71 @@ import { TENKA_MAPS, continentsHeld, tenkaMapOf } from "./tenkaMap.ts";
  * each returns a new game.
  */
 
-/** A name as the table typed it, tidied: spaces run together, trimmed, cut to `TENKA_NAME_MOST`. */
+/** A name as the table typed it, tidied: spaces run together, trimmed, cut to `TENKA_NAME_MOST`.
+ *
+ * @param name - The player name to clean for display.
+ * @returns A name as the table typed it, tidied: spaces run together, trimmed, cut to `TENKA_NAME_MOST`.
+ * @example
+ * ```ts
+ * import { cleanTenkaName } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(cleanTenkaName("  Seat 1  "));
+ * ```
+ */
 export function cleanTenkaName(name: string): string {
   return name.replace(/\s+/g, " ").trim().slice(0, TENKA_NAME_MOST);
 }
 
-/** A seat's name as the table reads it: the one given, or "Player 3". */
+/** A seat's name as the table reads it: the one given, or "Player 3".
+ *
+ * @param game - The current native game state.
+ * @param seat - The zero-based player seat.
+ * @returns A seat's name as the table reads it: the one given, or "Player 3".
+ * @example
+ * ```ts
+ * import { startTenka, tenkaPlayerName } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaPlayerName(game,0));
+ * ```
+ */
 export function tenkaPlayerName(game: Pick<TenkaGame, "players">, seat: TenkaSeat): string {
   const given = game.players[seat]?.trim() ?? "";
   return given === "" ? `Player ${seat + 1}` : given;
 }
 
-/** How many territories an owner holds. */
+/** How many territories an owner holds.
+ *
+ * @param owners - The territory owners in native map order.
+ * @param owner - The seat index, or the neutral-owner marker.
+ * @returns How many territories an owner holds.
+ * @example
+ * ```ts
+ * import { startTenka, territoriesHeld } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(territoriesHeld(game.owners,0));
+ * ```
+ */
 export function territoriesHeld(owners: readonly TenkaOwner[], owner: TenkaOwner): number {
   let count = 0;
   for (const holder of owners) if (holder === owner) count += 1;
   return count;
 }
 
-/** How many armies an owner has on the map. */
+/** How many armies an owner has on the map.
+ *
+ * @param game - The current native game state.
+ * @param owner - The seat index, or the neutral-owner marker.
+ * @returns How many armies an owner has on the map.
+ * @example
+ * ```ts
+ * import { armiesHeld, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(armiesHeld(game,0));
+ * ```
+ */
 export function armiesHeld(game: Pick<TenkaGame, "owners" | "armies">, owner: TenkaOwner): number {
   let count = 0;
   game.owners.forEach((holder, territory) => {
@@ -40,6 +86,18 @@ export function armiesHeld(game: Pick<TenkaGame, "owners" | "armies">, owner: Te
  * THE ARMIES A TURN BRINGS: one for every three territories held, never
  * fewer than three, and each continent held whole adds its bonus. Cards
  * traded in come on top (`tenka.ts`).
+ *
+ * @param owners - The territory owners in native map order.
+ * @param seat - The zero-based player seat.
+ * @param map - The native world or Europe map to use.
+ * @returns THE ARMIES A TURN BRINGS: one for every three territories held, never fewer than three, and each continent held whole adds its bonus. Cards traded in come on top (`tenka.ts`).
+ * @example
+ * ```ts
+ * import { reinforcementFor, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(reinforcementFor(game.owners,0));
+ * ```
  */
 export function reinforcementFor(owners: readonly TenkaOwner[], seat: TenkaSeat, map: TenkaMap = TENKA_MAPS.world): number {
   const fromLand = Math.max(TENKA_LEAST_REINFORCEMENT, Math.floor(territoriesHeld(owners, seat) / TENKA_TERRITORIES_PER_ARMY));
@@ -51,7 +109,19 @@ function placeInRound(game: TenkaGame, seat: TenkaSeat): number {
   return (seat - game.first + game.players.length) % game.players.length;
 }
 
-/** The next player still in after `seat`, round the table; the neutral army never takes a turn. */
+/** The next player still in after `seat`, round the table; the neutral army never takes a turn.
+ *
+ * @param game - The current native game state.
+ * @param seat - The zero-based player seat.
+ * @returns The next player still in after `seat`, round the table; the neutral army never takes a turn.
+ * @example
+ * ```ts
+ * import { nextSeatIn, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(nextSeatIn(game,game.toPlay));
+ * ```
+ */
 export function nextSeatIn(game: TenkaGame, seat: TenkaSeat): TenkaSeat {
   for (let step = 1; step <= game.players.length; step += 1) {
     const next = (seat + step) % game.players.length;
@@ -60,7 +130,20 @@ export function nextSeatIn(game: TenkaGame, seat: TenkaSeat): TenkaSeat {
   return seat;
 }
 
-/** A turn starting for `seat`: its armies worked out, nothing yet taken, nothing rolled. */
+/** A turn starting for `seat`: its armies worked out, nothing yet taken, nothing rolled.
+ *
+ * @param game - The current native game state.
+ * @param seat - The zero-based player seat.
+ * @param round - The round number of the turn.
+ * @returns A turn starting for `seat`: its armies worked out, nothing yet taken, nothing rolled.
+ * @example
+ * ```ts
+ * import { beginTurn, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(beginTurn(game,0,2).round);
+ * ```
+ */
 export function beginTurn(game: TenkaGame, seat: TenkaSeat, round: number): TenkaGame {
   return {
     ...game,
@@ -76,7 +159,19 @@ export function beginTurn(game: TenkaGame, seat: TenkaSeat, round: number): Tenk
   };
 }
 
-/** The game ended, with these seats winning. */
+/** The game ended, with these seats winning.
+ *
+ * @param game - The current native game state.
+ * @param winners - The seat indices declared winners.
+ * @returns The game ended, with these seats winning.
+ * @example
+ * ```ts
+ * import { finished, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(finished(game,[0]).winners);
+ * ```
+ */
 export function finished(game: TenkaGame, winners: readonly TenkaSeat[]): TenkaGame {
   return { ...game, phase: TENKA_PHASES.over, reserve: 0, occupying: null, shifting: null, winners: [...winners].sort((a, b) => a - b) };
 }
@@ -85,6 +180,16 @@ export function finished(game: TenkaGame, winners: readonly TenkaSeat[]): TenkaG
  * THE COUNT, when the last round is over: whoever holds the most
  * territories wins; level on territories, whoever has more armies on the
  * map; level on both, they share the win.
+ *
+ * @param game - The current native game state.
+ * @returns THE COUNT, when the last round is over: whoever holds the most territories wins; level on territories, whoever has more armies on the map; level on both, they share the win.
+ * @example
+ * ```ts
+ * import { counted, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(counted(game).winners);
+ * ```
  */
 export function counted(game: TenkaGame): TenkaGame {
   const standing = game.players.flatMap((_, seat) => (game.out[seat] ? [] : [{ seat, held: territoriesHeld(game.owners, seat), armies: armiesHeld(game, seat) }]));
@@ -116,6 +221,16 @@ function drawCard(game: TenkaGame, seat: TenkaSeat): TenkaGame {
  * THE END OF A TURN: a card for a player who took a territory in it, then
  * the next player still in. Passing the first player's place starts a new
  * round, and past the last round the game is counted.
+ *
+ * @param game - The current native game state.
+ * @returns THE END OF A TURN: a card for a player who took a territory in it, then the next player still in. Passing the first player's place starts a new round, and past the last round the game is counted.
+ * @example
+ * ```ts
+ * import { endOfTurn, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(endOfTurn(game).toPlay);
+ * ```
  */
 export function endOfTurn(game: TenkaGame): TenkaGame {
   const drawn = game.conquered ? drawCard(game, game.toPlay) : { ...game, lastDraw: null };

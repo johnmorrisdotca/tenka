@@ -27,7 +27,17 @@ const KEPT_VERSION = 2;
 
 type Kept = (string | number)[];
 
-/** A move as the short list it is kept as — and sent as, to the other devices at a table played on several. */
+/** A move as the short list it is kept as — and sent as, to the other devices at a table played on several.
+ *
+ * @param move - The native move to apply or encode.
+ * @returns A move as the short list it is kept as — and sent as, to the other devices at a table played on several.
+ * @example
+ * ```ts
+ * import { writeTenkaMove } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(writeTenkaMove({kind:"endTurn"}));
+ * ```
+ */
 export function writeTenkaMove(move: TenkaMove): Kept {
   switch (move.kind) {
     case TENKA_MOVES.place:
@@ -51,7 +61,17 @@ export function writeTenkaMove(move: TenkaMove): Kept {
   }
 }
 
-/** A kept move read back, or null for anything that is not one. */
+/** A kept move read back, or null for anything that is not one.
+ *
+ * @param kept - The unknown compact move data to parse.
+ * @returns The parsed move, or null when the compact shape is not recognized.
+ * @example
+ * ```ts
+ * import { readTenkaMove } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(readTenkaMove(["t"]));
+ * ```
+ */
 export function readTenkaMove(kept: unknown): TenkaMove | null {
   if (!Array.isArray(kept) || typeof kept[0] !== "string") return null;
   const [letter, ...rest] = kept as [string, ...unknown[]];
@@ -82,7 +102,18 @@ export function readTenkaMove(kept: unknown): TenkaMove | null {
   }
 }
 
-/** A game made again from its table and its moves, or null if any move could not have been made when it was. */
+/** A game made again from its table and its moves, or null if any move could not have been made when it was.
+ *
+ * @param table - The original round limit, players, seed, placement and map.
+ * @param moves - The native moves in chronological order.
+ * @returns The replayed game, or null for invalid setup or any refused move.
+ * @example
+ * ```ts
+ * import { replayTenka } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(replayTenka({rounds:10,players:["Seat 1","Seat 2"],seed:42,placing:"auto"},[] )?.seed);
+ * ```
+ */
 export function replayTenka(
   table: { rounds: number; players: readonly string[]; seed: number; placing: TenkaPlacing; map?: TenkaMapKey },
   moves: readonly TenkaMove[],
@@ -95,7 +126,18 @@ export function replayTenka(
   return game;
 }
 
-/** A game as text to keep: its table and its moves. */
+/** A game as text to keep: its table and its moves.
+ *
+ * @param game - The current native game state.
+ * @returns A game as text to keep: its table and its moves.
+ * @example
+ * ```ts
+ * import { encodeTenka, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(encodeTenka(game));
+ * ```
+ */
 export function encodeTenka(game: TenkaGame): string {
   return JSON.stringify({
     v: KEPT_VERSION,
@@ -113,6 +155,16 @@ export function encodeTenka(game: TenkaGame): string {
  * A kept game read back, or null for nothing kept, or for text that is not a
  * game these rules can play out again: a browser's storage is somebody's to
  * edit, and a half-understood game is worse than none.
+ *
+ * @param text - The encoded game text to validate and replay.
+ * @returns The reconstructed game, or null for absent, malformed, unsupported or illegal saved data.
+ * @example
+ * ```ts
+ * import { decodeTenka, encodeTenka, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(decodeTenka(encodeTenka(game))?.seed);
+ * ```
  */
 export function decodeTenka(text: string | null): TenkaGame | null {
   if (text === null) return null;

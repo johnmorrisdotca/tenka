@@ -32,12 +32,33 @@ const CONTINENT_FILLS = ["#e1bd63", "#d0766b", "#7b9bcf", "#c99458", "#8dba7b", 
 
 const escapeXml = (text: string): string => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** The id of a card in Toranpu's hands: `tenka-world-12` for the world's twelfth territory, `tenka-wild` for a wild card. */
+/** The id of a card in Toranpu's hands: `tenka-world-12` for the world's twelfth territory, `tenka-wild` for a wild card.
+ *
+ * @param map - The native world or Europe map to use.
+ * @param territory - The native territory index.
+ * @returns The id of a card in Toranpu's hands: `tenka-world-12` for the world's twelfth territory, `tenka-wild` for a wild card.
+ * @example
+ * ```ts
+ * import { tenkaCardId } from "@johnmorrisdotca/tenka/dressing";
+ *
+ * console.log(tenkaCardId("world",0));
+ * ```
+ */
 export function tenkaCardId(map: TenkaMapKey, territory: number | null): string {
   return territory === null ? "tenka-wild" : `tenka-${map}-${territory}`;
 }
 
-/** The map and territory an id of `tenkaCardId` names, or null for a wild card (`wild: true`) or anything else. */
+/** The map and territory an id of `tenkaCardId` names, or null for a wild card (`wild: true`) or anything else.
+ *
+ * @param id - A native Tenka card identifier.
+ * @returns The map and territory for a native card id, a wild marker for a wild id, or null for an unknown id.
+ * @example
+ * ```ts
+ * import { tenkaCardId, tenkaCardOfId } from "@johnmorrisdotca/tenka/dressing";
+ *
+ * console.log(tenkaCardOfId(tenkaCardId("world",0)));
+ * ```
+ */
 export function tenkaCardOfId(id: string): { map: TenkaMapKey; territory: number } | { wild: true } | null {
   if (id === "tenka-wild") return { wild: true };
   const found = /^tenka-(\w+)-(\d+)$/.exec(id);
@@ -132,6 +153,14 @@ function wildCard(language: TenkaLocale): string {
  * territory's shape and name with its army's symbol, on its paper and in its frame. Register it
  * (`registerCardDesign(tenkaCardDesign())`) for `<toranpu-card design="tenka">` and the rest of Toranpu's elements to
  * draw Tenka's cards by id.
+ *
+ * @returns Tenka's cards as a Toranpu design: ask Toranpu for `tenkaCardId(map, territory)` in this design and it draws the territory's shape and name with its army's symbol, on its paper and in its frame. Register it (`registerCardDesign(tenkaCardDesign())`) for `<toranpu-card design="tenka">` and the rest of Toranpu's elements to draw Tenka's cards by id.
+ * @example
+ * ```ts
+ * import { tenkaCardDesign } from "@johnmorrisdotca/tenka/dressing";
+ *
+ * console.log(tenkaCardDesign().name);
+ * ```
  */
 export function tenkaCardDesign(): CardDesign {
   return {

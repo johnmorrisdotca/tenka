@@ -16,7 +16,14 @@ import { areNeighbours, connectedOwn, tenkaMapOf, tenkaNeighbours } from "./tenk
  *            land lit up as where the armies may go.
  */
 
-/** Nothing chosen: where a turn, and a table, start. */
+/** Nothing chosen: where a turn, and a table, start.
+ *
+ * @example
+ * ```ts
+ * import { NO_CHOICE } from "@johnmorrisdotca/tenka";
+ * console.log(NO_CHOICE);
+ * ```
+ */
 export const NO_CHOICE: TenkaChoice = { from: null, to: null, armies: 0, placedOn: null };
 
 function isOwn(game: TenkaGame, territory: number): boolean {
@@ -27,7 +34,20 @@ function canLeave(game: TenkaGame, territory: number): boolean {
   return isOwn(game, territory) && game.armies[territory] >= 2;
 }
 
-/** A choice made on an earlier map, read against this one: only what still stands, and a number of armies the move can take. */
+/** A choice made on an earlier map, read against this one: only what still stands, and a number of armies the move can take.
+ *
+ * @param game - The current native game state.
+ * @param choice - The current user-interface selection.
+ * @returns A choice made on an earlier map, read against this one: only what still stands, and a number of armies the move can take.
+ * @example
+ * ```ts
+ * import { choiceNow, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const choice = {from:null,to:null,armies:1,placedOn:null};
+ * console.log(choiceNow(game,choice));
+ * ```
+ */
 export function choiceNow(game: TenkaGame, choice: TenkaChoice): TenkaChoice {
   switch (game.phase) {
     case TENKA_PHASES.reinforce:
@@ -54,7 +74,21 @@ export function choiceNow(game: TenkaGame, choice: TenkaChoice): TenkaChoice {
   }
 }
 
-/** What tapping `territory` does now: a new choice, and the move to make at once, if the tap is one. */
+/** What tapping `territory` does now: a new choice, and the move to make at once, if the tap is one.
+ *
+ * @param game - The current native game state.
+ * @param choice - The current user-interface selection.
+ * @param territory - The native territory index.
+ * @returns The new selection and a move to apply; move is null when the tap only changes the selection.
+ * @example
+ * ```ts
+ * import { startTenka, tapTerritory } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const choice = {from:null,to:null,armies:1,placedOn:null};
+ * console.log(tapTerritory(game,choice,0));
+ * ```
+ */
 export function tapTerritory(game: TenkaGame, choice: TenkaChoice, territory: number): { choice: TenkaChoice; move: TenkaMove | null } {
   const now = choiceNow(game, choice);
   switch (game.phase) {
@@ -80,7 +114,20 @@ export function tapTerritory(game: TenkaGame, choice: TenkaChoice, territory: nu
   }
 }
 
-/** What the map lights up for a choice. */
+/** What the map lights up for a choice.
+ *
+ * @param game - The current native game state.
+ * @param choice - The current user-interface selection.
+ * @returns What the map lights up for a choice.
+ * @example
+ * ```ts
+ * import { marksFor, startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const choice = {from:null,to:null,armies:1,placedOn:null};
+ * console.log(marksFor(game,choice));
+ * ```
+ */
 export function marksFor(game: TenkaGame, choice: TenkaChoice): TenkaMapMarks {
   const now = choiceNow(game, choice);
   switch (game.phase) {

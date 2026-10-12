@@ -5,15 +5,43 @@ import { randomBelow, shuffled } from "./tenkaDice.ts";
 import { TENKA_MAPS } from "./tenkaMap.ts";
 import { beginTurn, cleanTenkaName, territoriesHeld } from "./tenkaTurn.ts";
 
-/** The largest seed a game keeps: the random's state is one 32-bit number. */
+/** The largest seed a game keeps: the random's state is one 32-bit number.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_SEED_MOST } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_SEED_MOST);
+ * ```
+ */
 export const TENKA_SEED_MOST = 0xffffffff;
 
-/** Whether a game this long for this many players is one Tenka is offered for. */
+/** Whether a game this long for this many players is one Tenka is offered for.
+ *
+ * @param rounds - The supported round limit for the table.
+ * @param count - The player or item count requested.
+ * @returns Whether a game this long for this many players is one Tenka is offered for.
+ * @example
+ * ```ts
+ * import { isTenkaTable } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(isTenkaTable(10,2));
+ * ```
+ */
 export function isTenkaTable(rounds: number, count: number): boolean {
   return TENKA_LENGTHS.includes(rounds) && Number.isInteger(count) && count >= TENKA_FEWEST_PLAYERS && count <= TENKA_MOST_PLAYERS;
 }
 
-/** Whether a number is a seed a game can be dealt from: a whole number from 0 to `TENKA_SEED_MOST`. */
+/** Whether a number is a seed a game can be dealt from: a whole number from 0 to `TENKA_SEED_MOST`.
+ *
+ * @param seed - The unsigned 32-bit starting seed.
+ * @returns Whether a number is a seed a game can be dealt from: a whole number from 0 to `TENKA_SEED_MOST`.
+ * @example
+ * ```ts
+ * import { isTenkaSeed } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(isTenkaSeed(42));
+ * ```
+ */
 export function isTenkaSeed(seed: number): boolean {
   return Number.isInteger(seed) && seed >= 0 && seed <= TENKA_SEED_MOST;
 }
@@ -40,6 +68,19 @@ function scatter(armies: number[], owners: readonly TenkaOwner[], owner: TenkaOw
  * one at a time round the table. The neutral army's are always scattered.
  *
  * Null for a table the game is not offered for, or a seed that is not one.
+ *
+ * @param rounds - The supported round limit for the table.
+ * @param players - The two to six local player names.
+ * @param seed - The unsigned 32-bit starting seed.
+ * @param placing - Automatic or manual initial reinforcement placement.
+ * @param map - The native world or Europe map to use.
+ * @returns The initial game, or null for an invalid round limit, player count, seed, placement or map.
+ * @example
+ * ```ts
+ * import { startTenka } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(startTenka(10,["Seat 1","Seat 2"],42)?.phase);
+ * ```
  */
 export function startTenka(rounds: number, players: readonly string[], seed: number, placing: TenkaPlacing = TENKA_PLACING.auto, map: TenkaMapKey = "world"): TenkaGame | null {
   if (!isTenkaTable(rounds, players.length) || !isTenkaSeed(seed)) return null;
@@ -114,7 +155,19 @@ export function startTenka(rounds: number, players: readonly string[], seed: num
   return placing === TENKA_PLACING.auto ? beginTurn(game, first, 1) : game;
 }
 
-/** The same table again, from nothing, with a new seed: a new deal, a new first player, new dice. */
+/** The same table again, from nothing, with a new seed: a new deal, a new first player, new dice.
+ *
+ * @param game - The current native game state.
+ * @param seed - The unsigned 32-bit starting seed.
+ * @returns A fresh deal of the same table, or null when the new seed is invalid.
+ * @example
+ * ```ts
+ * import { startTenka, tenkaAgain } from "@johnmorrisdotca/tenka";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(tenkaAgain(game,43)?.seed);
+ * ```
+ */
 export function tenkaAgain(game: TenkaGame, seed: number): TenkaGame | null {
   return startTenka(game.rounds, game.players, seed, game.placing, game.map ?? "world");
 }

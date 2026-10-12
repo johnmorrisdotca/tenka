@@ -10,6 +10,12 @@ import type { TenkaShapes } from "./tenka.types.ts";
  * One outline per territory, in the order of `TENKA_EUROPE_TERRITORY_DATA`; where its army counter stands; its extent; the
  * sea routes' dashed lines; the links that go off one edge and on at the other (none here); and the borders between regions, drawn heavier. Read only by the board in
  * the browser, so none of it is carried by a page the server renders for the rules.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_EUROPE_SHAPES } from "@johnmorrisdotca/tenka/shapes";
+ * console.log(TENKA_EUROPE_SHAPES);
+ * ```
  */
 export const TENKA_EUROPE_SHAPES: TenkaShapes = {
   width: 2000,

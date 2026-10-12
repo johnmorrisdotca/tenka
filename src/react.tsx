@@ -6,7 +6,18 @@ import { mountTenka, type TenkaTableOptions } from "./ui/mount.ts";
 
 const RING = { chosen: { stroke: "#111", width: 5 }, target: { stroke: "#fff", width: 5 }, reach: { stroke: "#111", width: 2.5 } } as const;
 
-/** What `TenkaMap` takes: a game to draw, and any attribute of its `<svg>`. */
+/** What `TenkaMap` takes: a game to draw, and any attribute of its `<svg>`.
+ *
+ * @example
+ * ```ts
+ * import { startTenka } from "@johnmorrisdotca/tenka";
+ * import type { TenkaMapProps } from "@johnmorrisdotca/tenka/react";
+ *
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * const value: TenkaMapProps = {game, label:"World conquest"};
+ * console.log(value);
+ * ```
+ */
 export type TenkaMapProps = {
   /** The game to draw: only who holds each territory and with how many armies is read. */
   game: Pick<TenkaGame, "owners" | "armies">;
@@ -28,6 +39,17 @@ export type TenkaMapProps = {
  * container's width; style `.tk-land`, `.tk-sea` and the rest as you like.
  * Where a press is wanted, each territory can be reached by Tab and pressed
  * with Enter or Space.
+ *
+ * @param options - The component, table or display options.
+ * @returns The React SVG map element.
+ * @example
+ * ```ts no-run
+ * import {createElement} from "react";
+ * import { TenkaMap } from "@johnmorrisdotca/tenka/react";
+ * import {startTenka} from "@johnmorrisdotca/tenka";
+ * const game = startTenka(10,["Seat 1","Seat 2"],42)!;
+ * console.log(createElement(TenkaMap,{game}));
+ * ```
  */
 export function TenkaMap({ game, marks = NO_MARKS, colours, onTerritory, label = "Map of the world", ...svg }: TenkaMapProps) {
   const model = tenkaMapModel(game, marks, colours);
@@ -72,7 +94,16 @@ export function TenkaMap({ game, marks = NO_MARKS, colours, onTerritory, label =
   );
 }
 
-/** What `TenkaTable` takes: the options of `mountTenka`, and any attribute of its `<div>`. */
+/** What `TenkaTable` takes: the options of `mountTenka`, and any attribute of its `<div>`.
+ *
+ * @example
+ * ```ts
+ * import type { TenkaTableProps } from "@johnmorrisdotca/tenka/react";
+ *
+ * const value: TenkaTableProps = {players:["Seat 1","Seat 2"],seed:42};
+ * console.log(value);
+ * ```
+ */
 export type TenkaTableProps = TenkaTableOptions & Omit<HTMLAttributes<HTMLDivElement>, keyof TenkaTableOptions>;
 
 /**
@@ -80,6 +111,15 @@ export type TenkaTableProps = TenkaTableOptions & Omit<HTMLAttributes<HTMLDivEle
  * table (`mountTenka`) mounted into this component's element once the
  * browser has it. Options are read when it mounts; give it a new `key` to
  * start over with different ones.
+ *
+ * @param options - The component, table or display options.
+ * @returns The React host element for the native playable table.
+ * @example
+ * ```ts no-run
+ * import {createElement} from "react";
+ * import { TenkaTable } from "@johnmorrisdotca/tenka/react";
+ * console.log(createElement(TenkaTable,{seed:42,record:false}));
+ * ```
  */
 export function TenkaTable({ players, computers, rounds, seed, map, colours, computerDelayMs, onChange, locale, strings, theme, record, dressing, ...element }: TenkaTableProps) {
   const host = useRef<HTMLDivElement>(null);

@@ -10,13 +10,33 @@
 
 const pad = (value: number, width: number): string => String(value).padStart(width, "0");
 
-/** The day a moment falls on, in UTC, written `YYYY-MM-DD`. Throws a `RangeError` for an invalid `Date`. */
+/** The day a moment falls on, in UTC, written `YYYY-MM-DD`. Throws a `RangeError` for an invalid `Date`.
+ *
+ * @param at - The date whose UTC day selects the daily seed.
+ * @returns The day a moment falls on, in UTC, written `YYYY-MM-DD`. Throws a `RangeError` for an invalid `Date`.
+ * @example
+ * ```ts
+ * import { tenkaDay } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(tenkaDay(new Date("2026-10-12T12:00:00Z")));
+ * ```
+ */
 export function tenkaDay(at: Date): string {
   if (Number.isNaN(at.getTime())) throw new RangeError("tenka: an invalid Date has no day");
   return `${pad(at.getUTCFullYear(), 4)}-${pad(at.getUTCMonth() + 1, 2)}-${pad(at.getUTCDate(), 2)}`;
 }
 
-/** Today's seed, the date as a number: 2026-10-01 is 20261001. The day is UTC, so it is one seed worldwide. */
+/** Today's seed, the date as a number: 2026-10-01 is 20261001. The day is UTC, so it is one seed worldwide.
+ *
+ * @param at - The date whose UTC day selects the daily seed.
+ * @returns Today's seed, the date as a number: 2026-10-01 is 20261001. The day is UTC, so it is one seed worldwide.
+ * @example
+ * ```ts
+ * import { tenkaDailySeed } from "@johnmorrisdotca/tenka";
+ *
+ * console.log(tenkaDailySeed(new Date("2026-10-12T12:00:00Z")));
+ * ```
+ */
 export function tenkaDailySeed(at: Date): number {
   const [year, month, day] = tenkaDay(at).split("-").map(Number) as [number, number, number];
   return year * 10_000 + month * 100 + day;

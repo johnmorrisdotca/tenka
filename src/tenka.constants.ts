@@ -6,7 +6,14 @@ import type { TenkaCardKind, TenkaMoveKind, TenkaPhase, TenkaPlacing } from "./t
  * its art and its wording are, and none of those is used here.
  */
 
-/** The phases of a turn, by name: compare `game.phase` with these rather than with text typed out. */
+/** The phases of a turn, by name: compare `game.phase` with these rather than with text typed out.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_PHASES } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_PHASES);
+ * ```
+ */
 export const TENKA_PHASES = {
   setUp: "setUp",
   reinforce: "reinforce",
@@ -17,7 +24,14 @@ export const TENKA_PHASES = {
   over: "over",
 } as const satisfies Record<TenkaPhase, TenkaPhase>;
 
-/** The kinds of move, by name: what goes in a move's `kind`. */
+/** The kinds of move, by name: what goes in a move's `kind`.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_MOVES } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_MOVES);
+ * ```
+ */
 export const TENKA_MOVES = {
   place: "place",
   trade: "trade",
@@ -30,27 +44,75 @@ export const TENKA_MOVES = {
   endTurn: "endTurn",
 } as const satisfies Record<TenkaMoveKind, TenkaMoveKind>;
 
-/** How the starting armies are placed: scattered at random (`auto`), or by the players in turn (`hand`). */
+/** How the starting armies are placed: scattered at random (`auto`), or by the players in turn (`hand`).
+ *
+ * @example
+ * ```ts
+ * import { TENKA_PLACING } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_PLACING);
+ * ```
+ */
 export const TENKA_PLACING = { auto: "auto", hand: "hand" } as const satisfies Record<TenkaPlacing, TenkaPlacing>;
 
-/** The owner of the territories nobody at a table of two holds: the neutral army, which never takes a turn. */
+/** The owner of the territories nobody at a table of two holds: the neutral army, which never takes a turn.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_NEUTRAL } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_NEUTRAL);
+ * ```
+ */
 export const TENKA_NEUTRAL = -1;
 
 /**
  * THE ARMIES EACH PLAYER STARTS WITH, by how many are playing: the standard
  * table. Two players are joined by a neutral army with forty of its own,
  * holding a third of the world, which never moves and only defends.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_STARTING_ARMIES } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_STARTING_ARMIES);
+ * ```
  */
 export const TENKA_STARTING_ARMIES: Readonly<Record<number, number>> = { 2: 40, 3: 35, 4: 30, 5: 25, 6: 20 };
 
-/** The fewest armies a turn brings, however little is held. */
+/** The fewest armies a turn brings, however little is held.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_LEAST_REINFORCEMENT } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_LEAST_REINFORCEMENT);
+ * ```
+ */
 export const TENKA_LEAST_REINFORCEMENT = 3;
-/** How many territories held bring one army each turn: three. */
+/** How many territories held bring one army each turn: three.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_TERRITORIES_PER_ARMY } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_TERRITORIES_PER_ARMY);
+ * ```
+ */
 export const TENKA_TERRITORIES_PER_ARMY = 3;
 
-/** The most dice an attacker throws. */
+/** The most dice an attacker throws.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_ATTACK_DICE } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_ATTACK_DICE);
+ * ```
+ */
 export const TENKA_ATTACK_DICE = 3;
-/** The most dice a defender throws. */
+/** The most dice a defender throws.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_DEFEND_DICE } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_DEFEND_DICE);
+ * ```
+ */
 export const TENKA_DEFEND_DICE = 2;
 
 /**
@@ -58,21 +120,69 @@ export const TENKA_DEFEND_DICE = 2;
  * before it: 4, 6, 8, 10, 12, 15, and five more for every set after that —
  * the escalating standard schedule. And two armies more, placed straight
  * onto it, when a card in the set shows a territory the trader holds.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_TRADE_VALUES } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_TRADE_VALUES);
+ * ```
  */
 export const TENKA_TRADE_VALUES: readonly number[] = [4, 6, 8, 10, 12, 15];
-/** How much more each set is worth than the last, once `TENKA_TRADE_VALUES` runs out: 20, 25, 30… */
+/** How much more each set is worth than the last, once `TENKA_TRADE_VALUES` runs out: 20, 25, 30…
+ *
+ * @example
+ * ```ts
+ * import { TENKA_TRADE_STEP } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_TRADE_STEP);
+ * ```
+ */
 export const TENKA_TRADE_STEP = 5;
-/** The armies placed straight onto a territory the trader holds, when a card of the set shows it. */
+/** The armies placed straight onto a territory the trader holds, when a card of the set shows it.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_TERRITORY_CARD_BONUS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_TERRITORY_CARD_BONUS);
+ * ```
+ */
 export const TENKA_TERRITORY_CARD_BONUS = 2;
 
-/** With this many cards in hand a player must trade before placing; after knocking somebody out, down to fewer than this. */
+/** With this many cards in hand a player must trade before placing; after knocking somebody out, down to fewer than this.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_MUST_TRADE_AT } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_MUST_TRADE_AT);
+ * ```
+ */
 export const TENKA_MUST_TRADE_AT = 5;
 
-/** The three kinds a territory's card shows, in turn round the map, and the wild card that is any of them. */
+/** The three kinds a territory's card shows, in turn round the map, and the wild card that is any of them.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_CARD_KINDS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_CARD_KINDS);
+ * ```
+ */
 export const TENKA_CARD_KINDS: readonly TenkaCardKind[] = ["land", "sea", "air"];
-/** The kind of a wild card, which stands for whatever a set needs. */
+/** The kind of a wild card, which stands for whatever a set needs.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_WILD } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_WILD);
+ * ```
+ */
 export const TENKA_WILD: TenkaCardKind = "wild";
-/** How many wild cards are in the deck. */
+/** How many wild cards are in the deck.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_WILD_CARDS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_WILD_CARDS);
+ * ```
+ */
 export const TENKA_WILD_CARDS = 2;
 
 /**
@@ -83,19 +193,68 @@ export const TENKA_WILD_CARDS = 2;
  * round sixty, so that a stalemate between two players who will not attack
  * still ends.
  */
-/** The short game: ten rounds, then the count. */
+/** The short game: ten rounds, then the count.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_SHORT_ROUNDS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_SHORT_ROUNDS);
+ * ```
+ */
 export const TENKA_SHORT_ROUNDS = 10;
-/** The medium game: twenty rounds, then the count. */
+/** The medium game: twenty rounds, then the count.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_MEDIUM_ROUNDS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_MEDIUM_ROUNDS);
+ * ```
+ */
 export const TENKA_MEDIUM_ROUNDS = 20;
-/** The whole world: played to the last player standing, and counted after sixty rounds if nobody is. */
+/** The whole world: played to the last player standing, and counted after sixty rounds if nobody is.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_WORLD_ROUNDS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_WORLD_ROUNDS);
+ * ```
+ */
 export const TENKA_WORLD_ROUNDS = 60;
-/** The lengths of game `startTenka` takes, in rounds: 10, 20 and 60. */
+/** The lengths of game `startTenka` takes, in rounds: 10, 20 and 60.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_LENGTHS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_LENGTHS);
+ * ```
+ */
 export const TENKA_LENGTHS: readonly number[] = [TENKA_SHORT_ROUNDS, TENKA_MEDIUM_ROUNDS, TENKA_WORLD_ROUNDS];
 
-/** The fewest at a table: two, joined by the neutral army. */
+/** The fewest at a table: two, joined by the neutral army.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_FEWEST_PLAYERS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_FEWEST_PLAYERS);
+ * ```
+ */
 export const TENKA_FEWEST_PLAYERS = 2;
-/** The most at a table: six. */
+/** The most at a table: six.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_MOST_PLAYERS } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_MOST_PLAYERS);
+ * ```
+ */
 export const TENKA_MOST_PLAYERS = 6;
 
-/** The longest name a seat keeps. */
+/** The longest name a seat keeps.
+ *
+ * @example
+ * ```ts
+ * import { TENKA_NAME_MOST } from "@johnmorrisdotca/tenka";
+ * console.log(TENKA_NAME_MOST);
+ * ```
+ */
 export const TENKA_NAME_MOST = 20;
