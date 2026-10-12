@@ -1,0 +1,42 @@
+{
+  "job": "World conquest strategy game",
+  "pitch": {
+    "en": "Play seeded world conquest for two to six, with dice battles, cards, computer players and saved games.",
+    "ja": "2〜6人で、シードから始まる世界征服ゲームを遊べます。さいころでの戦い、カード、コンピューターの相手、ゲームの保存に対応します。"
+  },
+  "name": {
+    "en": "Tenka means the world under heaven in Japanese.",
+    "ja": "「天下」は、天の下に広がる世界を表す言葉です。"
+  },
+  "icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%23f3efe4'%3E天%3C/text%3E%3C/svg%3E",
+  "entries": {
+    ".": {
+      "en": "Rules, maps and records",
+      "ja": "ルール・地図・棋譜"
+    },
+    "./shapes": {
+      "en": "World outlines",
+      "ja": "世界の輪郭"
+    },
+    "./ui": {
+      "en": "Browser table and SVG",
+      "ja": "ブラウザーの卓とSVG"
+    },
+    "./react": {
+      "en": "React table",
+      "ja": "Reactの卓"
+    },
+    "./dressing": {
+      "en": "Dice and card dressing",
+      "ja": "さいころとカードの表示"
+    },
+    "./element": {
+      "en": "Table element",
+      "ja": "卓の要素"
+    },
+    "./element/define": {
+      "en": "Register the table",
+      "ja": "卓の登録"
+    }
+  }
+}

@@ -9,3 +9,6 @@
 .tag tenka-table { display: block; margin-top: 10px; }
 .tag .tk-root { --tk-ink: var(--ink); --tk-panel: var(--surface); --tk-font: var(--font); --tk-accent: var(--felt); --tk-accent-ink: var(--felt-ink); }
 .fam-button[data-said="true"] { opacity: .8; }
+
+/* Keep navigation width stable across languages. */
+header nav a[data-say="pageDocs"] { inline-size: 8rem; justify-content: center; flex: none; }

@@ -1,4 +1,4 @@
-<h1 align="center">Tenka <sub>天下</sub></h1>
+<h1 align="center">Tenka <sub>天下</sub> — World conquest strategy game</h1>
 
 <p align="center"><strong>A world conquest board game for two to six, on a map of the real world.</strong><br>
 The rules as pure, seeded TypeScript, a computer player, a game that saves and replays, and a table to play on in React, Vue, Svelte, Angular or plain HTML.</p>
@@ -9,9 +9,11 @@ The rules as pure, seeded TypeScript, a computer player, a game that saves and r
   <a href="./LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-2f5d4a"></a>
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-2f5d4a">
   <img alt="TypeScript" src="https://img.shields.io/badge/types-TypeScript-3178c6">
+  <a href="https://johnmorrisdotca.github.io/tenka/docs/api/main/index.html"><img alt="14.9 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-14.9%20kB-2f5d4a"></a>
+  <a href="https://www.npmjs.com/package/@johnmorrisdotca/tenka#provenance"><img alt="Published with npm provenance" src="https://img.shields.io/badge/npm-provenance-2f5d4a"></a>
 </p>
 
-<p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><strong>Play a game →</strong></a> · <a href="https://johnmorrisdotca.github.io/tenka/api.html">API reference</a> · <a href="docs/API.md">Every export</a></p>
+<p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><strong>Play a game →</strong></a> · <a href="https://johnmorrisdotca.github.io/tenka/docs/">Documentation</a> · <a href="https://johnmorrisdotca.github.io/tenka/docs/guides/getting-started.html">Getting started</a> · <a href="https://johnmorrisdotca.github.io/tenka/api.html">API reference</a> · <a href="docs/API.md">Every export</a></p>
 
 <table align="center">
 <tr>
@@ -187,6 +189,17 @@ Each picture is the table the package draws (`mountTenka`), taken from [the demo
 </table>
 
 ## Use it in your project
+
+### Install under another name
+
+```sh
+npm install strategy-game@npm:@johnmorrisdotca/tenka
+```
+
+```ts no-check
+import { startTenka } from "strategy-game";
+console.log(startTenka(10,["Seat 1","Seat 2"],42)?.phase);
+```
 
 ### Install
 
@@ -911,7 +924,7 @@ card="tenka-world-11" design="tenka">` draw a Tenka card anywhere on a page.
 
 ## API
 
-The [API reference](https://johnmorrisdotca.github.io/tenka/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
+The [documentation](https://johnmorrisdotca.github.io/tenka/docs/) includes bilingual guides, local search, signatures, parameters, return values and checked examples, built from source by `pnpm docs:site`. The [API index](https://johnmorrisdotca.github.io/tenka/api.html) preserves export anchors.
 
 Every function, type and constant has a doc comment, so an editor shows this
 as you type. The entries:
@@ -1026,8 +1039,7 @@ Drawing the map yourself, the same classes are there to style: `.tk-map`,
 | Territories | 42 | `TENKA_TERRITORY_COUNT` |
 | Cards | 44 | `TENKA_DECK` |
 
-`startTenka` returns `null` for anything outside them. One map, and one set of
-rules: see the roadmap.
+`startTenka` returns `null` for anything outside them. World and Europe maps share the native turn rules; see [the maps](docs/guides/maps-and-dressing.md).
 
 ## Accessibility
 
@@ -1124,10 +1136,7 @@ for React, `/shapes` for the outlines), so a page that only wants the rules load
 Drawing the table's dice and cards with Korokoro and Toranpu is `/dressing`, the one entry that imports another package.
 Dressing the table's dice and cards in the family's own is `/dressing`, the one entry that reaches another package.
 
-The file-by-file tree, with a line on each source file, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): the rules (`tenka`, `tenkaTurn`, `tenkaMoves`, `tenkaCards`, `tenkaDice`), the maps and their outlines (`tenkaMap`, `*.data`, `shapes`), keeping a game (`tenkaExport`, `tenkaKeep`), the taps and the computer player (`tenkaTaps`, `tenkaPolicy`), and the three faces (`ui`, `element`, `react`). Tests sit beside the code they test (`*.test.ts`). `scripts/` makes the map
-data from public-domain outlines, builds the demo and checks the package as
-npm packs it, `demo/` is the page published on GitHub Pages, and `table/`
-taps it in real browsers.
+The [state and rules guide](docs/guides/state-and-random.md#source-layout) explains the source layout; [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) preserves the file-by-file tree.
 
 ## The name
 

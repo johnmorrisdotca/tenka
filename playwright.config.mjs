@@ -4,8 +4,8 @@ import { defineConfig, devices } from "@playwright/test";
 const phone = { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true };
 
 export default defineConfig({
-  testDir: "table",
-  testMatch: "*.table.mjs",
+  testDir: ".",
+  testMatch: ["table/**/*.table.mjs", "e2e/**/*.demo.mjs"],
   fullyParallel: true,
   forbidOnly: true,
   reporter: "list",
