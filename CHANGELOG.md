@@ -6,6 +6,8 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+- Keep large documentation resource catalogues on the entry index and the active resource beside core navigation, preserving every reference page; render valid default imports in HTML and Markdown.
+
 - Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
 
 - Add shared builder and validated no-storage iframe, reflected table/display settings, UTC daily dates, generic seat counts and complete native host options.
