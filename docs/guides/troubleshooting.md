@@ -2,7 +2,7 @@
 title: Troubleshooting and FAQ
 section: troubleshooting
 order: 9
-description: Learn troubleshooting and faq.
+description: Find out why a start, a move or a saved game is null, and why a table will not load.
 ---
 
 ## Setup returned null

@@ -2,7 +2,7 @@
 title: Mount and embed a table
 section: how-to
 order: 6
-description: Learn mount and embed a table.
+description: Mount a table in the DOM or as a custom element, and keep private names out of events and frames.
 ---
 
 ## Mount the DOM table

@@ -2,7 +2,7 @@
 title: 問題の確認とFAQ
 section: troubleshooting
 order: 9
-description: 問題の確認とFAQの使い方と注意点。
+description: 開始、手、保存データがnullになる場合と、卓が読み込めない場合の原因を確認します。
 ---
 
 ## 開始でnullになった

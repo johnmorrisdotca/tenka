@@ -2,7 +2,7 @@
 title: Getting started
 section: tutorial
 order: 1
-description: Learn getting started.
+description: Install Tenka, start a seeded game and play one legal move.
 ---
 
 Tenka is a seeded world-conquest engine for two to six players. The core uses plain data and needs no DOM, clock or runtime dependency. A separate table entry draws and plays the game.

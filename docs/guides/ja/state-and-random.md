@@ -2,7 +2,7 @@
 title: 状態とシード付きルール
 section: explanation
 order: 7
-description: 状態とシード付きルールの使い方と注意点。
+description: ゲームが1つの値である仕組み、さいころと判断が別の乱数を使うこと、ソースの構成を説明します。
 ---
 
 ## ゲームは1つの値

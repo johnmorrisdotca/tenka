@@ -2,7 +2,7 @@
 title: Maps, SVG and dressing
 section: explanation
 order: 8
-description: Learn maps, svg and dressing.
+description: Use the map connections the rules read, draw them as SVG, and dress the table with Korokoro dice and Toranpu cards.
 ---
 
 ## Rules use the graph

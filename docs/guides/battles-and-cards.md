@@ -2,7 +2,7 @@
 title: Read battles and trade cards
 section: how-to
 order: 3
-description: Learn read battles and trade cards.
+description: Read battle outcomes from dice, use the native attack and blitz actions, and trade card sets.
 ---
 
 ## Dice decide losses

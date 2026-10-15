@@ -2,7 +2,7 @@
 title: Upgrading and other engines
 section: upgrading
 order: 10
-description: Learn upgrading and other engines.
+description: Move from 1.x to 2.x, update within 2.x, and come from a mutable-board or networked engine.
 ---
 
 ## From 1.x to 2.x
@@ -11,7 +11,7 @@ Version 2 changed territory keys, indices, names and counts to the classic world
 
 ## Updating within 2.x
 
-2.1 added optional card/dice dressing; plain and dressed tables run the same rules. This rollout changes documentation, examples and navigation without changing emitted SDK behavior. Preserve seeds, map and move records. A seed alone is not enough without table settings and compatible rules.
+2.1 added optional card/dice dressing; plain and dressed tables run the same rules. Preserve seeds, map and move records. A seed alone is not enough without table settings and compatible rules.
 
 ## Coming from mutable or network engines
 

@@ -2,7 +2,7 @@
 title: Save, restore and export
 section: how-to
 order: 4
-description: Learn save, restore and export.
+description: Save a game as its deal and moves, restore it by replaying them, and export a readable record.
 ---
 
 ## Save the original deal and moves

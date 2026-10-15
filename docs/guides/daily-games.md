@@ -2,7 +2,7 @@
 title: Share a daily starting deal
 section: how-to
 order: 5
-description: Learn share a daily starting deal.
+description: Share a daily starting deal from the UTC date, and keep past days reproducible.
 ---
 
 ## One UTC calendar date

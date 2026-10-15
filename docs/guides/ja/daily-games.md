@@ -2,7 +2,7 @@
 title: 日替わりの配置を共有する
 section: how-to
 order: 5
-description: 日替わりの配置を共有するの使い方と注意点。
+description: UTCの日付から日替わりの開始時の配置を共有し、過去の日も再現できるようにします。
 ---
 
 ## UTCの日付を1つ使う

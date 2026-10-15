@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/tenka",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "Tenka \u5929\u4e0b \u2014 World conquest strategy game: seeded rules for two to six, world and Europe maps, dice, cards, saved games and a playable table for React, Vue, Svelte, Angular or plain HTML. Zero dependencies.",
   "keywords": [
     "ai",

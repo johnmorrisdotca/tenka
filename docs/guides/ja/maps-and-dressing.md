@@ -2,7 +2,7 @@
 title: 地図・SVG・装飾
 section: explanation
 order: 8
-description: 地図・SVG・装飾の使い方と注意点。
+description: ルールが読む地図の接続関係を使い、SVGで描き、KorokoroのさいころとToranpuのカードで卓を飾ります。
 ---
 
 ## ルールは接続関係を使う

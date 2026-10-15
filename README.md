@@ -771,7 +771,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 2,
   "game": "tenka",
-  "generator": "tenka 2.1.2",
+  "generator": "tenka 2.2.0",
   "seed": 2026,
   "players": [
     "Ann",
@@ -894,33 +894,7 @@ else: a project that never imports that entry never loads them, and Tenka
 still has no dependencies. A page with no bundler needs an import map to find
 them, as the demo's has.
 
-Your own look is a function. A `TenkaDressing` is `{ die?, card?, back? }`,
-each given what the game decided and returning an element to show (with
-`destroy` if it has a timer to stop); anything left out is drawn plainly. The
-cards are also a plain Toranpu design, for Toranpu's own elements:
-
-```ts
-import { roll } from "@johnmorrisdotca/korokoro";
-import { cardFaceSvg } from "@johnmorrisdotca/toranpu/card-faces";
-import { tenkaCardDesign, tenkaCardId, tenkaCardOfId, tenkaThrownDie } from "@johnmorrisdotca/tenka/dressing";
-
-tenkaCardId("world", 11); // → "tenka-world-11"
-tenkaCardOfId("tenka-europe-7"); // → { map: "europe", territory: 7 }
-tenkaCardOfId("tenka-wild"); // → { wild: true }
-roll({ count: 1, sides: 6 }, tenkaThrownDie(5)).faces; // → [5]
-cardFaceSvg(tenkaCardId("world", 11), { design: tenkaCardDesign() })?.includes(">Brazil</text>"); // → true
-```
-
-`registerCardDesign(tenkaCardDesign())` from Toranpu then lets `<toranpu-card
-card="tenka-world-11" design="tenka">` draw a Tenka card anywhere on a page.
-
-| Export of `/dressing` | What it is |
-| --- | --- |
-| `tenkaDressing(options?)` | The dressing to give a table |
-| `tenkaCardDesign()` | Tenka's cards as a Toranpu design, named `tenka` |
-| `tenkaCardId(map, territory)`, `tenkaCardOfId(id)` | A card's id in Toranpu's hands, and back |
-| `tenkaThrownDie(face)` | Korokoro's random source that throws this face of a d6 |
-| `TENKA_BACK` | Tenka's own back, as Toranpu's back options |
+Your own look is a function: a `TenkaDressing` is `{ die?, card?, back? }`, each given what the game decided and returning an element to show, and anything left out is drawn plainly. The cards are also a plain Toranpu design, `tenkaCardDesign()`, for Toranpu's own elements. [docs/dressing.md](docs/dressing.md) has the shape, an example and every export of `/dressing`.
 
 ## API
 
@@ -1116,12 +1090,12 @@ game === null ? "not a game these rules can replay" : tenkaToText(game); // → 
   bonus.
 - Maps of your own: the map as data, with a tool to draw one.
 - A stronger computer player that plans a whole turn.
-- Armies moving in, animated on the table. (The dice already tumble, when the
-  table is dressed in Korokoro's.)
+- Armies moving in, animated on the table. (The dice already tumble, dressed
+  in Korokoro's.)
 - A Vue wrapper, beside the React one and the tag.
 
 Left out on purpose: play between devices, which needs a server (the moves
-are made to be sent, and Itsutsu sends them; the sending is yours); a command
+are made to be sent, and Itsutsu sends them); a command
 line; and any name, art or wording of a published game. Tenka runs from a
 static page and costs nothing to host.
 
@@ -1166,7 +1140,7 @@ issue and we will add you.
 ### The family
 
 <!-- family:start (made by scripts/family-readme.mjs from scripts/family-template.mjs; change those, not this) -->
-Tenka is one of twenty-eight packages, each made for the same site, each at
+Tenka is one of thirty-two packages, each made for the same site, each at
 [github.com/johnmorrisdotca](https://github.com/johnmorrisdotca) or [github.com/spxis](https://github.com/spxis). The code of every one is MIT.
 
 **Games — board**
@@ -1214,12 +1188,19 @@ Tenka is one of twenty-eight packages, each made for the same site, each at
 - [Hata](https://github.com/johnmorrisdotca/hata) (旗): country and regional flags as SVG, at their true proportions and keyed by ISO code. [Demo](https://johnmorrisdotca.github.io/hata/).
 - [Kuni](https://github.com/johnmorrisdotca/kuni) (国): countries and their regions, with ISO codes and names in English and Japanese. [Demo](https://johnmorrisdotca.github.io/kuni/).
 
+**Sports**
+
+- [Dougu Sports](https://github.com/johnmorrisdotca/dougu-sports) (道具): sports emblems as SVG: trophies, medals, crests, and the ball and gear of every sport, with optional 3D turning. [Demo](https://johnmorrisdotca.github.io/dougu-sports/).
+- [Kyogijo Stadiums](https://github.com/johnmorrisdotca/kyogijo-stadiums) (競技場): sports fields, rinks, courts and ballparks drawn to scale as SVG, with each team and the score on them. [Demo](https://johnmorrisdotca.github.io/kyogijo-stadiums/).
+- [Senshu Jerseys](https://github.com/johnmorrisdotca/senshu-jerseys) (選手): sports jerseys, sweaters, kits, caps, helmets and retired-number banners as SVG, front and back, with optional 2.5D turning. [Demo](https://johnmorrisdotca.github.io/senshu-jerseys/).
+- [Taisen Brackets](https://github.com/johnmorrisdotca/taisen-brackets) (対戦): a sport-agnostic tournament bracket, drawn as SVG, from a list of ties. [Demo](https://johnmorrisdotca.github.io/taisen-brackets/).
+
 **Developer tools**
 
 - [REST in Pieces](https://github.com/spxis/rest-in-pieces) (レスト・イン・ピーシーズ): seeded test data and REST APIs for frontend development, with latency and error drills. [Demo](https://spxis.github.io/rest-in-pieces/).
 
 
-**This package is Tenka.** The demos of all twenty-eight share one header and footer, so each links the rest.
+**This package is Tenka.** The demos of all thirty-two share one header and footer, so each links the rest.
 <!-- family:end -->
 
 ## Development
@@ -1248,7 +1229,7 @@ Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make a game,
 
 See [CHANGELOG.md](./CHANGELOG.md).
 
-The latest release is 2.1.2: the README takes the family's full layout, with pictures of the table and examples that are run.
+The latest release is 2.2.0: the table's standard embed attributes, the shared embed builder, and the documentation site with a checked example for every export.
 
 ## Licence
 

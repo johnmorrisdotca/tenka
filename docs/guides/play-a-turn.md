@@ -2,7 +2,7 @@
 title: Play a complete turn
 section: how-to
 order: 2
-description: Learn play a complete turn.
+description: Follow the phases of a full turn, let the engine decide what is legal, and run the computer players.
 ---
 
 ## Follow the phase

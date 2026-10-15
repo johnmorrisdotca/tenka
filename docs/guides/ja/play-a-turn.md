@@ -2,7 +2,7 @@
 title: 手番を進める
 section: how-to
 order: 2
-description: 手番を進めるの使い方と注意点。
+description: 1手番の段階に従い、合法かどうかはエンジンに任せ、コンピューターの手を進めます。
 ---
 
 ## 段階に従う

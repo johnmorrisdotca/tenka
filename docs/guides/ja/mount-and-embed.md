@@ -2,7 +2,7 @@
 title: 卓を配置し埋め込む
 section: how-to
 order: 6
-description: 卓を配置し埋め込むの使い方と注意点。
+description: 卓をDOMまたはカスタム要素として配置し、個人名をイベントやフレームに出さないようにします。
 ---
 
 ## DOMの卓を配置する

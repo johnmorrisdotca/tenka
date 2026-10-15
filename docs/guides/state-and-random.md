@@ -2,7 +2,7 @@
 title: State and seeded rules
 section: explanation
 order: 7
-description: Learn state and seeded rules.
+description: See how a game is one value, how dice and plans draw from separate random streams, and how the source is laid out.
 ---
 
 ## A game is a value

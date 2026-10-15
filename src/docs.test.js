@@ -19,7 +19,7 @@ import { TENKA_STYLE } from "./ui/style.ts";
 import { TENKA_VERSION } from "./version.ts";
 
 // The README and the page of the API tables it links: what the package says about itself is held to the code across both.
-const readme = `${readFileSync("README.md", "utf8")}\n${readFileSync("docs/API.md", "utf8")}`;
+const readme = `${readFileSync("README.md", "utf8")}\n${readFileSync("docs/API.md", "utf8")}\n${readFileSync("docs/dressing.md", "utf8")}`;
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 
 /** Every fenced block of the README: its language and its text. */
@@ -231,7 +231,7 @@ describe("the package", () => {
     expect(family.length).toBeGreaterThanOrEqual(16);
     const block = readme.slice(readme.indexOf("### The family"), readme.indexOf("\n## ", readme.indexOf("### The family")));
     for (const { id, name, kana } of family) expect(block, id).toContain(`- [${name}](${familyRepo(id)}) (${kana}`);
-    const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight"];
+    const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight", "twenty-nine", "thirty", "thirty-one", "thirty-two"];
     expect(block).toContain(`one of ${words[family.length]} packages`);
     expect([...block.matchAll(/^- \[/gm)]).toHaveLength(family.length);
     expect(FAMILY).toContainEqual({ id: "tenka", name: "Tenka", kana: "天下" });
