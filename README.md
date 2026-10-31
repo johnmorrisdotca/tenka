@@ -1042,7 +1042,6 @@ Drawing the map yourself, the same classes are there to style: `.tk-map`,
   by the neighbours the rules count, so a sea route is not followed by a key.
   The focus ring is drawn in `--tk-accent`; a page that re-colours it should
   check its contrast.
-- **No command line.** A game of Tenka is a world map to look at and tap, and its whole interest is that map, so a terminal would have little to show; the rules are plain functions for a script that wants to run games.
 
 ## Browser support
 
