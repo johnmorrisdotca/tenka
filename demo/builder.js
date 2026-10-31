@@ -44,6 +44,7 @@ const nativeNames = {
   lang: "locale",
   record: "record",
   delay: "computerDelayMs",
+  cloth: "cloth",
 };
 const row = (id, kind, en, ja, extra = {}) => ({
   id,
@@ -119,6 +120,19 @@ const options = [
     ["Width", "Pixels, fitting a narrower parent."],
     ["幅", "ピクセルで指定します。狭い表示枠にも収まります。"],
     { range: { min: 200, max: 1000, step: 10 } },
+  ),
+  row(
+    "cloth",
+    "choice",
+    ["Cloth", "The colour of the sea under the map. Unless said, the table keeps its own."],
+    ["テーブルの色", "地図の下の海の色です。指定がなければ、テーブル本来の色のままです。"],
+    {
+      choices: ["green", "blue", "red", "black", "wood"],
+      choiceLabels: {
+        en: { green: "Green", blue: "Blue", red: "Red", black: "Black", wood: "Wood" },
+        ja: { green: "緑", blue: "青", red: "赤", black: "黒", wood: "木目" },
+      },
+    },
   ),
   row(
     "theme",

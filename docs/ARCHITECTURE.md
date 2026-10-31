@@ -42,6 +42,7 @@ src/
 ├── version.ts                 the version of this package, as package.json has it
 └── ui/  the table that draws and plays a game
     ├── chrome.ts    the controls, the dice, the seats and the continent views
+    ├── cloth.ts   the five cloths a table may be laid in
     ├── colours.ts   the colours a table is drawn in
     ├── dom.ts       a node, a button, and handing a file to the person
     ├── dressing.types.ts  what a table asks a dressing for, and what it gets back: a die, a card, a back

@@ -7,6 +7,7 @@ import { sensibleTenkaMove } from "../tenkaPolicy.ts";
 import { startTenka } from "../tenkaStart.ts";
 import { choiceNow, marksFor, NO_CHOICE, tapTerritory } from "../tenkaTaps.ts";
 import { createTenkaChrome, type TenkaChrome } from "./chrome.ts";
+import { type Cloth, clothVars, isCloth } from "./cloth.ts";
 import { node } from "./dom.ts";
 import type { TenkaDressing } from "./dressing.types.ts";
 import { continentView, landInDirection, nearestLand, type TenkaArrow, tenkaMapModel } from "./mapModel.ts";
@@ -42,6 +43,8 @@ export type TenkaTableOptions = {
   locale?: TenkaLocale;
   /** Words of your own, laid over the locale's: any of `TenkaStrings`. */
   strings?: Partial<TenkaStrings>;
+  /** The cloth the table is laid in: "green", "blue", "red", "black" or "wood", the family's five; with none, it keeps its own sea. `theme` is laid over it. */
+  cloth?: Cloth;
   /** CSS variables set on the table itself, which win in light and dark alike: `{ "--tk-sea": "#23405a" }`. */
   theme?: Readonly<Record<string, string>>;
   /** Whether the table shows the record of the game, with saving and loading. True by default. */
@@ -71,7 +74,7 @@ export type TenkaTableHandle = {
   set: (
     options: Pick<
       TenkaTableOptions,
-      "locale" | "strings" | "theme" | "record" | "dressing" | "colours" | "computerDelayMs" | "onChange"
+      "locale" | "strings" | "cloth" | "theme" | "record" | "dressing" | "colours" | "computerDelayMs" | "onChange"
     >,
   ) => void;
   /** Take the table off the page and stop its timers. */
@@ -141,7 +144,14 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
 
   const root = node("div", "tk-root");
   root.dataset.testid = "tk-root";
-  for (const [name, value] of Object.entries(current.theme ?? {})) root.style.setProperty(name, value);
+  const wear = (cloth: string | undefined, theme: Readonly<Record<string, string>>) => {
+    for (const name of Object.keys(clothVars("green"))) root.style.removeProperty(name);
+    for (const [name, value] of Object.entries<string>({ ...clothVars(cloth), ...theme }))
+      root.style.setProperty(name, value);
+    if (isCloth(cloth)) root.dataset.cloth = cloth;
+    else delete root.dataset.cloth;
+  };
+  wear(current.cloth, current.theme ?? {});
   const style = node("style");
   style.textContent = TENKA_STYLE;
   const status = node("p", "tk-status");
@@ -362,9 +372,10 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       render();
     },
     set: (next) => {
-      if (next.theme !== undefined) {
-        for (const name of Object.keys(current.theme ?? {})) if (!(name in next.theme)) root.style.removeProperty(name);
-        for (const [name, value] of Object.entries(next.theme)) root.style.setProperty(name, value);
+      if (next.theme !== undefined || "cloth" in next) {
+        const theme = next.theme ?? current.theme ?? {};
+        for (const name of Object.keys(current.theme ?? {})) if (!(name in theme)) root.style.removeProperty(name);
+        wear("cloth" in next ? next.cloth : current.cloth, theme);
       }
       if ("record" in next) {
         showRecord = next.record !== false;

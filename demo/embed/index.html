@@ -2,7 +2,7 @@
 import "../dist/element-define.js";
 import { embedDay } from "../dist/embed-day.js";
 const query=new URLSearchParams(location.search),table=document.createElement("tenka-table");table.setAttribute("size","medium");table.setAttribute("record","false");
-for(const[name,choices]of[["map",["world","europe"]],["rounds",["10","20","60"]],["computers",["all","none"]],["lang",["en","ja"]],["theme",["auto","light","dark"]],["size",["small","medium","large"]]])if(choices.includes(query.get(name)))table.setAttribute(name,query.get(name));
+for(const[name,choices]of[["map",["world","europe"]],["rounds",["10","20","60"]],["computers",["all","none"]],["lang",["en","ja"]],["theme",["auto","light","dark"]],["cloth",["green","blue","red","black","wood"]],["size",["small","medium","large"]]])if(choices.includes(query.get(name)))table.setAttribute(name,query.get(name));
 const computers=query.get("computers");if(computers!==null&&/^(true|false|on|off|1|0|no|yes|computer)(,(true|false|on|off|1|0|no|yes|computer)){1,5}$/.test(computers))table.setAttribute("computers",computers);
 for(const[name,min,max]of[["width",100,2000],["seed",0,4294967295],["seats",2,6],["delay",0,60000]]){const value=query.get(name);if(value!==null&&/^\d+$/.test(value)&&Number(value)>=min&&Number(value)<=max)table.setAttribute(name,value);}if(query.get("seed")==="daily")table.setAttribute("seed","daily");
 if(query.has("daily"))try{embedDay(query.get("daily"));table.setAttribute("daily",query.get("daily"));}catch{/* Ignore an invalid day. */}

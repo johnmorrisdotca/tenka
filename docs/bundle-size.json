@@ -10,24 +10,24 @@
       "gzip": 58189
     },
     "./ui": {
-      "minified": 258245,
-      "gzip": 82725
+      "minified": 260206,
+      "gzip": 83461
     },
     "./react": {
-      "minified": 297362,
-      "gzip": 95081
+      "minified": 299410,
+      "gzip": 95789
     },
     "./dressing": {
       "minified": 404192,
       "gzip": 136104
     },
     "./element": {
-      "minified": 267066,
-      "gzip": 84776
+      "minified": 269349,
+      "gzip": 85730
     },
     "./element/define": {
-      "minified": 267071,
-      "gzip": 84783
+      "minified": 269354,
+      "gzip": 85736
     }
   }
 }

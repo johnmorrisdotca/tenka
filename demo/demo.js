@@ -159,6 +159,16 @@ const table = mountTenka(document.getElementById("table"), {
   onChange: keep,
 });
 
+// The cloth is the header's patches: once a reader has chosen one the table is laid in it, and until then keeps its own sea.
+let clothKept = new URLSearchParams(location.search).has("cloth");
+try {
+  clothKept ||= localStorage.getItem("johnmorrisdotca.cloth") !== null;
+} catch {
+  // A browser that keeps nothing has chosen nothing.
+}
+if (clothKept) table.set({ cloth: document.documentElement.dataset.cloth });
+document.addEventListener("family-cloth", (event) => table.set({ cloth: event.detail.cloth }));
+
 // The table's view chooser (the world, or one continent) is the package's own; the page words it for the Help switch.
 const looks = document.querySelector(".tk-zoom");
 if (looks !== null) {

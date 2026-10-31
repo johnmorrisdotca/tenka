@@ -122,6 +122,7 @@ plays a whole game in the element, and returns a handle.
 | `onChange` | | Called with the game after every move |
 | `locale` | the page's `lang` | `"en"` or `"ja"` |
 | `strings` | | Words of your own, laid over the locale's |
+| `cloth` | none: its own sea | The cloth the table is laid in: `green`, `blue`, `red`, `black` or `wood`, the family's five. `theme` is laid over it |
 | `theme` | | CSS variables set on the table itself |
 | `record` | `true` | Whether the record of the game, with saving and loading, is shown |
 | `dressing` | the plain dice and cards | How the dice and cards are drawn: [`tenkaDressing()`](#dice-and-cards-from-korokoro-and-toranpu) draws them with Korokoro and Toranpu |
@@ -172,6 +173,7 @@ record, delay, callbacks and drawings preserve play. Invalid choices show a stat
 | `width` | | Explicit width in pixels, fitting a narrower host |
 | `theme` | auto | auto, light or dark |
 | `label` | | Optional spoken table label |
+| `cloth` | none: its own sea | The cloth the table is laid in: `green`, `blue`, `red`, `black` or `wood`, the family's five; changed in place, keeping the game |
 
 It fires `tenka-change` after every move, with the game as `event.detail.game`
 (a bubbling, composed JSON-safe `CustomEvent`; player names use generic seat labels), and has `game`, `table` (the handle `mountTenka`

@@ -50,7 +50,8 @@ export const TENKA_STYLE = `
 .tk-button:focus-visible, .tk-record-title:focus-visible, .tk-slider:focus-visible, .tk-log:focus-visible { outline: 2px solid var(--tk-accent); outline-offset: 2px; }
 .tk-primary { background: var(--tk-accent); color: var(--tk-accent-ink); border-color: transparent; }
 .tk-slider { min-height: 44px; min-width: 120px; flex: 1 1 120px; max-width: 280px; accent-color: var(--tk-accent); }
-.tk-dice { min-height: 1.6em; }
+.tk-dice { min-height: 2.8em; }
+.tk-root, .tk-root * { line-height: 1.35; }
 .tk-roll { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
 .tk-faces { display: inline-flex; gap: 3px; }
 .tk-die { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 5px; font-weight: 700; font-size: 13px; }

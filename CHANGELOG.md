@@ -6,6 +6,10 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A table can be laid in the family's five cloths: `<tenka-table cloth="blue">`, `mountTenka(el, { cloth })` and `set({ cloth })`, the `cloth` embed parameter and Builder option, the header's patches on the demo, and `TENKA_CLOTHS`, `isCloth` and `clothVars` from `/ui`.
+
 ## [2.2.1] - 2026-10-31
 
 ### Changed

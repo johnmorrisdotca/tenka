@@ -20,6 +20,7 @@ describe("the element, where there is no page", () => {
       "width",
       "theme",
       "label",
+      "cloth",
     ]);
   });
 

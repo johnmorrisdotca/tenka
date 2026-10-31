@@ -987,6 +987,8 @@ are the `colours` option.
 | `--tk-radius` | The map's corners | `10px` | the same |
 | `--tk-font` | The table's typeface | `system-ui, …` | the same |
 
+`<tenka-table cloth="blue">`, or `cloth: "blue"` when you mount, lays the table in one of the family's five cloths, `green`, `blue`, `red`, `black` or `wood`, the same set as the boards on itsutsu.com; `set({ cloth })` changes it in place, keeping the game, and `theme` is laid over it. With no cloth, the table keeps its own sea. `TENKA_CLOTHS` lists the colours, and `clothVars` gives them as variables.
+
 A night-sea table with six colours of its own:
 
 ```js no-run
@@ -1040,6 +1042,7 @@ Drawing the map yourself, the same classes are there to style: `.tk-map`,
   by the neighbours the rules count, so a sea route is not followed by a key.
   The focus ring is drawn in `--tk-accent`; a page that re-colours it should
   check its contrast.
+- **No command line.** A game of Tenka is a world map to look at and tap, and its whole interest is that map, so a terminal would have little to show; the rules are plain functions for a script that wants to run games.
 
 ## Browser support
 

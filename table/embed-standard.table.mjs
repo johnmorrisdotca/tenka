@@ -209,3 +209,31 @@ test("copied frame forwards native details, ignores names, validates fields and 
   for (const name of ["seats", "rounds", "seed", "daily", "computers", "width", "players"])
     await expect(page.locator("tenka-table")).not.toHaveAttribute(name, /.*/);
 });
+
+test("the cloth attribute lays the table in each of the five and keeps the game; taking it off gives its own sea back", async ({
+  page,
+}) => {
+  await serve(page);
+  await page.goto("http://tenka.test/embed/?seed=42&cloth=blue&delay=60000");
+  const table = page.locator("tenka-table");
+  await expect(table).toHaveAttribute("cloth", "blue");
+  await expect(table.locator(".tk-board")).toBeVisible();
+  const sea = () =>
+    table.evaluate((el) => getComputedStyle(el.querySelector(".tk-root")).getPropertyValue("--tk-sea").trim());
+  expect(await sea()).toBe("#2865a6");
+  const own = await table.evaluate((el) => el.game.seed);
+  for (const [name, colour] of [
+    ["green", "#2f5d4a"],
+    ["red", "#a3342e"],
+    ["black", "#2f3236"],
+    ["wood", "#e2ba7a"],
+  ]) {
+    await table.evaluate((el, value) => el.setAttribute("cloth", value), name);
+    await expect.poll(sea).toBe(colour);
+  }
+  expect(await table.evaluate((el) => el.game.seed)).toBe(own);
+  await table.evaluate((el) => el.removeAttribute("cloth"));
+  await expect.poll(sea).not.toBe("#e2ba7a");
+  await page.goto("http://tenka.test/embed/?cloth=plaid");
+  await expect(page.locator("tenka-table")).not.toHaveAttribute("cloth", /./);
+});

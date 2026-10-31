@@ -4,6 +4,7 @@ import { TENKA_WORLD_ROUNDS } from "./tenka.constants.ts";
 import type { TenkaGame, TenkaMapKey } from "./tenka.types.ts";
 import { tenkaDailySeed } from "./tenkaDaily.ts";
 import { isTenkaSeed, isTenkaTable } from "./tenkaStart.ts";
+import { type Cloth, isCloth } from "./ui/cloth.ts";
 import type { TenkaDressing } from "./ui/dressing.types.ts";
 import { mountTenka, type TenkaTableHandle, type TenkaTableOptions } from "./ui/mount.ts";
 import { TENKA_STYLE } from "./ui/style.ts";
@@ -42,6 +43,7 @@ export const TENKA_EMBED_OPTION_KEYS = Object.keys({
   onChange: true,
   locale: true,
   strings: true,
+  cloth: true,
   theme: true,
   record: true,
   dressing: true,
@@ -79,6 +81,7 @@ export class TenkaTable extends ElementBase {
     "width",
     "theme",
     "label",
+    "cloth",
   ];
   #table: TenkaTableHandle | null = null;
   #key = "";
@@ -244,6 +247,13 @@ export class TenkaTable extends ElementBase {
   set width(value: string | number | boolean | null | undefined) {
     this.#write("width", value);
   }
+  /** The `cloth` attribute, reflected: green, blue, red, black or wood. */
+  get cloth(): string | null {
+    return this.getAttribute("cloth");
+  }
+  set cloth(value: string | number | boolean | null | undefined) {
+    this.#write("cloth", value);
+  }
   /** The `theme` attribute, reflected. */
   get theme(): string | null {
     return this.getAttribute("theme");
@@ -376,6 +386,7 @@ export class TenkaTable extends ElementBase {
         dressing: this.#dressing ?? this.#options.dressing,
         colours: this.#options.colours,
         strings: this.#options.strings,
+        cloth: isCloth(this.getAttribute("cloth")) ? (this.getAttribute("cloth") as Cloth) : this.#options.cloth,
         theme: this.#options.theme ?? {},
         onChange: (game: TenkaGame) => {
           const detail = JSON.parse(

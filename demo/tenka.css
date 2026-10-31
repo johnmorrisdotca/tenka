@@ -1,10 +1,51 @@
 /* What is Tenka's own on its demo page. The family's look is family.css, which this never repeats. */
 :root {
-  --intro-room: 9.5rem;
-  --intro-room-wide: 5.5rem;
+  --intro-room: 11.5rem;
+  --intro-room-wide: 7rem;
+}
+/* Room kept for the longer of the two languages, so that switching moves nothing below: one line height for both alphabets, and the header's pills and the setup their tallest wrap. */
+body {
+  line-height: 1.35;
+}
+nav {
+  min-height: 104px;
+  align-content: flex-start;
+}
+@media (max-width: 480px) {
+  nav {
+    min-height: 210px;
+  }
+}
+@media (min-width: 1200px) {
+  nav {
+    min-height: 50px;
+  }
 }
 .setup {
   margin: 0 0 16px;
+  min-height: 112px;
+  align-content: flex-start;
+}
+@media (max-width: 1100px) {
+  .setup > .fam-row {
+    flex: 1 1 100%;
+  }
+  .setup {
+    min-height: 172px;
+  }
+}
+@media (max-width: 480px) {
+  .setup {
+    min-height: 444px;
+  }
+  .setup .fam-seg {
+    min-height: 100px;
+    align-content: flex-start;
+  }
+  #table .tk-zoom {
+    min-height: 144px;
+    align-content: flex-start;
+  }
 }
 .setup .fam-seg button {
   min-width: 44px;

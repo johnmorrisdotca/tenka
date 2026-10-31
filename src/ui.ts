@@ -13,6 +13,7 @@ export {
   tenkaStrings,
   territoryNameIn,
 } from "./strings.ts";
+export { type Cloth, clothVars, isCloth, TENKA_CLOTHS } from "./ui/cloth.ts";
 export { ownerColour, TENKA_NEUTRAL_COLOUR, TENKA_SEAT_COLOURS } from "./ui/colours.ts";
 export type { TenkaBackHow, TenkaCardHow, TenkaDieHow, TenkaDrawn, TenkaDressing } from "./ui/dressing.types.ts";
 export {
