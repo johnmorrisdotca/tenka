@@ -771,7 +771,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 2,
   "game": "tenka",
-  "generator": "tenka 2.2.0",
+  "generator": "tenka 2.2.1",
   "seed": 2026,
   "players": [
     "Ann",
@@ -1229,7 +1229,7 @@ Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make a game,
 
 See [CHANGELOG.md](./CHANGELOG.md).
 
-The latest release is 2.2.0: the table's standard embed attributes, the shared embed builder, and the documentation site with a checked example for every export.
+The latest release, 2.2.1, changes nothing a player sees.
 
 ## Licence
 
