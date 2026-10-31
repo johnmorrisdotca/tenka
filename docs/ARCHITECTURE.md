@@ -41,10 +41,13 @@ src/
 ├── ui.ts                      the "/ui" entry: Tenka drawn and played in the browser, in plain DOM
 ├── version.ts                 the version of this package, as package.json has it
 └── ui/  the table that draws and plays a game
+    ├── chrome.ts    the controls, the dice, the seats and the continent views
     ├── colours.ts   the colours a table is drawn in
+    ├── dom.ts       a node, a button, and handing a file to the person
     ├── dressing.types.ts  what a table asks a dressing for, and what it gets back: a die, a card, a back
     ├── mapModel.ts  which outlines draw which map, and which territory an arrow key moves to
-    ├── mount.ts     the table itself: mounting it on a page, and the options it takes
+    ├── mount.ts     mounting the table on a page: the options, the map and the play
+    ├── record.ts    the record of the game: saving it and loading a saved one back
     ├── style.ts     the table's own styles, every colour a CSS variable so a page can re-colour it
     └── svg.ts       small helpers that build the map's SVG
 ```

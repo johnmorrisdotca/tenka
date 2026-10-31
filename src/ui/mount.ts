@@ -1,24 +1,14 @@
-import {
-  continentNameIn,
-  type TenkaLocale,
-  type TenkaStrings,
-  tenkaSay,
-  tenkaStrings,
-  territoryNameIn,
-} from "../strings.ts";
-import { TENKA_MOVES, TENKA_PHASES, TENKA_WORLD_ROUNDS } from "../tenka.constants.ts";
-import { mustTrade, playTenka } from "../tenka.ts";
+import { type TenkaLocale, type TenkaStrings, tenkaSay, tenkaStrings, territoryNameIn } from "../strings.ts";
+import { TENKA_PHASES, TENKA_WORLD_ROUNDS } from "../tenka.constants.ts";
+import { playTenka } from "../tenka.ts";
 import type { TenkaChoice, TenkaContinentKey, TenkaGame, TenkaMapKey, TenkaMove } from "../tenka.types.ts";
-import { cardKind, cardTerritory, setsIn } from "../tenkaCards.ts";
-import { mostAttackDice } from "../tenkaDice.ts";
-import { tenkaFromJSON, tenkaToCSV, tenkaToJSON, tenkaToText } from "../tenkaExport.ts";
 import { tenkaMapOf } from "../tenkaMap.ts";
 import { sensibleTenkaMove } from "../tenkaPolicy.ts";
 import { startTenka } from "../tenkaStart.ts";
 import { choiceNow, marksFor, NO_CHOICE, tapTerritory } from "../tenkaTaps.ts";
-import { armiesHeld, territoriesHeld } from "../tenkaTurn.ts";
-import { ownerColour } from "./colours.ts";
-import type { TenkaDrawn, TenkaDressing } from "./dressing.types.ts";
+import { createTenkaChrome, type TenkaChrome } from "./chrome.ts";
+import { node } from "./dom.ts";
+import type { TenkaDressing } from "./dressing.types.ts";
 import { continentView, landInDirection, nearestLand, type TenkaArrow, tenkaMapModel } from "./mapModel.ts";
 import { TENKA_STYLE } from "./style.ts";
 import { tenkaMapSvg } from "./svg.ts";
@@ -94,35 +84,6 @@ function freshSeed(): number {
   return Math.floor(Math.random() * 0xffffffff) >>> 0;
 }
 
-function node<K extends keyof HTMLElementTagNameMap>(
-  name: K,
-  className?: string,
-  text?: string,
-): HTMLElementTagNameMap[K] {
-  const made = document.createElement(name);
-  if (className !== undefined) made.className = className;
-  if (text !== undefined) made.textContent = text;
-  return made;
-}
-
-function button(text: string, onClick: () => void, primary = false, testId?: string): HTMLButtonElement {
-  const made = node("button", primary ? "tk-button tk-primary" : "tk-button", text);
-  made.type = "button";
-  if (testId !== undefined) made.dataset.testid = testId;
-  made.addEventListener("click", onClick);
-  return made;
-}
-
-/** Hand a string to the person as a file of that name. */
-function save(name: string, type: string, text: string): void {
-  const url = URL.createObjectURL(new Blob([text], { type }));
-  const link = node("a");
-  link.href = url;
-  link.download = name;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
 /**
  * A WHOLE TABLE OF TENKA IN PLAIN DOM: the map, whose turn it is and what to
  * do, the players, your cards and the last dice, played against the
@@ -175,33 +136,8 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   let note = "";
   // The territory a keyboard is on: the one Tab lands on, and the one the arrow keys move from.
   let onLand: number | null = null;
-  // The dice are shown landing only when a move has just thrown them, never when the table is drawn again for any other reason.
-  let drawnRoll: TenkaGame["lastRoll"] = null;
+  // A move has just been made, so the chrome can show the dice landing. It clears the flag when it draws them.
   let moved = false;
-  // What a dressing drew for the dice, and for the hand and the deck: told when it is drawn again, or the table goes.
-  let diceDrawn: TenkaDrawn[] = [];
-  let handDrawn: TenkaDrawn[] = [];
-  const letGo = (drawn: TenkaDrawn[]) => {
-    for (const one of drawn) {
-      try {
-        one.destroy?.();
-      } catch {
-        // A dressing that fails to tidy up is no reason to stop the game.
-      }
-    }
-    return [];
-  };
-  // A dressing that fails draws nothing, and the plain way is drawn instead.
-  const dress = (make: (() => TenkaDrawn) | undefined, kept: TenkaDrawn[]): Element | null => {
-    if (make === undefined) return null;
-    try {
-      const drawn = make();
-      kept.push(drawn);
-      return drawn.element;
-    } catch {
-      return null;
-    }
-  };
 
   const root = node("div", "tk-root");
   root.dataset.testid = "tk-root";
@@ -312,403 +248,6 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     there?.focus();
   });
 
-  const armiesPicker = (
-    least: number,
-    most: number,
-    start: number,
-    act: (armies: number) => void,
-    label: (armies: number) => string,
-  ) => {
-    let armies = Math.min(most, Math.max(least, start));
-    const row = node("div", "tk-row");
-    const slider = node("input", "tk-slider");
-    slider.type = "range";
-    slider.min = String(least);
-    slider.max = String(most);
-    slider.value = String(armies);
-    slider.disabled = least === most;
-    slider.setAttribute("aria-label", words.armiesLabel);
-    const go = button(label(armies), () => act(armies), true, "tk-go");
-    slider.addEventListener("input", () => {
-      armies = Number(slider.value);
-      go.textContent = label(armies);
-    });
-    row.append(slider, go);
-    return row;
-  };
-
-  function renderControls() {
-    controls.replaceChildren();
-    if (game.phase === TENKA_PHASES.over) {
-      controls.append(button(words.newGame, () => handle.newGame(), true, "tk-new"));
-      return;
-    }
-    if (computers[game.toPlay]) return;
-    const now = choiceNow(game, choice);
-    const hand = game.hands[game.toPlay]!;
-    switch (game.phase) {
-      case TENKA_PHASES.reinforce: {
-        const sets = setsIn(hand, tenkaMapOf(game));
-        if (sets.length > 0)
-          controls.append(
-            button(
-              mustTrade(game) ? words.tradeMust : words.trade,
-              () => make({ kind: TENKA_MOVES.trade, cards: sets[0]! }),
-              mustTrade(game),
-              "tk-trade",
-            ),
-          );
-        if (!mustTrade(game) && now.placedOn !== null && game.reserve > 1) {
-          controls.append(
-            button(
-              tenkaSay(words.allOn, { n: game.reserve, land: landName(now.placedOn) }),
-              () => make({ kind: TENKA_MOVES.place, territory: now.placedOn!, armies: game.reserve }),
-              false,
-              "tk-all",
-            ),
-          );
-        }
-        break;
-      }
-      case TENKA_PHASES.attack: {
-        if (now.from !== null && now.to !== null) {
-          const most = mostAttackDice(game.armies[now.from]!);
-          controls.append(
-            button(
-              most === 1 ? words.attackWithOne : tenkaSay(words.attackWith, { n: most }),
-              () => make({ kind: TENKA_MOVES.attack, from: now.from!, to: now.to!, dice: most }),
-              true,
-              "tk-attack",
-            ),
-            button(
-              words.blitz,
-              () => make({ kind: TENKA_MOVES.blitz, from: now.from!, to: now.to! }),
-              false,
-              "tk-blitz",
-            ),
-          );
-        }
-        controls.append(button(words.stopAttacking, () => make({ kind: TENKA_MOVES.endAttack }), false, "tk-stop"));
-        break;
-      }
-      case TENKA_PHASES.occupy: {
-        const taking = game.occupying!;
-        const most = game.armies[taking.from]! - 1;
-        controls.append(
-          armiesPicker(
-            taking.least,
-            most,
-            most,
-            (armies) => make({ kind: TENKA_MOVES.occupy, armies }),
-            (armies) => tenkaSay(words.moveIn, { n: armies }),
-          ),
-        );
-        break;
-      }
-      case TENKA_PHASES.fortify: {
-        if (now.from !== null && now.to !== null) {
-          const most = game.armies[now.from]! - 1;
-          controls.append(
-            armiesPicker(
-              1,
-              most,
-              now.armies,
-              (armies) => {
-                const from = now.from!;
-                const to = now.to!;
-                const chosen = playTenka(game, { kind: TENKA_MOVES.fortify, from, to });
-                if (chosen === null) return;
-                game = chosen;
-                make({ kind: TENKA_MOVES.shift, armies });
-              },
-              (armies) => tenkaSay(words.moveTo, { n: armies, land: landName(now.to!) }),
-            ),
-          );
-        }
-        controls.append(button(words.endTurn, () => make({ kind: TENKA_MOVES.endTurn }), false, "tk-end"));
-        break;
-      }
-      default:
-        break;
-    }
-  }
-
-  function statusLine(): string {
-    if (game.phase === TENKA_PHASES.over) {
-      const names = game.winners.map(who);
-      return names.length === 1
-        ? tenkaSay(words.wins, { name: names[0]! })
-        : tenkaSay(words.tie, { names: names.join(words.and) });
-    }
-    const name = who(game.toPlay);
-    const round = `${tenkaSay(words.round, { n: game.round, of: game.rounds })} `;
-    if (computers[game.toPlay]) return round + tenkaSay(words.thinking, { name });
-    const now = choiceNow(game, choice);
-    switch (game.phase) {
-      case TENKA_PHASES.setUp:
-        return round + tenkaSay(words.setUpSay, { name, n: game.setUpLeft[game.toPlay]! });
-      case TENKA_PHASES.reinforce:
-        if (mustTrade(game)) return round + tenkaSay(words.mustTradeSay, { name });
-        return (
-          round +
-          (game.reserve === 1
-            ? tenkaSay(words.placeOne, { name })
-            : tenkaSay(words.placeSay, { name, n: game.reserve }))
-        );
-      case TENKA_PHASES.attack:
-        if (now.from === null) return round + tenkaSay(words.attackFrom, { name });
-        if (now.to === null) return round + tenkaSay(words.attackTo, { name, land: landName(now.from) });
-        return round + tenkaSay(words.attackReady, { name, from: landName(now.from), to: landName(now.to) });
-      case TENKA_PHASES.occupy:
-        return round + tenkaSay(words.occupySay, { name, land: landName(game.occupying!.to) });
-      case TENKA_PHASES.fortify:
-        if (now.from === null) return round + tenkaSay(words.fortifyFrom, { name });
-        if (now.to === null) return round + tenkaSay(words.fortifyTo, { name, land: landName(now.from) });
-        return round + tenkaSay(words.fortifyReady, { name, from: landName(now.from), to: landName(now.to) });
-      default:
-        return round + name;
-    }
-  }
-
-  function renderDice() {
-    diceDrawn = letGo(diceDrawn);
-    dice.replaceChildren();
-    const thrownNow = moved;
-    moved = false;
-    const roll = game.lastRoll;
-    if (roll === null) {
-      drawnRoll = null;
-      return;
-    }
-    const tumble = thrownNow && roll !== drawnRoll;
-    drawnRoll = roll;
-    const line = node("p", "tk-roll");
-    const count = roll.attackDice.length + roll.defendDice.length;
-    let index = 0;
-    const faces = (values: readonly number[], side: "attack" | "defend") => {
-      const group = node("span", `tk-faces tk-${side}`);
-      for (const value of values) {
-        const die = node("span", "tk-die");
-        die.dataset.face = String(value);
-        const label = tenkaSay(side === "attack" ? words.dieAttack : words.dieDefend, { n: value });
-        const drawDie = dressing;
-        const drawn = dress(
-          drawDie?.die === undefined
-            ? undefined
-            : () => drawDie.die!(value, { side, tumble, index: index++, count, label, locale }),
-          diceDrawn,
-        );
-        if (drawn === null) die.textContent = String(value);
-        else {
-          // The picture is the whole of what a screen reader gets, so what is inside it is left out.
-          die.classList.add("tk-die-drawn");
-          die.setAttribute("role", "img");
-          die.setAttribute("aria-label", label);
-          drawn.setAttribute("aria-hidden", "true");
-          die.append(drawn);
-        }
-        group.append(die);
-      }
-      return group;
-    };
-    const after = `${roll.throws > 1 ? tenkaSay(words.rollThrows, { n: roll.throws }) : ""}${tenkaSay(words.rollLost, { a: roll.attackerLost, d: roll.defenderLost })}${roll.took ? words.rollTook : ""}`;
-    line.append(
-      node("span", undefined, landName(roll.from)),
-      faces(roll.attackDice, "attack"),
-      node("span", undefined, words.against),
-      faces(roll.defendDice, "defend"),
-      node("span", undefined, `${landName(roll.to)}${after}`),
-    );
-    dice.append(line);
-  }
-
-  function renderSeats() {
-    handDrawn = letGo(handDrawn);
-    seats.replaceChildren();
-    const list = node("ol", "tk-players");
-    game.players.forEach((_, seat) => {
-      const item = node(
-        "li",
-        seat === game.toPlay && game.phase !== TENKA_PHASES.over ? "tk-player tk-to-play" : "tk-player",
-      );
-      item.dataset.testid = "tk-player";
-      if (game.out[seat]) item.classList.add("tk-out");
-      const marble = node("span", "tk-marble");
-      marble.style.background = ownerColour(seat, colours);
-      item.append(
-        marble,
-        node("span", "tk-name", who(seat)),
-        node(
-          "span",
-          "tk-count",
-          tenkaSay(words.counts, {
-            lands: territoriesHeld(game.owners, seat),
-            armies: armiesHeld(game, seat),
-            cards: game.hands[seat]!.length,
-          }),
-        ),
-      );
-      list.append(item);
-    });
-    seats.append(list);
-    const human = game.players.findIndex((_, seat) => !computers[seat]);
-    const shown = !computers[game.toPlay] ? game.toPlay : human;
-    if (shown >= 0) {
-      const hand = game.hands[shown]!;
-      const cards = node("div", "tk-hand");
-      cards.append(
-        node(
-          "p",
-          "tk-hand-title",
-          tenkaSay(hand.length === 0 ? words.noCards : words.cardsInHand, { name: who(shown) }),
-        ),
-      );
-      const kinds = { land: words.kindLand, sea: words.kindSea, air: words.kindAir, wild: words.wild };
-      for (const card of hand) {
-        const territory = cardTerritory(card, tenkaMapOf(game));
-        const kind = cardKind(card, tenkaMapOf(game));
-        const name = territory === null ? words.wild : landName(territory);
-        const label = territory === null ? words.wild : tenkaSay(words.card, { kind: kinds[kind], land: name });
-        const chip = node("span", `tk-card tk-${kind}`);
-        chip.dataset.card = String(card);
-        if (territory !== null) chip.dataset.territory = String(territory);
-        const drawCard = dressing;
-        const drawn = dress(
-          drawCard?.card === undefined
-            ? undefined
-            : () => drawCard.card!({ card, territory, kind, map: game.map ?? "world", name, label, locale }),
-          handDrawn,
-        );
-        if (drawn === null) chip.textContent = label;
-        else {
-          chip.classList.add("tk-card-drawn");
-          chip.setAttribute("role", "img");
-          chip.setAttribute("aria-label", label);
-          drawn.setAttribute("aria-hidden", "true");
-          chip.append(drawn);
-        }
-        cards.append(chip);
-      }
-      // The deck, face down beside the hand, with the number left in it.
-      const left = tenkaSay(words.deckLeft, { n: game.deck.length });
-      const drawBack = dressing;
-      const back = dress(
-        drawBack?.back === undefined ? undefined : () => drawBack.back!({ label: left, locale }),
-        handDrawn,
-      );
-      if (back !== null) {
-        const pile = node("span", "tk-pile");
-        pile.dataset.testid = "tk-pile";
-        back.setAttribute("aria-hidden", "true");
-        pile.append(back, node("span", "tk-pile-count", left));
-        cards.append(pile);
-      }
-      seats.append(cards);
-    }
-  }
-
-  // The record's shell is made once, so that it stays open or shut as the person left it; only its words and lines are drawn again.
-  const recordTitle = node("summary", "tk-record-title");
-  const recordLines = node("pre", "tk-log");
-  recordLines.dataset.testid = "tk-log";
-  recordLines.tabIndex = 0;
-  const recordButtons = node("div", "tk-row");
-  const recordNote = node("p", "tk-note");
-  recordNote.dataset.testid = "tk-note";
-  recordNote.setAttribute("aria-live", "polite");
-  const picker = node("input");
-  picker.type = "file";
-  picker.accept = ".json,application/json";
-  picker.hidden = true;
-  picker.dataset.testid = "tk-file";
-  const read = (text: string) => {
-    const loaded = tenkaFromJSON(text);
-    if (loaded === null) {
-      note = words.loadBad;
-      render();
-      return;
-    }
-    handle.setGame(loaded);
-    note = tenkaSay(words.loaded, { n: loaded.moves.length });
-    render();
-  };
-  picker.addEventListener("change", () => {
-    const file = picker.files?.[0];
-    picker.value = "";
-    if (file === undefined) return;
-    void file.text().then(read, () => read(""));
-  });
-  // Made once, like the views' buttons: only their words change.
-  const saveJson = button(
-    "",
-    () => save(`tenka-${game.seed}.json`, "application/json", tenkaToJSON(game)),
-    false,
-    "tk-save-json",
-  );
-  const saveText = button(
-    "",
-    () => save(`tenka-${game.seed}.txt`, "text/plain", tenkaToText(game, words)),
-    false,
-    "tk-save-text",
-  );
-  const saveCsv = button("", () => save(`tenka-${game.seed}.csv`, "text/csv", tenkaToCSV(game)), false, "tk-save-csv");
-  const load = button("", () => picker.click(), false, "tk-load");
-  recordButtons.append(saveJson, saveText, saveCsv, load);
-  record.append(recordTitle, recordLines, recordButtons, recordNote, picker);
-  record.addEventListener("toggle", () => {
-    if (record.open) renderRecord();
-  });
-
-  function renderRecord() {
-    if (!showRecord) return;
-    recordTitle.textContent = words.record;
-    recordNote.textContent = note;
-    saveJson.textContent = words.saveJson;
-    saveText.textContent = words.saveText;
-    saveCsv.textContent = words.saveCsv;
-    load.textContent = words.load;
-    // Written only while it is open: a long game's record is played again from its seed to be written.
-    if (!record.open) return;
-    recordLines.textContent =
-      game.moves.length === 0 ? `${tenkaToText(game, words)}${words.recordEmpty}\n` : tenkaToText(game, words);
-    recordLines.scrollTop = recordLines.scrollHeight;
-  }
-
-  // The views' buttons are made once for a map and only told their words and which is pressed, so a button being
-  // pressed is never replaced under the finger; a game on another map makes them again, for its own continents.
-  let viewsOf: TenkaMapKey | null = null;
-  let views: { key: TenkaContinentKey | null; pick: HTMLButtonElement }[] = [];
-  function makeViews() {
-    const now = game.map ?? "world";
-    if (viewsOf === now) return;
-    viewsOf = now;
-    focus = null;
-    zoom.replaceChildren();
-    views = [null, ...tenkaMapOf(game).continents.map((one) => one.key)].map((key) => {
-      const pick = button("", () => {
-        focus = key;
-        render();
-      });
-      pick.dataset.view = key ?? now;
-      zoom.append(pick);
-      return { key, pick };
-    });
-  }
-
-  function renderZoom() {
-    makeViews();
-    zoom.setAttribute("aria-label", words.lookAt);
-    for (const { key, pick } of views) {
-      pick.textContent =
-        key === null
-          ? (game.map ?? "world") === "europe"
-            ? words.europe
-            : words.world
-          : continentNameIn(words, key) || key;
-      pick.setAttribute("aria-pressed", String(focus === key));
-    }
-  }
-
   function drawMap() {
     const marks = computers[game.toPlay] ? marksFor(game, NO_CHOICE) : marksFor(game, choice);
     const model = tenkaMapModel(game, marks, colours);
@@ -756,18 +295,21 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     if (kept) there?.focus({ preventScroll: true });
   }
 
+  // The chrome's buttons call the handle, which is built just below; nothing is drawn until both exist.
+  let chrome!: TenkaChrome;
+
   function render() {
     root.lang = locale;
-    status.textContent = statusLine();
+    status.textContent = chrome.statusLine();
     drawMap();
     root.dataset.phase = game.phase;
     root.dataset.toPlay = String(game.toPlay);
     root.dataset.waiting = String(game.phase !== TENKA_PHASES.over && !computers[game.toPlay]);
-    renderZoom();
-    renderControls();
-    renderDice();
-    renderSeats();
-    renderRecord();
+    chrome.renderZoom();
+    chrome.renderControls();
+    chrome.renderDice();
+    chrome.renderSeats();
+    chrome.renderRecord();
     schedule();
   }
 
@@ -837,12 +379,49 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     },
     destroy: () => {
       if (timer !== null) clearTimeout(timer);
-      diceDrawn = letGo(diceDrawn);
-      handDrawn = letGo(handDrawn);
+      chrome.releaseDrawn();
       resized?.disconnect();
       root.remove();
     },
   };
+
+  chrome = createTenkaChrome({
+    controls,
+    dice,
+    seats,
+    record,
+    zoom,
+    game: () => game,
+    setGame: (next) => {
+      game = next;
+    },
+    choice: () => choice,
+    computers: () => computers,
+    words: () => words,
+    locale: () => locale,
+    colours: () => colours,
+    dressing: () => dressing,
+    showRecord: () => showRecord,
+    note: () => note,
+    setNote: (next) => {
+      note = next;
+    },
+    focus: () => focus,
+    setFocus: (next) => {
+      focus = next;
+    },
+    landName,
+    who,
+    make,
+    newGame: () => handle.newGame(),
+    loadGame: (loaded) => handle.setGame(loaded),
+    render: () => render(),
+    takeMove: () => {
+      const thrown = moved;
+      moved = false;
+      return thrown;
+    },
+  });
 
   // Counters are sized for the map's width on the screen, so a change of width draws the map again, and only the map.
   let drawnWidth = 0;
