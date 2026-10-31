@@ -1,12 +1,12 @@
+import { embedDay } from "./embed-day.ts";
+import { tenkaStrings } from "./strings.ts";
 import { TENKA_WORLD_ROUNDS } from "./tenka.constants.ts";
 import type { TenkaGame, TenkaMapKey } from "./tenka.types.ts";
 import { tenkaDailySeed } from "./tenkaDaily.ts";
 import { isTenkaSeed, isTenkaTable } from "./tenkaStart.ts";
-import { tenkaStrings } from "./strings.ts";
-import { embedDay } from "./embed-day.ts";
 import type { TenkaDressing } from "./ui/dressing.types.ts";
-import { TENKA_STYLE } from "./ui/style.ts";
 import { mountTenka, type TenkaTableHandle, type TenkaTableOptions } from "./ui/mount.ts";
+import { TENKA_STYLE } from "./ui/style.ts";
 
 const ElementBase: typeof HTMLElement =
   typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
@@ -261,8 +261,8 @@ export class TenkaTable extends ElementBase {
   #frame(): void {
     this.style.display = "block";
     this.style.maxWidth = "100%";
-    const width = Number(this.getAttribute("width")),
-      size = this.getAttribute("size");
+    const width = Number(this.getAttribute("width"));
+    const size = this.getAttribute("size");
     const pixels =
       this.hasAttribute("width") && width > 0 && Number.isFinite(width)
         ? Math.min(width, 2000)
@@ -284,9 +284,9 @@ export class TenkaTable extends ElementBase {
     const theme = this.getAttribute("theme");
     this.style.colorScheme = theme === "light" || theme === "dark" ? theme : "light dark";
     this.setAttribute("data-tenka-embed", "");
-    const root = this.getRootNode(),
-      target: ParentNode =
-        typeof ShadowRoot !== "undefined" && root instanceof ShadowRoot ? root : this.ownerDocument.head;
+    const root = this.getRootNode();
+    const target: ParentNode =
+      typeof ShadowRoot !== "undefined" && root instanceof ShadowRoot ? root : this.ownerDocument.head;
     if (target.querySelector("style[data-tenka-embed-style]") === null) {
       const style = this.ownerDocument.createElement("style");
       style.setAttribute("data-tenka-embed-style", "");
@@ -338,28 +338,34 @@ export class TenkaTable extends ElementBase {
           ? "europe"
           : "world"
         : (this.#options.map ?? "world");
-      const seedAttribute = this.getAttribute("seed"),
-        day = embedDay(
-          this.hasAttribute("daily") ? this.getAttribute("daily") : seedAttribute === "daily" ? "today" : null,
-        );
-      const seed =
-        day !== null
-          ? tenkaDailySeed(new Date(`${day}T00:00:00Z`))
-          : seedAttribute !== null && isTenkaSeed(Number(seedAttribute))
-            ? Number(seedAttribute)
-            : (this.#options.seed ?? (this.#seed ??= Math.floor(Math.random() * 0xffffffff) >>> 0));
-      const lang = this.closest("[lang]")?.getAttribute("lang"),
-        locale =
-          lang === "en" || lang === "ja"
-            ? lang
-            : (this.#options.locale ??
-              (this.ownerDocument.documentElement.lang.toLowerCase().startsWith("ja") ? "ja" : "en"));
+      const seedAttribute = this.getAttribute("seed");
+      const day = embedDay(
+        this.hasAttribute("daily") ? this.getAttribute("daily") : seedAttribute === "daily" ? "today" : null,
+      );
+      let seed: number;
+      if (day !== null) seed = tenkaDailySeed(new Date(`${day}T00:00:00Z`));
+      else if (seedAttribute !== null && isTenkaSeed(Number(seedAttribute))) seed = Number(seedAttribute);
+      else if (this.#options.seed !== undefined && this.#options.seed !== null) seed = this.#options.seed;
+      else {
+        let held = this.#seed;
+        if (held === null) {
+          held = Math.floor(Math.random() * 0xffffffff) >>> 0;
+          this.#seed = held;
+        }
+        seed = held;
+      }
+      const lang = this.closest("[lang]")?.getAttribute("lang");
+      const locale =
+        lang === "en" || lang === "ja"
+          ? lang
+          : (this.#options.locale ??
+            (this.ownerDocument.documentElement.lang.toLowerCase().startsWith("ja") ? "ja" : "en"));
       const record = this.hasAttribute("record") ? !isOff(this.getAttribute("record")) : (this.#options.record ?? true);
-      const askedDelay = this.getAttribute("delay"),
-        delay =
-          askedDelay !== null && Number.isFinite(Number(askedDelay))
-            ? Math.max(0, Math.min(60000, Number(askedDelay)))
-            : this.#options.computerDelayMs;
+      const askedDelay = this.getAttribute("delay");
+      const delay =
+        askedDelay !== null && Number.isFinite(Number(askedDelay))
+          ? Math.max(0, Math.min(60000, Number(askedDelay)))
+          : this.#options.computerDelayMs;
       if (!isTenkaTable(rounds, count) || players?.some((name) => name.length > 200))
         throw new RangeError("Choose two to six seats and 10, 20 or 60 rounds.");
       const key = JSON.stringify([players, computers, rounds, map, seed]);
@@ -408,8 +414,8 @@ export class TenkaTable extends ElementBase {
       this.#table?.destroy();
       this.#table = null;
       this.#key = "";
-      const message = error instanceof Error ? error.message : String(error),
-        status = this.ownerDocument.createElement("p");
+      const message = error instanceof Error ? error.message : String(error);
+      const status = this.ownerDocument.createElement("p");
       status.setAttribute("role", "status");
       status.textContent = (
         this.closest("[lang]")?.getAttribute("lang") ??

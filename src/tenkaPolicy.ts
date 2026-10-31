@@ -1,6 +1,6 @@
 import { TENKA_MOVES, TENKA_PHASES } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaMove } from "./tenka.types.ts";
 import { mustTrade } from "./tenka.ts";
+import type { TenkaGame, TenkaMove } from "./tenka.types.ts";
 import { setsIn } from "./tenkaCards.ts";
 import { connectedOwn, tenkaMapOf, tenkaNeighbours } from "./tenkaMap.ts";
 import { attacksOpen } from "./tenkaMoves.ts";

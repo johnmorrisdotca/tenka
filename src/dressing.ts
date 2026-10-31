@@ -22,12 +22,12 @@
  */
 import {
   createRollSound,
-  mountDie,
   type DieHandle,
+  mountDie,
   type RandomSource,
   type RollSound,
 } from "@johnmorrisdotca/korokoro";
-import { cardBackSvg, type CardBackOptions } from "@johnmorrisdotca/toranpu/card-backs";
+import { type CardBackOptions, cardBackSvg } from "@johnmorrisdotca/toranpu/card-backs";
 import { cardFaceSvg } from "@johnmorrisdotca/toranpu/card-faces";
 
 import { tenkaCardDesign, tenkaCardId } from "./dressingCards.ts";

@@ -2,9 +2,9 @@
 // The family's standard is in johnmorrisdotca/.github (README-STANDARD.md); the shared part is readme-pictures-lib.mjs.
 // The page is served to a browser without a port, never fetched from the live site, and is the same each run: the deal is a
 // seed (`?seed=`), the computers move at once (`?delay=0`) and motion is reduced. Output: docs/images/<subject>-<desk|phone>-<light|dark>.webp.
-import { takePictures } from "./readme-pictures-lib.mjs";
 
 import { playTenka, startTenka, tenkaFromJSON, tenkaMoves } from "../dist/index.js";
+import { takePictures } from "./readme-pictures-lib.mjs";
 
 const TABLE = '#table [data-testid="tk-root"]';
 const url = (lang = "en") => `/?seed=7&delay=0&lang=${lang}`;

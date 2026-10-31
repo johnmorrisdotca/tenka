@@ -1,8 +1,8 @@
 // A game played by taps: placing, attacking, moving in, ending the turn, and the computer's reply.
 import { expect, test } from "@playwright/test";
 
-import { TENKA_TERRITORIES, playTenka, startTenka, tenkaMoves } from "../dist/index.js";
-import { ROOT, WAITING, look, open, sound, state, tap, tapLand } from "./table.mjs";
+import { playTenka, startTenka, TENKA_TERRITORIES, tenkaMoves } from "../dist/index.js";
+import { look, open, ROOT, sound, state, tap, tapLand, WAITING } from "./table.mjs";
 
 // The demo's own first game, as `?seed=7` deals it: the same in every browser, so the taps can be planned.
 const dealt = startTenka(20, ["You", "Kaze", "Yama"], 7);
@@ -94,7 +94,7 @@ test("a fortifying move: from one of your territories to one joined to it, by th
 }) => {
   const errors = await open(page);
   let game = dealt;
-  const own = game.owners.findIndex((owner) => owner === 0);
+  const own = game.owners.indexOf(0);
   await tapLand(page, own);
   await tap(page, '#table [data-testid="tk-all"]');
   await tap(page, '#table [data-testid="tk-stop"]');

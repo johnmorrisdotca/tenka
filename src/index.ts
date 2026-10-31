@@ -12,19 +12,20 @@
  * own entry, `@johnmorrisdotca/tenka/shapes`, and so is the table that
  * draws and plays a game in plain DOM, `@johnmorrisdotca/tenka/ui`.
  */
-export * from "./tenka.types.ts";
+
+export * from "./strings.ts";
 export * from "./tenka.constants.ts";
 export * from "./tenka.ts";
-export * from "./tenkaStart.ts";
-export * from "./tenkaTurn.ts";
-export * from "./tenkaMap.ts";
+export * from "./tenka.types.ts";
 export * from "./tenkaCards.ts";
+export * from "./tenkaDaily.ts";
 export * from "./tenkaDice.ts";
+export * from "./tenkaExport.ts";
+export * from "./tenkaKeep.ts";
+export * from "./tenkaMap.ts";
 export * from "./tenkaMoves.ts";
 export * from "./tenkaPolicy.ts";
-export * from "./tenkaKeep.ts";
+export * from "./tenkaStart.ts";
 export * from "./tenkaTaps.ts";
-export * from "./tenkaExport.ts";
-export * from "./tenkaDaily.ts";
-export * from "./strings.ts";
+export * from "./tenkaTurn.ts";
 export { TENKA_VERSION } from "./version.ts";

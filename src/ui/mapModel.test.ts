@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { TENKA_CONTINENTS, TENKA_TERRITORY_COUNT } from "../tenkaMap.ts";
+import { TENKA_SHAPES } from "../tenkaShapes.data.ts";
 import { startTenka } from "../tenkaStart.ts";
 import { ownerColour, TENKA_NEUTRAL_COLOUR, TENKA_SEAT_COLOURS } from "./colours.ts";
 import { continentView, landInDirection, nearestLand, tenkaMapModel } from "./mapModel.ts";
-import { TENKA_SHAPES } from "../tenkaShapes.data.ts";
 
 describe("the map drawn for a game", () => {
   const game = startTenka(20, ["A", "B"], 7)!;

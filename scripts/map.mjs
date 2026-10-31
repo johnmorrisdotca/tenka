@@ -44,7 +44,7 @@
  *     links' dashed lines and the continents' borders — what only the browser's
  *     board draws).
  */
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -257,7 +257,8 @@ const polygonsOf = (feature) =>
 /** Gives a feature's polygons to the territories its rule names, adding them to `byTerritory`. */
 let featureCount = 0;
 function place(byTerritory, code, rule, polygons, admin1) {
-  const feature = (featureCount += 1);
+  featureCount += 1;
+  const feature = featureCount;
   const largest = Math.max(...polygons.map((polygon) => Math.abs(ringArea(polygon[0]))));
   for (const polygon of polygons) {
     const main = Math.abs(ringArea(polygon[0])) === largest;
@@ -488,7 +489,7 @@ function pathOf(rings) {
   return rings
     .map((ring) => {
       let d = `M${ring[0][0]} ${ring[0][1]}l`;
-      let parts = [];
+      const parts = [];
       for (let i = 1; i < ring.length; i += 1)
         parts.push(`${ring[i][0] - ring[i - 1][0]} ${ring[i][1] - ring[i - 1][1]}`);
       d += parts.join(" ").replace(/ -/g, "-");
@@ -647,7 +648,7 @@ function snapProvinces(byTerritory) {
         for (let x = Math.min(a[0], b[0]) - 1; x <= Math.max(a[0], b[0]) + 1; x += 1) {
           for (let y = Math.min(a[1], b[1]) - 1; y <= Math.max(a[1], b[1]) + 1; y += 1) {
             const found = known.get(`${x},${y}`);
-            const p = found && found.point;
+            const p = found?.point;
             const own = p && owners.get(keyOf(p));
             if (!own || own.includes(piece.feature) || found.code === piece.code) continue;
             const t = ((x - a[0]) * dx + (y - a[1]) * dy) / length2;

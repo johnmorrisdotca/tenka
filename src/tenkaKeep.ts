@@ -1,6 +1,6 @@
 import { TENKA_MOVES, TENKA_PLACING } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaMove, TenkaPlacing, TenkaMapKey } from "./tenka.types.ts";
 import { playTenka } from "./tenka.ts";
+import type { TenkaGame, TenkaMapKey, TenkaMove, TenkaPlacing } from "./tenka.types.ts";
 import { TENKA_MAPS } from "./tenkaMap.ts";
 import { startTenka } from "./tenkaStart.ts";
 
@@ -39,6 +39,7 @@ type Kept = (string | number)[];
  * ```
  */
 export function writeTenkaMove(move: TenkaMove): Kept {
+  // biome-ignore lint/nursery/useExhaustiveSwitchCases: every kind is named by TENKA_MOVES, which covers the union
   switch (move.kind) {
     case TENKA_MOVES.place:
       return ["p", move.territory, move.armies];

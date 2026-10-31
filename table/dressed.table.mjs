@@ -4,16 +4,16 @@
 import { expect, test } from "@playwright/test";
 
 import {
-  TENKA_STRINGS,
-  TENKA_TERRITORIES,
   playTenka,
   startTenka,
+  TENKA_STRINGS,
+  TENKA_TERRITORIES,
   tenkaFromJSON,
   tenkaMoves,
   territoryNameIn,
 } from "../dist/index.js";
 import { TENKA_SHAPES } from "../dist/shapes.js";
-import { ROOT, WAITING, open, sound, state, tap, tapLand } from "./table.mjs";
+import { open, ROOT, sound, state, tap, tapLand, WAITING } from "./table.mjs";
 
 const dealt = startTenka(20, ["You", "Kaze", "Yama"], 7);
 const KEPT = "tenka.page.game";

@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { CLASSIC_EDGES } from "../scripts/classic-edges.mjs";
 import { TENKA_PHASES } from "./tenka.constants.ts";
 import { playTenka } from "./tenka.ts";
+import { cardTerritory, isWild, TENKA_DECK } from "./tenkaCards.ts";
 import { nextRandom } from "./tenkaDice.ts";
-import { TENKA_DECK, cardTerritory, isWild } from "./tenkaCards.ts";
 import { TENKA_CONTINENTS, TENKA_MAPS, TENKA_TERRITORIES } from "./tenkaMap.ts";
 import { sensibleTenkaMove } from "./tenkaPolicy.ts";
 import { startTenka } from "./tenkaStart.ts";
@@ -179,7 +179,9 @@ describe("Tenka's world is the classic graph", () => {
 
   it("has a card for every territory, in territory order, and the two wild cards after them", () => {
     expect(TENKA_DECK.length).toBe(42 + 2);
-    TENKA_TERRITORIES.forEach((_, at) => expect(cardTerritory(at)).toBe(at));
+    TENKA_TERRITORIES.forEach((_, at) => {
+      expect(cardTerritory(at)).toBe(at);
+    });
     expect(TENKA_DECK.filter((card) => isWild(card)).length).toBe(2);
   });
 

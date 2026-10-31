@@ -1,19 +1,19 @@
+import { TENKA_STRINGS, type TenkaStrings, tenkaSay, territoryNameIn } from "./strings.ts";
 import { TENKA_MOVES, TENKA_PHASES } from "./tenka.constants.ts";
+import { playTenka } from "./tenka.ts";
 import type {
   TenkaGame,
+  TenkaMap,
+  TenkaMapKey,
   TenkaMove,
   TenkaPhase,
   TenkaRoll,
   TenkaSeat,
   TenkaTrade,
-  TenkaMap,
-  TenkaMapKey,
 } from "./tenka.types.ts";
-import { playTenka } from "./tenka.ts";
 import { decodeTenka, readTenkaMove, replayTenka, writeTenkaMove } from "./tenkaKeep.ts";
 import { TENKA_MAPS, tenkaMapOf } from "./tenkaMap.ts";
 import { startTenka } from "./tenkaStart.ts";
-import { TENKA_STRINGS, tenkaSay, territoryNameIn, type TenkaStrings } from "./strings.ts";
 import { TENKA_VERSION } from "./version.ts";
 
 /**
@@ -262,6 +262,7 @@ function entryText(game: TenkaGame, entry: TenkaRecordEntry, strings: TenkaStrin
   const name = nameOf(game, entry.seat, strings);
   const { move } = entry;
   const parts: string[] = [];
+  // biome-ignore lint/nursery/useExhaustiveSwitchCases: every kind is named by TENKA_MOVES, which covers the union
   switch (move.kind) {
     case TENKA_MOVES.place:
       parts.push(

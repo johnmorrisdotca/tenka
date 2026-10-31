@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 
 import { tenkaDailySeed } from "../dist/index.js";
-import { ROOT, open, sound, tap } from "./table.mjs";
+import { open, ROOT, sound, tap } from "./table.mjs";
 
 test("the table in a tag is on the page, played by the computer in turn, and speaks the page's language", async ({
   page,
@@ -41,7 +41,11 @@ test("Copy link copies a link that deals the same game, and the address is read 
   // The page is served over http, where a browser keeps no clipboard; this one is a stand-in that remembers what was written.
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
-      value: { writeText: async (text) => void (window.__copied = text) },
+      value: {
+        writeText: async (text) => {
+          window.__copied = text;
+        },
+      },
     });
   });
   const errors = await open(page, "?seed=2026&players=4&rounds=10&map=europe&delay=0&lang=en", 49);

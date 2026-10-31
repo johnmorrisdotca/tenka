@@ -1,5 +1,5 @@
-import type { TenkaCardKind, TenkaMapKey } from "../tenka.types.ts";
 import type { TenkaLocale } from "../strings.ts";
+import type { TenkaCardKind, TenkaMapKey } from "../tenka.types.ts";
 
 /** Something a dressing drew: the element to put on the table, and what to do when the table takes it away again (stop a timer, say).
  *

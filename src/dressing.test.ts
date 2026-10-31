@@ -7,8 +7,8 @@ import { describe, expect, it } from "vitest";
 
 import { TENKA_BACK, tenkaCardDesign, tenkaCardId, tenkaCardOfId, tenkaThrownDie } from "./dressing.ts";
 import { TENKA_STRINGS, tenkaSay, territoryNameIn } from "./strings.ts";
-import { TENKA_MAP_LIST, tenkaMapOf } from "./tenkaMap.ts";
 import { cardKind, tenkaDeckFor } from "./tenkaCards.ts";
+import { TENKA_MAP_LIST, tenkaMapOf } from "./tenkaMap.ts";
 import { tenkaShapesOf } from "./ui/mapModel.ts";
 
 /** Tenka's table dressed in Korokoro's dice and Toranpu's cards: only what can be checked without a page. The page is tapped in table/dressed.table.mjs. */

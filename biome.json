@@ -1,4 +1,17 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["./scripts/biome-family.json"]
+  "extends": ["./scripts/biome-family.json"],
+  "overrides": [
+    {
+      "includes": ["src/react.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useSemanticElements": "off",
+            "noStaticElementInteractions": "off"
+          }
+        }
+      }
+    }
+  ]
 }

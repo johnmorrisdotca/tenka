@@ -291,20 +291,18 @@ function assign(features) {
       for (const [key, piece] of pieces) {
         if (key === null) continue;
         for (const inFrame of clipToFrame(piece)) {
-          byTerritory
-            .get(key)
-            .push({
-              unit: `${p.adm0_a3}/${p.name}`,
-              main,
-              rings: [
-                inFrame,
-                ...holes.filter((hole) =>
-                  hole.every(
-                    ([lon, lat]) => lon > FRAME.west && lon < FRAME.east && lat > FRAME.south && lat < FRAME.north,
-                  ),
+          byTerritory.get(key).push({
+            unit: `${p.adm0_a3}/${p.name}`,
+            main,
+            rings: [
+              inFrame,
+              ...holes.filter((hole) =>
+                hole.every(
+                  ([lon, lat]) => lon > FRAME.west && lon < FRAME.east && lat > FRAME.south && lat < FRAME.north,
                 ),
-              ],
-            });
+              ),
+            ],
+          });
           counts.set(key, (counts.get(key) ?? 0) + 1);
         }
       }

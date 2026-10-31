@@ -2,11 +2,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
+
 const site = join(dirname(fileURLToPath(import.meta.url)), "..", "site");
 async function serve(page) {
   await page.route("http://tenka.test/**", (route) => {
-    const { pathname } = new URL(route.request().url()),
-      file = join(site, pathname.endsWith("/") ? `${pathname}index.html` : pathname);
+    const { pathname } = new URL(route.request().url());
+    const file = join(site, pathname.endsWith("/") ? `${pathname}index.html` : pathname);
     if (!existsSync(file)) return route.fulfill({ status: 404, body: "" });
     return route.fulfill({
       body: readFileSync(file),
@@ -33,8 +34,8 @@ test("presentation and drawing changes preserve native game and handle", async (
   await serve(page);
   await page.goto("http://tenka.test/embed/?seed=7&size=small&computers=none&rounds=10");
   const result = await page.locator("tenka-table").evaluate(async (table) => {
-    const native = table.table,
-      game = table.game;
+    const native = table.table;
+    const game = table.game;
     table.theme = "dark";
     table.record = true;
     table.lang = "ja";
@@ -81,8 +82,8 @@ test("saved game restoration and shadow events keep private names local", async 
     const { defineTable } = await import("../dist/element.js");
     defineTable("article-conquest");
     defineTable("article-conquest");
-    const host = document.createElement("div"),
-      shadow = host.attachShadow({ mode: "open" });
+    const host = document.createElement("div");
+    const shadow = host.attachShadow({ mode: "open" });
     document.body.append(host);
     const table = document.createElement("article-conquest");
     let local;
@@ -135,8 +136,8 @@ test("map keyboard focus survives language and appearance redraws in a shadow ro
   await page.evaluate(async () => {
     const { defineTable } = await import("../dist/element.js");
     defineTable("article-map");
-    const host = document.createElement("div"),
-      shadow = host.attachShadow({ mode: "open" });
+    const host = document.createElement("div");
+    const shadow = host.attachShadow({ mode: "open" });
     document.body.append(host);
     const table = document.createElement("article-map");
     table.options = { seed: 7, computers: [false, false, false] };
@@ -146,9 +147,9 @@ test("map keyboard focus survives language and appearance redraws in a shadow ro
   });
   await page.keyboard.press("ArrowRight");
   const result = await page.locator("article-map").evaluate(async (table) => {
-    const shadow = table.getRootNode(),
-      before = shadow.activeElement.getAttribute("data-territory"),
-      moves = table.game.moves;
+    const shadow = table.getRootNode();
+    const before = shadow.activeElement.getAttribute("data-territory");
+    const moves = table.game.moves;
     table.lang = "ja";
     table.theme = "dark";
     await Promise.resolve();

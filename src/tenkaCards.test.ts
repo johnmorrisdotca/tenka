@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { TENKA_DECK, cardKind, cardTerritory, isSet, isWild, setsIn, tradeValue } from "./tenkaCards.ts";
+import { cardKind, cardTerritory, isSet, isWild, setsIn, TENKA_DECK, tradeValue } from "./tenkaCards.ts";
 
 /** Tenka's cards: a card for every territory in three kinds, two wild, sets of three, and what a set is worth. */
 

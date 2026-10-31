@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { TENKA_NEUTRAL, TENKA_PHASES, TENKA_WORLD_ROUNDS } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaMove } from "./tenka.types.ts";
 import { mustTrade, playTenka } from "./tenka.ts";
+import type { TenkaGame, TenkaMove } from "./tenka.types.ts";
 import { battleLosses, defendDice, throwDice } from "./tenkaDice.ts";
 import { decodeTenka, encodeTenka } from "./tenkaKeep.ts";
 import { TENKA_CONTINENTS, TENKA_TERRITORIES, TENKA_TERRITORY_COUNT } from "./tenkaMap.ts";
@@ -301,7 +301,7 @@ describe("the end of a turn", () => {
     const base = world({ players: 2, owners: { brazil: 0, peru: 1 }, armies: { brazil: 30 } });
     const neutral = {
       ...base,
-      owners: base.owners.map((owner, territory) =>
+      owners: base.owners.map((_owner, territory) =>
         territory === at("brazil") ? 0 : territory === at("peru") ? 1 : TENKA_NEUTRAL,
       ),
       out: [false, false],

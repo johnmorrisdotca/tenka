@@ -1,18 +1,17 @@
 import { describe, expect, it } from "vitest";
-
+import { EUROPE_LAND_EDGES, EUROPE_SEA_EDGES, EUROPE_TERRITORY_LIST } from "../scripts/europe-edges.mjs";
+import { continentNameIn, TENKA_STRINGS, territoryNameIn } from "./strings.ts";
 import { TENKA_PHASES, TENKA_WORLD_ROUNDS } from "./tenka.constants.ts";
-import type { TenkaGame } from "./tenka.types.ts";
 import { playTenka } from "./tenka.ts";
+import type { TenkaGame } from "./tenka.types.ts";
 import { isWild, tenkaDeckFor } from "./tenkaCards.ts";
-import { decodeTenka, encodeTenka } from "./tenkaKeep.ts";
+import { nextRandom } from "./tenkaDice.ts";
+import { TENKA_EUROPE_SHAPES } from "./tenkaEuropeShapes.data.ts";
 import { tenkaFromJSON, tenkaToJSON } from "./tenkaExport.ts";
-import { TENKA_MAPS, TENKA_MAP_LIST, areNeighbours, tenkaMapOf } from "./tenkaMap.ts";
+import { decodeTenka, encodeTenka } from "./tenkaKeep.ts";
+import { areNeighbours, TENKA_MAP_LIST, TENKA_MAPS, tenkaMapOf } from "./tenkaMap.ts";
 import { sensibleTenkaMove } from "./tenkaPolicy.ts";
 import { startTenka } from "./tenkaStart.ts";
-import { TENKA_STRINGS, continentNameIn, territoryNameIn } from "./strings.ts";
-import { EUROPE_LAND_EDGES, EUROPE_SEA_EDGES, EUROPE_TERRITORY_LIST } from "../scripts/europe-edges.mjs";
-import { TENKA_EUROPE_SHAPES } from "./tenkaEuropeShapes.data.ts";
-import { nextRandom } from "./tenkaDice.ts";
 
 /** A seeded stream of numbers from 0 up to 1, for the computer's choices: the game's own generator. */
 function seededRandom(seed: number): () => number {

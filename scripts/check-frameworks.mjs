@@ -15,8 +15,8 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -55,7 +55,7 @@ const page = (script) =>
 const readme = readFileSync(join(process.cwd(), "README.md"), "utf8");
 function example(heading, lang) {
   const from = readme.indexOf(heading);
-  const found = from < 0 ? null : new RegExp("^```" + lang + "\\n([\\s\\S]*?)^```$", "m").exec(readme.slice(from));
+  const found = from < 0 ? null : new RegExp(`^\`\`\`${lang}\\n([\\s\\S]*?)^\`\`\`$`, "m").exec(readme.slice(from));
   if (found === null) throw new Error(`the README has no ${lang} example under “${heading}”`);
   return found[1];
 }

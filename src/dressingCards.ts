@@ -1,6 +1,6 @@
 import type { CardDesign } from "@johnmorrisdotca/toranpu/card-faces";
 
-import { TENKA_STRINGS, continentNameIn, tenkaSay, territoryNameIn, type TenkaLocale } from "./strings.ts";
+import { continentNameIn, TENKA_STRINGS, type TenkaLocale, tenkaSay, territoryNameIn } from "./strings.ts";
 import type { TenkaCardKind, TenkaMapKey } from "./tenka.types.ts";
 import { cardKind } from "./tenkaCards.ts";
 import { TENKA_MAP_LIST, tenkaMapOf } from "./tenkaMap.ts";

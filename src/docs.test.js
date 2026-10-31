@@ -1,4 +1,3 @@
-import { FAMILY, familyRepo } from "../scripts/family-template.mjs";
 // The documents that are made from the source, or that quote it, checked against it.
 // Plain JavaScript, so that reading files needs no Node types. `pnpm docs:make` rewrites what is made.
 import { createHash } from "node:crypto";
@@ -6,9 +5,9 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { join, resolve } from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
-
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
+import { FAMILY, familyRepo } from "../scripts/family-template.mjs";
 
 import { TenkaTable } from "./element.ts";
 import { TENKA_STRINGS } from "./strings.ts";

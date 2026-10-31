@@ -4,9 +4,9 @@ import {
   TENKA_PHASES,
   TENKA_TERRITORIES_PER_ARMY,
 } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaOwner, TenkaSeat, TenkaMap } from "./tenka.types.ts";
+import type { TenkaGame, TenkaMap, TenkaOwner, TenkaSeat } from "./tenka.types.ts";
 import { shuffled } from "./tenkaDice.ts";
-import { TENKA_MAPS, continentsHeld, tenkaMapOf } from "./tenkaMap.ts";
+import { continentsHeld, TENKA_MAPS, tenkaMapOf } from "./tenkaMap.ts";
 
 /**
  * HOW A TURN BEGINS AND ENDS, and how a game is counted: the parts of the

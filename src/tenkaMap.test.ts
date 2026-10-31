@@ -1,17 +1,16 @@
 import { statSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
-
+import type { TenkaContinentKey } from "./tenka.types.ts";
 import {
+  connectedOwn,
+  continentsHeld,
   TENKA_CONTINENTS,
   TENKA_TERRITORIES,
   TENKA_TERRITORY_COUNT,
-  connectedOwn,
-  continentsHeld,
   tenkaNeighbours,
 } from "./tenkaMap.ts";
 import { TENKA_SHAPES } from "./tenkaShapes.data.ts";
-import type { TenkaContinentKey } from "./tenka.types.ts";
 
 /**
  * Tenka's world, as the map script wrote it and the rules read it: every

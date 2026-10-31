@@ -6,7 +6,7 @@ import {
   TENKA_WILD_CARDS,
 } from "./tenka.constants.ts";
 import type { TenkaCard, TenkaCardKind, TenkaMap } from "./tenka.types.ts";
-import { TENKA_MAPS, TENKA_TERRITORY_COUNT, boardOf } from "./tenkaMap.ts";
+import { boardOf, TENKA_MAPS, TENKA_TERRITORY_COUNT } from "./tenkaMap.ts";
 
 /**
  * THE CARDS: one for every territory, each showing one of three kinds (land,

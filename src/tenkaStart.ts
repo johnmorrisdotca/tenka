@@ -7,7 +7,7 @@ import {
   TENKA_PLACING,
   TENKA_STARTING_ARMIES,
 } from "./tenka.constants.ts";
-import type { TenkaGame, TenkaOwner, TenkaPlacing, TenkaSeat, TenkaMapKey } from "./tenka.types.ts";
+import type { TenkaGame, TenkaMapKey, TenkaOwner, TenkaPlacing, TenkaSeat } from "./tenka.types.ts";
 import { tenkaDeckFor } from "./tenkaCards.ts";
 import { randomBelow, shuffled } from "./tenkaDice.ts";
 import { TENKA_MAPS } from "./tenkaMap.ts";

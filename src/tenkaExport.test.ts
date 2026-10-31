@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-
-import type { TenkaGame } from "./tenka.types.ts";
+import { TENKA_STRINGS } from "./strings.ts";
 import { playTenka, tenkaOver } from "./tenka.ts";
+import type { TenkaGame } from "./tenka.types.ts";
 import { nextRandom } from "./tenkaDice.ts";
 import {
   TENKA_CSV_COLUMNS,
@@ -17,7 +17,6 @@ import { encodeTenka } from "./tenkaKeep.ts";
 import { attacksOpen } from "./tenkaMoves.ts";
 import { sensibleTenkaMove } from "./tenkaPolicy.ts";
 import { startTenka } from "./tenkaStart.ts";
-import { TENKA_STRINGS } from "./strings.ts";
 import { TENKA_VERSION } from "./version.ts";
 
 /** A random that gives the same numbers every time, so a computer's game is the same game. */

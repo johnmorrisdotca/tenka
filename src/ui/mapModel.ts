@@ -1,7 +1,7 @@
-import { tenkaMapOf } from "../tenkaMap.ts";
-import { TENKA_EUROPE_SHAPES } from "../tenkaEuropeShapes.data.ts";
-import { TENKA_SHAPES } from "../tenkaShapes.data.ts";
 import type { TenkaContinentKey, TenkaGame, TenkaMapKey, TenkaMapMarks, TenkaShapes } from "../tenka.types.ts";
+import { TENKA_EUROPE_SHAPES } from "../tenkaEuropeShapes.data.ts";
+import { tenkaMapOf } from "../tenkaMap.ts";
+import { TENKA_SHAPES } from "../tenkaShapes.data.ts";
 
 /** How each map is drawn.
  *
@@ -30,6 +30,7 @@ export const TENKA_MAP_SHAPES: Readonly<Record<TenkaMapKey, TenkaShapes>> = {
 export function tenkaShapesOf(map: TenkaMapKey | undefined): TenkaShapes {
   return TENKA_MAP_SHAPES[map ?? "world"] ?? TENKA_SHAPES;
 }
+
 import { ownerColour } from "./colours.ts";
 
 /** How a territory is ringed: the one chosen, one it can reach, or the target.

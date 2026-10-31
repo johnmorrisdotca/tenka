@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 
 import { TENKA_CSV_COLUMNS, tenkaFromJSON } from "../dist/index.js";
-import { ROOT, WAITING, open, sound, state, tap, tapLand } from "./table.mjs";
+import { open, ROOT, sound, state, tap, tapLand, WAITING } from "./table.mjs";
 
 /** Tap a button that saves a file, and hand back the file's text. */
 async function saved(page, selector) {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type HTMLAttributes, type KeyboardEvent, type SVGAttributes } from "react";
+import { type HTMLAttributes, type KeyboardEvent, type SVGAttributes, useEffect, useRef } from "react";
 
 import type { TenkaGame, TenkaMapMarks } from "./tenka.types.ts";
 import { NO_MARKS, tenkaMapModel } from "./ui/mapModel.ts";

@@ -1,8 +1,9 @@
+import { TENKA_EMBED_OPTION_KEYS, TenkaTable } from "./dist/element.js";
 import { TENKA_VERSION } from "./dist/index.js";
-import { TenkaTable, TENKA_EMBED_OPTION_KEYS } from "./dist/element.js";
 import "./dist/element-define.js";
 import { embedDay } from "./dist/embed-day.js";
-import { familyEmbedBuilder, FAMILY_EMBED_BUILDER_WORDS } from "./family-embed-builder.js";
+import { FAMILY_EMBED_BUILDER_WORDS, familyEmbedBuilder } from "./family-embed-builder.js";
+
 const words = {
   en: {
     ...FAMILY_EMBED_BUILDER_WORDS.en,
@@ -160,14 +161,14 @@ function problem(settings) {
 }
 let mounted;
 const page = globalThis.familyLanguage({
-    id: "tenka",
-    words,
-    onChange: () => {
-      docsLink();
-      mounted?.draw();
-    },
-  }),
-  heights = {};
+  id: "tenka",
+  words,
+  onChange: () => {
+    docsLink();
+    mounted?.draw();
+  },
+});
+const heights = {};
 const key = (settings) => JSON.stringify(settings);
 const builder = familyEmbedBuilder({
   id: "tenka",

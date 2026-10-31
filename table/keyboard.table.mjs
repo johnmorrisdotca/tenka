@@ -2,7 +2,7 @@
 // Enter or Space for a tap, and the keyboard left where it was when the map is drawn again.
 import { expect, test } from "@playwright/test";
 
-import { WAITING, open, sound } from "./table.mjs";
+import { open, sound, WAITING } from "./table.mjs";
 
 const LANDS = "#table .tk-land";
 const focused = (page) => page.evaluate(() => document.activeElement?.getAttribute("data-territory") ?? null);

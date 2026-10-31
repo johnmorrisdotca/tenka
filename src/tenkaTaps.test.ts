@@ -5,7 +5,7 @@ import type { TenkaGame } from "./tenka.types.ts";
 import { TENKA_TERRITORIES, TENKA_TERRITORY_COUNT } from "./tenkaMap.ts";
 import { startTenka } from "./tenkaStart.ts";
 
-import { NO_CHOICE, choiceNow, marksFor, tapTerritory } from "./tenkaTaps.ts";
+import { choiceNow, marksFor, NO_CHOICE, tapTerritory } from "./tenkaTaps.ts";
 
 /** What a tap on Tenka's map means in each part of a turn, and what it lights up. */
 

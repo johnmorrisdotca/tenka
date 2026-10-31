@@ -1,25 +1,25 @@
+import {
+  continentNameIn,
+  type TenkaLocale,
+  type TenkaStrings,
+  tenkaSay,
+  tenkaStrings,
+  territoryNameIn,
+} from "../strings.ts";
 import { TENKA_MOVES, TENKA_PHASES, TENKA_WORLD_ROUNDS } from "../tenka.constants.ts";
-import type { TenkaChoice, TenkaContinentKey, TenkaGame, TenkaMove, TenkaMapKey } from "../tenka.types.ts";
 import { mustTrade, playTenka } from "../tenka.ts";
+import type { TenkaChoice, TenkaContinentKey, TenkaGame, TenkaMapKey, TenkaMove } from "../tenka.types.ts";
 import { cardKind, cardTerritory, setsIn } from "../tenkaCards.ts";
 import { mostAttackDice } from "../tenkaDice.ts";
 import { tenkaFromJSON, tenkaToCSV, tenkaToJSON, tenkaToText } from "../tenkaExport.ts";
 import { tenkaMapOf } from "../tenkaMap.ts";
 import { sensibleTenkaMove } from "../tenkaPolicy.ts";
 import { startTenka } from "../tenkaStart.ts";
-import { NO_CHOICE, choiceNow, marksFor, tapTerritory } from "../tenkaTaps.ts";
+import { choiceNow, marksFor, NO_CHOICE, tapTerritory } from "../tenkaTaps.ts";
 import { armiesHeld, territoriesHeld } from "../tenkaTurn.ts";
-import {
-  continentNameIn,
-  tenkaSay,
-  tenkaStrings,
-  territoryNameIn,
-  type TenkaLocale,
-  type TenkaStrings,
-} from "../strings.ts";
 import { ownerColour } from "./colours.ts";
-import { continentView, landInDirection, nearestLand, tenkaMapModel, type TenkaArrow } from "./mapModel.ts";
-import type { TenkaDressing, TenkaDrawn } from "./dressing.types.ts";
+import type { TenkaDrawn, TenkaDressing } from "./dressing.types.ts";
+import { continentView, landInDirection, nearestLand, type TenkaArrow, tenkaMapModel } from "./mapModel.ts";
 import { TENKA_STYLE } from "./style.ts";
 import { tenkaMapSvg } from "./svg.ts";
 
@@ -144,21 +144,22 @@ function save(name: string, type: string, text: string): void {
  * ```
  */
 export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {}): TenkaTableHandle {
+  let current = options;
   const pageLocale = (): TenkaLocale =>
     typeof document !== "undefined" && document.documentElement.lang.toLowerCase().startsWith("ja") ? "ja" : "en";
-  let locale: TenkaLocale = options.locale ?? pageLocale();
-  let own = options.strings ?? {};
+  let locale: TenkaLocale = current.locale ?? pageLocale();
+  let own = current.strings ?? {};
   let words = tenkaStrings(locale, own);
   // Names nobody gave are the table's own: "You" in the table's language, then the computer's.
-  const named = options.players !== undefined;
-  let players = options.players ?? [words.you, ...COMPUTER_NAMES];
-  let computers = options.computers ?? players.map((_, seat) => seat !== 0);
-  let rounds = options.rounds ?? TENKA_WORLD_ROUNDS;
-  let map: TenkaMapKey = options.map ?? "world";
-  let colours = options.colours;
-  let delay = options.computerDelayMs ?? 450;
-  let showRecord = options.record !== false;
-  let dressing = options.dressing;
+  const named = current.players !== undefined;
+  let players = current.players ?? [words.you, ...COMPUTER_NAMES];
+  let computers = current.computers ?? players.map((_, seat) => seat !== 0);
+  let rounds = current.rounds ?? TENKA_WORLD_ROUNDS;
+  let map: TenkaMapKey = current.map ?? "world";
+  let colours = current.colours;
+  let delay = current.computerDelayMs ?? 450;
+  let showRecord = current.record !== false;
+  let dressing = current.dressing;
 
   const begin = (seed: number): TenkaGame => {
     const game = startTenka(rounds, players, seed, undefined, map);
@@ -167,7 +168,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     return game;
   };
 
-  let game = begin(options.seed ?? freshSeed());
+  let game = begin(current.seed ?? freshSeed());
   let choice: TenkaChoice = NO_CHOICE;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let focus: TenkaContinentKey | null = null;
@@ -204,7 +205,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
 
   const root = node("div", "tk-root");
   root.dataset.testid = "tk-root";
-  for (const [name, value] of Object.entries(options.theme ?? {})) root.style.setProperty(name, value);
+  for (const [name, value] of Object.entries(current.theme ?? {})) root.style.setProperty(name, value);
   const style = node("style");
   style.textContent = TENKA_STYLE;
   const status = node("p", "tk-status");
@@ -245,7 +246,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     choice = choiceNow(game, choice);
     note = "";
     moved = true;
-    options.onChange?.(game);
+    current.onChange?.(game);
     render();
   };
 
@@ -289,7 +290,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
   const landAt = (territory: number) => board.querySelector<SVGElement>(`.tk-land[data-territory="${territory}"]`);
   board.addEventListener("focusin", (event) => {
     const hit = (event.target as Element).closest("[data-territory]");
-    if (hit !== null && hit.classList.contains("tk-land")) onLand = Number(hit.getAttribute("data-territory"));
+    if (hit?.classList.contains("tk-land")) onLand = Number(hit.getAttribute("data-territory"));
   });
   board.addEventListener("keydown", (event) => {
     const hit = (event.target as Element).closest(".tk-land[data-territory]");
@@ -791,7 +792,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       game = begin(changed.seed ?? freshSeed());
       choice = NO_CHOICE;
       note = "";
-      options.onChange?.(game);
+      current.onChange?.(game);
       render();
     },
     setGame: (loaded, playedBy) => {
@@ -803,7 +804,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       game = loaded;
       choice = NO_CHOICE;
       note = "";
-      options.onChange?.(game);
+      current.onChange?.(game);
       render();
     },
     setLocale: (next, strings) => {
@@ -820,7 +821,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
     },
     set: (next) => {
       if (next.theme !== undefined) {
-        for (const name of Object.keys(options.theme ?? {})) if (!(name in next.theme)) root.style.removeProperty(name);
+        for (const name of Object.keys(current.theme ?? {})) if (!(name in next.theme)) root.style.removeProperty(name);
         for (const [name, value] of Object.entries(next.theme)) root.style.setProperty(name, value);
       }
       if ("record" in next) {
@@ -831,7 +832,7 @@ export function mountTenka(target: HTMLElement, options: TenkaTableOptions = {})
       if ("colours" in next) colours = next.colours;
       if ("dressing" in next) dressing = next.dressing;
       if ("computerDelayMs" in next) delay = next.computerDelayMs ?? 450;
-      options = { ...options, ...next };
+      current = { ...current, ...next };
       handle.setLocale(next.locale ?? locale, next.strings ?? {});
     },
     destroy: () => {

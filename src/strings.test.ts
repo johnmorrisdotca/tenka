@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
+import { continentNameIn, TENKA_STRINGS, tenkaSay, tenkaStrings, territoryNameIn } from "./strings.ts";
 import { TENKA_CONTINENTS, TENKA_TERRITORIES } from "./tenkaMap.ts";
-import { TENKA_STRINGS, continentNameIn, tenkaSay, tenkaStrings, territoryNameIn } from "./strings.ts";
 
 const braces = (line: string) => [...line.matchAll(/\{(\w+)\}/g)].map((found) => found[1]).sort();
 

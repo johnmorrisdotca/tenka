@@ -3,31 +3,32 @@
  * the computer (`mountTenka`), and the map on its own (`tenkaMapSvg`, drawn
  * from `tenkaMapModel`). Its own entry, so the rules never carry the map.
  */
-export { mountTenka, type TenkaTableHandle, type TenkaTableOptions } from "./ui/mount.ts";
+
 export {
-  NO_MARKS,
-  TENKA_MAP_SHAPES,
+  continentNameIn,
+  TENKA_STRINGS,
+  type TenkaLocale,
+  type TenkaStrings,
+  tenkaSay,
+  tenkaStrings,
+  territoryNameIn,
+} from "./strings.ts";
+export { ownerColour, TENKA_NEUTRAL_COLOUR, TENKA_SEAT_COLOURS } from "./ui/colours.ts";
+export type { TenkaBackHow, TenkaCardHow, TenkaDieHow, TenkaDrawn, TenkaDressing } from "./ui/dressing.types.ts";
+export {
   continentView,
   landInDirection,
+  NO_MARKS,
   nearestLand,
-  tenkaMapModel,
-  tenkaShapesOf,
+  TENKA_MAP_SHAPES,
   type TenkaArrow,
   type TenkaLand,
   type TenkaMapModel,
   type TenkaRing,
   type TenkaView,
+  tenkaMapModel,
+  tenkaShapesOf,
 } from "./ui/mapModel.ts";
-export { TENKA_NEUTRAL_COLOUR, TENKA_SEAT_COLOURS, ownerColour } from "./ui/colours.ts";
-export { tenkaMapSvg } from "./ui/svg.ts";
-export type { TenkaBackHow, TenkaCardHow, TenkaDieHow, TenkaDrawn, TenkaDressing } from "./ui/dressing.types.ts";
+export { mountTenka, type TenkaTableHandle, type TenkaTableOptions } from "./ui/mount.ts";
 export { TENKA_STYLE } from "./ui/style.ts";
-export {
-  TENKA_STRINGS,
-  continentNameIn,
-  tenkaSay,
-  tenkaStrings,
-  territoryNameIn,
-  type TenkaLocale,
-  type TenkaStrings,
-} from "./strings.ts";
+export { tenkaMapSvg } from "./ui/svg.ts";
