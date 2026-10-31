@@ -3,31 +3,31 @@
   "entries": {
     ".": {
       "minified": 47618,
-      "gzip": 14869
+      "gzip": 14962
     },
     "./shapes": {
       "minified": 192112,
-      "gzip": 59025
+      "gzip": 58189
     },
     "./ui": {
-      "minified": 258243,
-      "gzip": 81852
+      "minified": 258245,
+      "gzip": 82725
     },
     "./react": {
-      "minified": 297359,
-      "gzip": 94172
+      "minified": 297362,
+      "gzip": 95081
     },
     "./dressing": {
       "minified": 404192,
       "gzip": 136104
     },
     "./element": {
-      "minified": 266959,
-      "gzip": 84850
+      "minified": 267066,
+      "gzip": 84776
     },
     "./element/define": {
-      "minified": 266964,
-      "gzip": 84853
+      "minified": 267071,
+      "gzip": 84783
     }
   }
 }
