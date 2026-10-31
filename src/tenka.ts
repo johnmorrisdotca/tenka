@@ -1,4 +1,10 @@
-import { TENKA_MOVES, TENKA_MUST_TRADE_AT, TENKA_NEUTRAL, TENKA_PHASES, TENKA_TERRITORY_CARD_BONUS } from "./tenka.constants.ts";
+import {
+  TENKA_MOVES,
+  TENKA_MUST_TRADE_AT,
+  TENKA_NEUTRAL,
+  TENKA_PHASES,
+  TENKA_TERRITORY_CARD_BONUS,
+} from "./tenka.constants.ts";
 import type { TenkaCard, TenkaGame, TenkaMove } from "./tenka.types.ts";
 import { cardTerritory, isSet, tradeValue } from "./tenkaCards.ts";
 import { battleLosses, defendDice, mostAttackDice, throwDice } from "./tenkaDice.ts";
@@ -32,7 +38,8 @@ function recorded(game: TenkaGame, move: TenkaMove): TenkaGame {
 }
 
 function place(game: TenkaGame, territory: number, armies: number): TenkaGame | null {
-  if (!isTerritory(territory, tenkaMapOf(game)) || game.owners[territory] !== game.toPlay || !Number.isInteger(armies)) return null;
+  if (!isTerritory(territory, tenkaMapOf(game)) || game.owners[territory] !== game.toPlay || !Number.isInteger(armies))
+    return null;
   const on = game.armies.map((count, at) => (at === territory ? count + armies : count));
   if (game.phase === TENKA_PHASES.setUp) {
     if (armies !== 1 || game.setUpLeft[game.toPlay] < 1) return null;
@@ -54,26 +61,43 @@ function place(game: TenkaGame, territory: number, armies: number): TenkaGame | 
 
 function trade(game: TenkaGame, cards: readonly TenkaCard[]): TenkaGame | null {
   const hand = game.hands[game.toPlay];
-  if (game.phase !== TENKA_PHASES.reinforce || !isSet(cards, tenkaMapOf(game)) || !cards.every((card) => hand.includes(card))) return null;
+  if (
+    game.phase !== TENKA_PHASES.reinforce ||
+    !isSet(cards, tenkaMapOf(game)) ||
+    !cards.every((card) => hand.includes(card))
+  )
+    return null;
   const set = [...cards].sort((a, b) => a - b);
   const armies = tradeValue(game.trades);
   // Two more armies straight onto a territory the trader holds that one of the cards shows: the first such, if any.
-  const bonusTerritory = set.map((card) => cardTerritory(card, tenkaMapOf(game))).find((territory) => territory !== null && game.owners[territory] === game.toPlay) ?? null;
+  const bonusTerritory =
+    set
+      .map((card) => cardTerritory(card, tenkaMapOf(game)))
+      .find((territory) => territory !== null && game.owners[territory] === game.toPlay) ?? null;
   return {
     ...game,
     hands: game.hands.map((held, seat) => (seat === game.toPlay ? held.filter((card) => !set.includes(card)) : held)),
     discards: [...game.discards, ...set],
     trades: game.trades + 1,
     reserve: game.reserve + armies,
-    armies: bonusTerritory === null ? game.armies : game.armies.map((count, at) => (at === bonusTerritory ? count + TENKA_TERRITORY_CARD_BONUS : count)),
+    armies:
+      bonusTerritory === null
+        ? game.armies
+        : game.armies.map((count, at) => (at === bonusTerritory ? count + TENKA_TERRITORY_CARD_BONUS : count)),
     lastTrade: { seat: game.toPlay, cards: set, armies, bonusTerritory },
   };
 }
 
 /** Whether the player to move may attack `to` from `from` at all: theirs, a neighbour, somebody else's, armies to spare. */
 function mayAttack(game: TenkaGame, from: number, to: number): boolean {
-  if (game.phase !== TENKA_PHASES.attack || !isTerritory(from, tenkaMapOf(game)) || !isTerritory(to, tenkaMapOf(game))) return false;
-  return game.owners[from] === game.toPlay && game.owners[to] !== game.toPlay && areNeighbours(from, to, tenkaMapOf(game)) && game.armies[from] >= 2;
+  if (game.phase !== TENKA_PHASES.attack || !isTerritory(from, tenkaMapOf(game)) || !isTerritory(to, tenkaMapOf(game)))
+    return false;
+  return (
+    game.owners[from] === game.toPlay &&
+    game.owners[to] !== game.toPlay &&
+    areNeighbours(from, to, tenkaMapOf(game)) &&
+    game.armies[from] >= 2
+  );
 }
 
 /**
@@ -105,7 +129,18 @@ function battle(game: TenkaGame, from: number, to: number, dice: number, untilDo
   } while (untilDone && armies[to] > 0 && armies[from] >= 2);
   const defender = game.owners[to];
   const took = armies[to] === 0;
-  const lastRoll = { from, to, attacker: game.toPlay, defender, attackDice: last.attack, defendDice: last.defend, attackerLost, defenderLost, throws, took };
+  const lastRoll = {
+    from,
+    to,
+    attacker: game.toPlay,
+    defender,
+    attackDice: last.attack,
+    defendDice: last.defend,
+    attackerLost,
+    defenderLost,
+    throws,
+    took,
+  };
   const rolled = { ...game, rng, armies, lastRoll };
   return took ? conquered(rolled, from, to, thrownDice) : rolled;
 }
@@ -120,20 +155,26 @@ function conquered(game: TenkaGame, from: number, to: number, dice: number): Ten
     taken = {
       ...taken,
       out: taken.out.map((isOut, seat) => isOut || seat === defender),
-      hands: taken.hands.map((held, seat) => (seat === game.toPlay ? [...held, ...taken.hands[defender]] : seat === defender ? [] : held)),
+      hands: taken.hands.map((held, seat) =>
+        seat === game.toPlay ? [...held, ...taken.hands[defender]] : seat === defender ? [] : held,
+      ),
       lastOut: { seat: defender, by: game.toPlay },
     };
   }
   const least = Math.min(dice, game.armies[from] - 1);
   // The world taken: nobody else is left. The fewest move in, and the game is over.
   if (nextSeatIn(taken, game.toPlay) === game.toPlay) {
-    return finished({ ...taken, armies: game.armies.map((count, at) => (at === from ? count - least : at === to ? least : count)) }, [game.toPlay]);
+    return finished(
+      { ...taken, armies: game.armies.map((count, at) => (at === from ? count - least : at === to ? least : count)) },
+      [game.toPlay],
+    );
   }
   return { ...taken, phase: TENKA_PHASES.occupy, occupying: { from, to, least } };
 }
 
 function attack(game: TenkaGame, from: number, to: number, dice: number): TenkaGame | null {
-  if (!mayAttack(game, from, to) || !Number.isInteger(dice) || dice < 1 || dice > mostAttackDice(game.armies[from])) return null;
+  if (!mayAttack(game, from, to) || !Number.isInteger(dice) || dice < 1 || dice > mostAttackDice(game.armies[from]))
+    return null;
   return battle(game, from, to, dice, false);
 }
 
@@ -148,17 +189,26 @@ function occupy(game: TenkaGame, armies: number): TenkaGame | null {
   if (armies < taking.least || armies > game.armies[taking.from] - 1) return null;
   const moved = {
     ...game,
-    armies: game.armies.map((count, at) => (at === taking.from ? count - armies : at === taking.to ? count + armies : count)),
+    armies: game.armies.map((count, at) =>
+      at === taking.from ? count - armies : at === taking.to ? count + armies : count,
+    ),
     occupying: null,
   };
   // Cards taken from a player knocked out: at six or more, trade until fewer than five before attacking on.
-  if (game.hands[game.toPlay].length > TENKA_MUST_TRADE_AT) return { ...moved, phase: TENKA_PHASES.reinforce, reserve: 0 };
+  if (game.hands[game.toPlay].length > TENKA_MUST_TRADE_AT)
+    return { ...moved, phase: TENKA_PHASES.reinforce, reserve: 0 };
   return { ...moved, phase: TENKA_PHASES.attack };
 }
 
 function fortify(game: TenkaGame, from: number, to: number): TenkaGame | null {
-  if (game.phase !== TENKA_PHASES.fortify || !isTerritory(from, tenkaMapOf(game)) || !isTerritory(to, tenkaMapOf(game))) return null;
-  if (game.owners[from] !== game.toPlay || game.armies[from] < 2 || !connectedOwn(game.owners, from, tenkaMapOf(game)).includes(to)) return null;
+  if (game.phase !== TENKA_PHASES.fortify || !isTerritory(from, tenkaMapOf(game)) || !isTerritory(to, tenkaMapOf(game)))
+    return null;
+  if (
+    game.owners[from] !== game.toPlay ||
+    game.armies[from] < 2 ||
+    !connectedOwn(game.owners, from, tenkaMapOf(game)).includes(to)
+  )
+    return null;
   return { ...game, phase: TENKA_PHASES.shift, shifting: { from, to } };
 }
 
@@ -168,7 +218,9 @@ function shift(game: TenkaGame, armies: number): TenkaGame | null {
   if (armies < 1 || armies > game.armies[moving.from] - 1) return null;
   const moved = {
     ...game,
-    armies: game.armies.map((count, at) => (at === moving.from ? count - armies : at === moving.to ? count + armies : count)),
+    armies: game.armies.map((count, at) =>
+      at === moving.from ? count - armies : at === moving.to ? count + armies : count,
+    ),
     shifting: null,
   };
   return endOfTurn(moved);

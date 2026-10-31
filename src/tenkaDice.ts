@@ -137,7 +137,10 @@ export function defendDice(armies: number): number {
  * console.log(battleLosses([6,3,1],[4,2]));
  * ```
  */
-export function battleLosses(attack: readonly number[], defend: readonly number[]): { attackerLost: number; defenderLost: number } {
+export function battleLosses(
+  attack: readonly number[],
+  defend: readonly number[],
+): { attackerLost: number; defenderLost: number } {
   let attackerLost = 0;
   let defenderLost = 0;
   for (let pair = 0; pair < Math.min(attack.length, defend.length); pair += 1) {

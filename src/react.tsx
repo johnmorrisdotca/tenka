@@ -4,7 +4,11 @@ import type { TenkaGame, TenkaMapMarks } from "./tenka.types.ts";
 import { NO_MARKS, tenkaMapModel } from "./ui/mapModel.ts";
 import { mountTenka, type TenkaTableOptions } from "./ui/mount.ts";
 
-const RING = { chosen: { stroke: "#111", width: 5 }, target: { stroke: "#fff", width: 5 }, reach: { stroke: "#111", width: 2.5 } } as const;
+const RING = {
+  chosen: { stroke: "#111", width: 5 },
+  target: { stroke: "#fff", width: 5 },
+  reach: { stroke: "#111", width: 2.5 },
+} as const;
 
 /** What `TenkaMap` takes: a game to draw, and any attribute of its `<svg>`.
  *
@@ -51,7 +55,14 @@ export type TenkaMapProps = {
  * console.log(createElement(TenkaMap,{game}));
  * ```
  */
-export function TenkaMap({ game, marks = NO_MARKS, colours, onTerritory, label = "Map of the world", ...svg }: TenkaMapProps) {
+export function TenkaMap({
+  game,
+  marks = NO_MARKS,
+  colours,
+  onTerritory,
+  label = "Map of the world",
+  ...svg
+}: TenkaMapProps) {
   const model = tenkaMapModel(game, marks, colours);
   const press = onTerritory === undefined ? undefined : (territory: number) => () => onTerritory(territory);
   const keyboard = (land: { territory: number; name: string; armies: number }) =>
@@ -71,21 +82,76 @@ export function TenkaMap({ game, marks = NO_MARKS, colours, onTerritory, label =
     <svg viewBox={`0 0 ${model.width} ${model.height}`} role="group" aria-label={label} {...svg}>
       <rect x={0} y={0} width={model.width} height={model.height} fill="#b9d3dc" className="tk-sea" />
       {model.lands.map((land) => (
-        <path key={land.key} d={land.outline} fill={land.fill} fillOpacity={0.82} stroke="rgba(20,20,20,0.55)" strokeWidth={1.2} strokeLinejoin="round" className="tk-land" data-territory={land.key} onClick={press?.(land.territory)} style={press === undefined ? undefined : { cursor: "pointer" }} {...keyboard(land)}>
+        <path
+          key={land.key}
+          d={land.outline}
+          fill={land.fill}
+          fillOpacity={0.82}
+          stroke="rgba(20,20,20,0.55)"
+          strokeWidth={1.2}
+          strokeLinejoin="round"
+          className="tk-land"
+          data-territory={land.key}
+          onClick={press?.(land.territory)}
+          style={press === undefined ? undefined : { cursor: "pointer" }}
+          {...keyboard(land)}
+        >
           <title>{`${land.name}: ${land.armies}`}</title>
         </path>
       ))}
-      <path d={model.continentBorders} fill="none" stroke="rgba(10,10,10,0.8)" strokeWidth={3} strokeLinecap="round" pointerEvents="none" />
+      <path
+        d={model.continentBorders}
+        fill="none"
+        stroke="rgba(10,10,10,0.8)"
+        strokeWidth={3}
+        strokeLinecap="round"
+        pointerEvents="none"
+      />
       {model.seaLines.map(([x1, y1, x2, y2], line) => (
-        <line key={line} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#1d3440" strokeWidth={2} strokeDasharray="8 6" pointerEvents="none" />
+        <line
+          key={line}
+          x1={x1}
+          y1={y1}
+          x2={x2}
+          y2={y2}
+          stroke="#1d3440"
+          strokeWidth={2}
+          strokeDasharray="8 6"
+          pointerEvents="none"
+        />
       ))}
       {model.lands.map((land) =>
-        land.ring === null ? null : <path key={`ring-${land.key}`} d={land.outline} fill="none" stroke={RING[land.ring].stroke} strokeWidth={RING[land.ring].width} strokeLinejoin="round" pointerEvents="none" />,
+        land.ring === null ? null : (
+          <path
+            key={`ring-${land.key}`}
+            d={land.outline}
+            fill="none"
+            stroke={RING[land.ring].stroke}
+            strokeWidth={RING[land.ring].width}
+            strokeLinejoin="round"
+            pointerEvents="none"
+          />
+        ),
       )}
       {model.lands.map((land) => (
-        <g key={`counter-${land.key}`} onClick={press?.(land.territory)} style={press === undefined ? undefined : { cursor: "pointer" }}>
+        <g
+          key={`counter-${land.key}`}
+          onClick={press?.(land.territory)}
+          style={press === undefined ? undefined : { cursor: "pointer" }}
+        >
           <circle cx={land.at[0]} cy={land.at[1]} r={17} fill={land.fill} stroke="#111" strokeWidth={2} />
-          <text x={land.at[0]} y={land.at[1]} textAnchor="middle" dominantBaseline="central" fontSize={18} fontWeight={700} fill="#fff" stroke="rgba(0,0,0,0.55)" strokeWidth={3} paintOrder="stroke">
+          <text
+            x={land.at[0]}
+            y={land.at[1]}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={18}
+            fontWeight={700}
+            fill="#fff"
+            stroke="rgba(0,0,0,0.55)"
+            strokeWidth={3}
+            paintOrder="stroke"
+          >
             {land.armies}
           </text>
         </g>
@@ -121,7 +187,22 @@ export type TenkaTableProps = TenkaTableOptions & Omit<HTMLAttributes<HTMLDivEle
  * console.log(createElement(TenkaTable,{seed:42,record:false}));
  * ```
  */
-export function TenkaTable({ players, computers, rounds, seed, map, colours, computerDelayMs, onChange, locale, strings, theme, record, dressing, ...element }: TenkaTableProps) {
+export function TenkaTable({
+  players,
+  computers,
+  rounds,
+  seed,
+  map,
+  colours,
+  computerDelayMs,
+  onChange,
+  locale,
+  strings,
+  theme,
+  record,
+  dressing,
+  ...element
+}: TenkaTableProps) {
   const host = useRef<HTMLDivElement>(null);
   const latest = useRef(onChange);
   useEffect(() => {
@@ -130,7 +211,21 @@ export function TenkaTable({ players, computers, rounds, seed, map, colours, com
   useEffect(() => {
     const target = host.current;
     if (target === null) return;
-    const table = mountTenka(target, { players, computers, rounds, seed, map, colours, computerDelayMs, locale, strings, theme, record, dressing, onChange: (game) => latest.current?.(game) });
+    const table = mountTenka(target, {
+      players,
+      computers,
+      rounds,
+      seed,
+      map,
+      colours,
+      computerDelayMs,
+      locale,
+      strings,
+      theme,
+      record,
+      dressing,
+      onChange: (game) => latest.current?.(game),
+    });
     return () => table.destroy();
     // Mounted once per key, as documented above.
     // eslint-disable-next-line react-hooks/exhaustive-deps

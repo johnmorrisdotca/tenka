@@ -32,7 +32,9 @@ test("Tab lands on one territory, which is named, and arrows move to a neighbour
   await sound(page, errors);
 });
 
-test("Enter places an army, and the keyboard is still on that territory after the map is drawn again", async ({ page }) => {
+test("Enter places an army, and the keyboard is still on that territory after the map is drawn again", async ({
+  page,
+}) => {
   const errors = await open(page);
   await expect(page.locator(WAITING)).toHaveCount(1);
   const own = page.locator(`${LANDS}[data-owner="0"]`).first();
@@ -40,10 +42,16 @@ test("Enter places an army, and the keyboard is still on that territory after th
   const armies = Number(await own.getAttribute("data-armies"));
   await own.focus();
   await page.keyboard.press("Enter");
-  await expect(page.locator(`${LANDS}[data-territory="${territory}"]`)).toHaveAttribute("data-armies", String(armies + 1));
+  await expect(page.locator(`${LANDS}[data-territory="${territory}"]`)).toHaveAttribute(
+    "data-armies",
+    String(armies + 1),
+  );
   expect(await focused(page)).toBe(territory);
   await page.keyboard.press(" ");
-  await expect(page.locator(`${LANDS}[data-territory="${territory}"]`)).toHaveAttribute("data-armies", String(armies + 2));
+  await expect(page.locator(`${LANDS}[data-territory="${territory}"]`)).toHaveAttribute(
+    "data-armies",
+    String(armies + 2),
+  );
   expect(await focused(page)).toBe(territory);
   await sound(page, errors);
 });
@@ -62,7 +70,9 @@ test("on a continent's view the arrows stay among the territories shown", async 
     await page.keyboard.press(key);
     const at = await page.evaluate(() => {
       const land = document.activeElement;
-      const counter = document.querySelector(`#table .tk-counter[data-territory="${land.getAttribute("data-territory")}"] circle`);
+      const counter = document.querySelector(
+        `#table .tk-counter[data-territory="${land.getAttribute("data-territory")}"] circle`,
+      );
       return [Number(counter.getAttribute("cx")), Number(counter.getAttribute("cy"))];
     });
     expect(at[0]).toBeGreaterThanOrEqual(view[0]);

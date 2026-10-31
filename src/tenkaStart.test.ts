@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { TENKA_NEUTRAL, TENKA_PHASES, TENKA_PLACING, TENKA_STARTING_ARMIES, TENKA_WORLD_ROUNDS } from "./tenka.constants.ts";
+import {
+  TENKA_NEUTRAL,
+  TENKA_PHASES,
+  TENKA_PLACING,
+  TENKA_STARTING_ARMIES,
+  TENKA_WORLD_ROUNDS,
+} from "./tenka.constants.ts";
 import { playTenka } from "./tenka.ts";
 import { TENKA_TERRITORY_COUNT } from "./tenkaMap.ts";
 import { startTenka, tenkaAgain } from "./tenkaStart.ts";
@@ -49,14 +55,22 @@ describe("the start of a game of tenka", () => {
   it("places by hand one army at a time round the table, then the first turn begins", () => {
     let game = startTenka(10, names(3), 42, TENKA_PLACING.hand)!;
     expect(game.phase).toBe(TENKA_PHASES.setUp);
-    expect(game.setUpLeft).toEqual(names(3).map((_, seat) => TENKA_STARTING_ARMIES[3] - territoriesHeld(game.owners, seat)));
+    expect(game.setUpLeft).toEqual(
+      names(3).map((_, seat) => TENKA_STARTING_ARMIES[3] - territoriesHeld(game.owners, seat)),
+    );
     const order: number[] = [];
     while (game.phase === TENKA_PHASES.setUp) {
       order.push(game.toPlay);
       const mine = game.owners.indexOf(game.toPlay);
       // Two at once, or on somebody else's territory: refused.
       expect(playTenka(game, { kind: "place", territory: mine, armies: 2 })).toBeNull();
-      expect(playTenka(game, { kind: "place", territory: game.owners.findIndex((owner) => owner !== game.toPlay), armies: 1 })).toBeNull();
+      expect(
+        playTenka(game, {
+          kind: "place",
+          territory: game.owners.findIndex((owner) => owner !== game.toPlay),
+          armies: 1,
+        }),
+      ).toBeNull();
       game = playTenka(game, { kind: "place", territory: mine, armies: 1 })!;
     }
     expect(order.slice(0, 3)).toEqual([game.first, (game.first + 1) % 3, (game.first + 2) % 3]);

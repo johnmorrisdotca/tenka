@@ -49,7 +49,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { CLASSIC_EDGES } from "./classic-edges.mjs";
-import { WORLD_CONTINENTS, WORLD_COUNTRIES, WORLD_CUT_MERIDIANS, WORLD_REGIONS, WORLD_SEA_LINKS, WORLD_TERRITORIES } from "./map-world.mjs";
+import {
+  WORLD_CONTINENTS,
+  WORLD_COUNTRIES,
+  WORLD_CUT_MERIDIANS,
+  WORLD_REGIONS,
+  WORLD_SEA_LINKS,
+  WORLD_TERRITORIES,
+} from "./map-world.mjs";
 
 /** Which map to build: `node scripts/map.mjs` for the world, `node scripts/map.mjs europe` for Europe, which has a script of its own. */
 const MAP = process.argv[2] ?? "world";
@@ -63,7 +70,8 @@ const REMOTE = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/m
 const CACHE = process.env.TENKA_SOURCE ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_0_countries.geojson`);
 /** The world is built from the provinces and states of its largest countries too (Natural Earth's admin-1, also public domain). */
 const REMOTE_ADMIN1 = `https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_${SCALE_NAME}_admin_1_states_provinces.geojson`;
-const CACHE_ADMIN1 = process.env.TENKA_ADMIN1_SOURCE ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_1_states_provinces.geojson`);
+const CACHE_ADMIN1 =
+  process.env.TENKA_ADMIN1_SOURCE ?? join(tmpdir(), `ne_${SCALE_NAME}_admin_1_states_provinces.geojson`);
 const WORLD_OUT = "src/tenkaWorld.data.ts";
 const SHAPES_OUT = "src/tenkaShapes.data.ts";
 /** What the two files export. */
@@ -107,7 +115,10 @@ const miller = (lat) => 1.25 * Math.log(Math.tan(Math.PI / 4 + 0.4 * lat * RAD))
 const SCALE = WIDTH / ((EAST - WEST) * RAD);
 const TOP = miller(NORTH);
 const HEIGHT = Math.round((TOP - miller(SOUTH)) * SCALE);
-const project = ([lon, lat]) => [Math.round((lon - WEST) * RAD * SCALE), Math.round((TOP - miller(Math.max(SOUTH, Math.min(NORTH, lat)))) * SCALE)];
+const project = ([lon, lat]) => [
+  Math.round((lon - WEST) * RAD * SCALE),
+  Math.round((TOP - miller(Math.max(SOUTH, Math.min(NORTH, lat)))) * SCALE),
+];
 
 /** A ring's signed area by the shoelace formula (in whatever units its points are). */
 function ringArea(ring) {
@@ -131,7 +142,8 @@ function centreOf(ring) {
 }
 
 /** A ring without its closing point, which GeoJSON repeats. */
-const open = (ring) => (ring.length > 1 && ring[0][0] === ring.at(-1)[0] && ring[0][1] === ring.at(-1)[1] ? ring.slice(0, -1) : ring);
+const open = (ring) =>
+  ring.length > 1 && ring[0][0] === ring.at(-1)[0] && ring[0][1] === ring.at(-1)[1] ? ring.slice(0, -1) : ring;
 
 /**
  * The point where a meridian crosses an edge, worked out the same way
@@ -160,7 +172,9 @@ function withCutPoints(ring) {
     const a = ring[i];
     const b = ring[(i + 1) % ring.length];
     out.push(a);
-    const between = CUT_MERIDIANS.filter((at) => (a[0] < at && b[0] > at) || (a[0] > at && b[0] < at)).sort((x, y) => (a[0] < b[0] ? x - y : y - x));
+    const between = CUT_MERIDIANS.filter((at) => (a[0] < at && b[0] > at) || (a[0] > at && b[0] < at)).sort((x, y) =>
+      a[0] < b[0] ? x - y : y - x,
+    );
     for (const at of between) out.push(crossing(a, b, at));
   }
   return out;
@@ -198,7 +212,8 @@ function clipRing(ring, at, side) {
 function cutRing(ring, meridians, into) {
   for (const at of meridians) {
     const count = crossings(ring, at);
-    if (count !== 2) throw new Error(`The meridian ${at} crosses a mainland ${count} times; choose one that crosses it twice.`);
+    if (count !== 2)
+      throw new Error(`The meridian ${at} crosses a mainland ${count} times; choose one that crosses it twice.`);
   }
   const pieces = [];
   let rest = ring;
@@ -223,7 +238,8 @@ async function download(cache, remote) {
 
 const source = () => download(CACHE, REMOTE);
 
-const codeOf = (properties) => (properties.ISO_A2_EH && properties.ISO_A2_EH !== "-99" ? properties.ISO_A2_EH : properties.ADM0_A3);
+const codeOf = (properties) =>
+  properties.ISO_A2_EH && properties.ISO_A2_EH !== "-99" ? properties.ISO_A2_EH : properties.ADM0_A3;
 
 /** One polygon's rings in longitude and latitude, with the cut points added and the far east of the map moved to the right of the seam. */
 function ringsOf(polygon) {
@@ -235,7 +251,8 @@ function ringsOf(polygon) {
 }
 
 /** A feature's polygons, each as its rings. */
-const polygonsOf = (feature) => (feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates).map(ringsOf);
+const polygonsOf = (feature) =>
+  (feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates).map(ringsOf);
 
 /** Gives a feature's polygons to the territories its rule names, adding them to `byTerritory`. */
 let featureCount = 0;
@@ -254,7 +271,9 @@ function place(byTerritory, code, rule, polygons, admin1) {
       continue;
     }
     if (polygon.length > 1) throw new Error(`${code}: a mainland with a hole cannot be cut here.`);
-    for (const piece of cutRing(polygon[0], answer.at, answer.into)) if (piece.territory !== null) byTerritory.get(piece.territory).push({ code, main: true, rings: [piece.ring], admin1, feature });
+    for (const piece of cutRing(polygon[0], answer.at, answer.into))
+      if (piece.territory !== null)
+        byTerritory.get(piece.territory).push({ code, main: true, rings: [piece.ring], admin1, feature });
   }
 }
 
@@ -267,7 +286,10 @@ function assign(features, regions) {
     // The countries cut by their own provinces are read from the provinces instead.
     if (feature.properties.ADM0_A3 in cut) continue;
     // The world must account for every country.
-    if (!(code in COUNTRIES)) throw new Error(`${code} (${feature.properties.NAME}) is given to no territory; add it to COUNTRIES, or null to leave it off.`);
+    if (!(code in COUNTRIES))
+      throw new Error(
+        `${code} (${feature.properties.NAME}) is given to no territory; add it to COUNTRIES, or null to leave it off.`,
+      );
     if (COUNTRIES[code] === null) continue;
     place(byTerritory, code, COUNTRIES[code], polygonsOf(feature), false);
   }
@@ -343,7 +365,8 @@ function orientated(polygonRings) {
  */
 function thin(ring) {
   let length = 0;
-  for (let i = 0; i < ring.length; i += 1) length += Math.hypot(ring[i][0] - ring[(i + 1) % ring.length][0], ring[i][1] - ring[(i + 1) % ring.length][1]);
+  for (let i = 0; i < ring.length; i += 1)
+    length += Math.hypot(ring[i][0] - ring[(i + 1) % ring.length][0], ring[i][1] - ring[(i + 1) % ring.length][1]);
   return length > 16 && Math.abs(ringArea(ring)) / length < 1;
 }
 
@@ -355,7 +378,11 @@ function thin(ring) {
 function following(edge, options) {
   if (options.length <= 1) return options[0];
   const [dx, dy] = [edge[1][0] - edge[0][0], edge[1][1] - edge[0][1]];
-  const turn = (next) => Math.atan2(dx * (next[1][1] - next[0][1]) - dy * (next[1][0] - next[0][0]), dx * (next[1][0] - next[0][0]) + dy * (next[1][1] - next[0][1]));
+  const turn = (next) =>
+    Math.atan2(
+      dx * (next[1][1] - next[0][1]) - dy * (next[1][0] - next[0][0]),
+      dx * (next[1][0] - next[0][0]) + dy * (next[1][1] - next[0][1]),
+    );
   return options.reduce((best, next) => (turn(next) > turn(best) ? next : best));
 }
 
@@ -395,12 +422,23 @@ function mergeOutline(pieces) {
     while (at !== undefined && !used.has(at)) {
       used.add(at);
       ring.push(at[0]);
-      at = following(at, (from.get(keyOf(at[1])) ?? []).filter((next) => !used.has(next)));
+      at = following(
+        at,
+        (from.get(keyOf(at[1])) ?? []).filter((next) => !used.has(next)),
+      );
     }
     if (ring.length >= 3 && !thin(ring)) rings.push(ring);
   }
   // A ring inside another of the same territory is no lake or island worth drawing: where the files of two provinces draw their border apart, it is the wedge between the two.
-  const drawn = rings.filter((ring) => !rings.some((other) => other !== ring && Math.abs(ringArea(other)) > Math.abs(ringArea(ring)) && ring.filter((point) => inside(point, other)).length >= ring.length * 0.6));
+  const drawn = rings.filter(
+    (ring) =>
+      !rings.some(
+        (other) =>
+          other !== ring &&
+          Math.abs(ringArea(other)) > Math.abs(ringArea(ring)) &&
+          ring.filter((point) => inside(point, other)).length >= ring.length * 0.6,
+      ),
+  );
   return { rings: drawn, edges: kept };
 }
 
@@ -415,7 +453,10 @@ function keepFarPoints(run) {
   let far = -1;
   let farthest = SIMPLIFY;
   for (let i = 1; i < run.length - 1; i += 1) {
-    const d = length === 0 ? Math.hypot(run[i][0] - a[0], run[i][1] - a[1]) : Math.abs(dx * (a[1] - run[i][1]) - dy * (a[0] - run[i][0])) / length;
+    const d =
+      length === 0
+        ? Math.hypot(run[i][0] - a[0], run[i][1] - a[1])
+        : Math.abs(dx * (a[1] - run[i][1]) - dy * (a[0] - run[i][0])) / length;
     if (d > farthest) {
       far = i;
       farthest = d;
@@ -429,7 +470,11 @@ function simplified(ring) {
   if (SIMPLIFY === 0 || ring.length < 8) return ring;
   let second = 0;
   for (let i = 1; i < ring.length; i += 1) {
-    if (Math.hypot(ring[i][0] - ring[0][0], ring[i][1] - ring[0][1]) > Math.hypot(ring[second][0] - ring[0][0], ring[second][1] - ring[0][1])) second = i;
+    if (
+      Math.hypot(ring[i][0] - ring[0][0], ring[i][1] - ring[0][1]) >
+      Math.hypot(ring[second][0] - ring[0][0], ring[second][1] - ring[0][1])
+    )
+      second = i;
   }
   if (second === 0) return ring;
   const turned = [...ring.slice(second), ...ring.slice(0, second)];
@@ -444,7 +489,8 @@ function pathOf(rings) {
     .map((ring) => {
       let d = `M${ring[0][0]} ${ring[0][1]}l`;
       let parts = [];
-      for (let i = 1; i < ring.length; i += 1) parts.push(`${ring[i][0] - ring[i - 1][0]} ${ring[i][1] - ring[i - 1][1]}`);
+      for (let i = 1; i < ring.length; i += 1)
+        parts.push(`${ring[i][0] - ring[i - 1][0]} ${ring[i][1] - ring[i - 1][1]}`);
       d += parts.join(" ").replace(/ -/g, "-");
       return `${d}z`;
     })
@@ -469,7 +515,10 @@ function distanceToEdges(point, rings) {
       const [bx, by] = ring[(i + 1) % ring.length];
       const dx = bx - ax;
       const dy = by - ay;
-      const t = dx === 0 && dy === 0 ? 0 : Math.max(0, Math.min(1, ((point[0] - ax) * dx + (point[1] - ay) * dy) / (dx * dx + dy * dy)));
+      const t =
+        dx === 0 && dy === 0
+          ? 0
+          : Math.max(0, Math.min(1, ((point[0] - ax) * dx + (point[1] - ay) * dy) / (dx * dx + dy * dy)));
       least = Math.min(least, Math.hypot(point[0] - (ax + t * dx), point[1] - (ay + t * dy)));
     }
   }
@@ -567,7 +616,8 @@ function snapProvinces(byTerritory) {
             for (let dy = -1; dy <= 1; dy += 1) {
               const found = known.get(`${x + dx},${y + dy}`);
               // Only another country's: the provinces of one country already agree where they meet.
-              if (found && found.code !== piece.code && (best === null || Math.hypot(dx, dy) < best.d)) best = { d: Math.hypot(dx, dy), found: found.point };
+              if (found && found.code !== piece.code && (best === null || Math.hypot(dx, dy) < best.d))
+                best = { d: Math.hypot(dx, dy), found: found.point };
             }
           }
           return best === null ? [x, y] : best.found;
@@ -576,11 +626,14 @@ function snapProvinces(byTerritory) {
         return cleanRing(moved);
       });
     }
-    for (const { point, code } of settled) if (!known.has(keyOf(point)) || known.get(keyOf(point)).code === code) known.set(keyOf(point), { point, code });
+    for (const { point, code } of settled)
+      if (!known.has(keyOf(point)) || known.get(keyOf(point)).code === code) known.set(keyOf(point), { point, code });
   }
   // A point of one feature that lies on an edge of another's (a long straight border on one side, many short edges on the other) is added to that edge, so that both sides make the same edges.
   const owners = new Map();
-  for (const piece of pieces) for (const ring of piece.snapped) for (const point of ring) owners.set(keyOf(point), [...(owners.get(keyOf(point)) ?? []), piece.feature]);
+  for (const piece of pieces)
+    for (const ring of piece.snapped)
+      for (const point of ring) owners.set(keyOf(point), [...(owners.get(keyOf(point)) ?? []), piece.feature]);
   for (const piece of pieces) {
     piece.snapped = piece.snapped.map((ring) => {
       const out = [];
@@ -638,7 +691,9 @@ outlines.forEach((outline, at) => {
   }
 });
 for (const [at, set] of land.entries()) {
-  for (const other of set) if (!land[other].has(at)) throw new Error(`${TERRITORIES[at].key} borders ${TERRITORIES[other].key} but not the other way round.`);
+  for (const other of set)
+    if (!land[other].has(at))
+      throw new Error(`${TERRITORIES[at].key} borders ${TERRITORIES[other].key} but not the other way round.`);
 }
 
 const labelFor = (at) => (TERRITORIES[at].label ? project(TERRITORIES[at].label) : labelOf(outlines[at].rings));
@@ -662,7 +717,8 @@ for (const [a, b, options = {}] of SEA_LINKS) {
   } else if (options.from) {
     const [p, q] = [project(options.from), project(options.to)];
     seaLines.push(crossingLine(p, q, q));
-    for (const more of options.also ?? []) seaLines.push(crossingLine(project(more.from), project(more.to), project(more.to)));
+    for (const more of options.also ?? [])
+      seaLines.push(crossingLine(project(more.from), project(more.to), project(more.to)));
   } else {
     const across = nearest(outlines[i].rings, outlines[j].rings);
     seaLines.push(crossingLine(across.p, across.q, labelFor(j)));
@@ -679,7 +735,9 @@ TERRITORIES.forEach((territory, at) => {
 const missing = [...wanted].filter((edge) => !drawn.has(edge));
 const extra = [...drawn].filter((edge) => !wanted.has(edge));
 if (missing.length > 0 || extra.length > 0) {
-  throw new Error(`The map is not the classic graph.\n  Missing (no shared border and no sea link): ${missing.join(", ") || "none"}\n  Extra (touch on the map, or a sea link, and not in the graph): ${extra.join(", ") || "none"}`);
+  throw new Error(
+    `The map is not the classic graph.\n  Missing (no shared border and no sea link): ${missing.join(", ") || "none"}\n  Extra (touch on the map, or a sea link, and not in the graph): ${extra.join(", ") || "none"}`,
+  );
 }
 
 const labels = TERRITORIES.map((_, at) => labelFor(at));
@@ -695,7 +753,10 @@ const boxes = outlines.map(({ rings }) => {
 });
 /* No territory may run more than half the map across: one that does has a piece on the wrong side of the seam. */
 boxes.forEach(([left, , right], at) => {
-  if (right - left > WIDTH / 2) throw new Error(`${TERRITORIES[at].key} runs from ${left} to ${right}, across half the map; a piece of it is on the wrong side of the seam.`);
+  if (right - left > WIDTH / 2)
+    throw new Error(
+      `${TERRITORIES[at].key} runs from ${left} to ${right}, across half the map; a piece of it is on the wrong side of the seam.`,
+    );
 });
 const bordersPath = continentBorders.map(([a, b]) => `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`).join("");
 
@@ -760,7 +821,11 @@ writeFileSync(
 );
 
 const size = (path) => readFileSync(path).length;
-console.log(`${TERRITORIES.length} territories, ${WIDTH}x${HEIGHT}; ${WORLD_OUT} ${size(WORLD_OUT)} bytes, ${SHAPES_OUT} ${size(SHAPES_OUT)} bytes.`);
+console.log(
+  `${TERRITORIES.length} territories, ${WIDTH}x${HEIGHT}; ${WORLD_OUT} ${size(WORLD_OUT)} bytes, ${SHAPES_OUT} ${size(SHAPES_OUT)} bytes.`,
+);
 for (const [at, territory] of TERRITORIES.entries()) {
-  console.log(`${territory.key.padEnd(18)} land ${[...land[at]].map((other) => TERRITORIES[other].key).join(", ")}${sea[at].size ? ` | sea ${[...sea[at]].map((other) => TERRITORIES[other].key).join(", ")}` : ""}`);
+  console.log(
+    `${territory.key.padEnd(18)} land ${[...land[at]].map((other) => TERRITORIES[other].key).join(", ")}${sea[at].size ? ` | sea ${[...sea[at]].map((other) => TERRITORIES[other].key).join(", ")}` : ""}`,
+  );
 }

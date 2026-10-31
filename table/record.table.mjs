@@ -57,7 +57,9 @@ test("a saved game loads back, and a file that is not a game is refused", async 
   // Play on, then go back to the saved game.
   await tapLand(page, own);
   expect((await state(page)).lands[own].armies).toBe(before.lands[own].armies + 1);
-  await page.locator('#table [data-testid="tk-file"]').setInputFiles({ name: "tenka-7.json", mimeType: "application/json", buffer: Buffer.from(json.text) });
+  await page
+    .locator('#table [data-testid="tk-file"]')
+    .setInputFiles({ name: "tenka-7.json", mimeType: "application/json", buffer: Buffer.from(json.text) });
   await expect(page.locator('#table [data-testid="tk-note"]')).toHaveText("Game loaded: 1 moves.");
   let s = await sound(page, errors);
   expect(s.lands.map((land) => land.armies)).toEqual(before.lands.map((land) => land.armies));
@@ -66,8 +68,12 @@ test("a saved game loads back, and a file that is not a game is refused", async 
   // A move nobody could have made, and a file of something else.
   const forged = JSON.stringify({ ...JSON.parse(json.text), moves: [["a", 0, 41, 3]] });
   for (const text of [forged, "not a game", "{}"]) {
-    await page.locator('#table [data-testid="tk-file"]').setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(text) });
-    await expect(page.locator('#table [data-testid="tk-note"]')).toHaveText("That file is not a game of Tenka these rules can replay.");
+    await page
+      .locator('#table [data-testid="tk-file"]')
+      .setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(text) });
+    await expect(page.locator('#table [data-testid="tk-note"]')).toHaveText(
+      "That file is not a game of Tenka these rules can replay.",
+    );
   }
   s = await sound(page, errors);
   expect(s.lands.map((land) => land.armies)).toEqual(before.lands.map((land) => land.armies));
@@ -88,10 +94,23 @@ test("a game left half way is on the table again on return", async ({ page }) =>
 });
 
 for (const map of ["world", "europe"]) {
-  test(`a ${map} game kept before 2.0.0 is refused cleanly: the page starts a new game and says nothing is wrong`, async ({ page }) => {
+  test(`a ${map} game kept before 2.0.0 is refused cleanly: the page starts a new game and says nothing is wrong`, async ({
+    page,
+  }) => {
     // Kept by 1.x, when the map had other territories: the moves would mean other places, so it is not replayed.
     const old = {
-      game: { format: 1, game: "tenka", generator: "tenka 1.3.0", seed: 7, players: ["You", "Ann", "Ben"], rounds: 10, placing: "auto", ...(map === "world" ? {} : { map }), moves: [["p", 1, 3]], state: { round: 1, phase: "attack", toPlay: 0, winners: [] } },
+      game: {
+        format: 1,
+        game: "tenka",
+        generator: "tenka 1.3.0",
+        seed: 7,
+        players: ["You", "Ann", "Ben"],
+        rounds: 10,
+        placing: "auto",
+        ...(map === "world" ? {} : { map }),
+        moves: [["p", 1, 3]],
+        state: { round: 1, phase: "attack", toPlay: 0, winners: [] },
+      },
       computers: [false, true, true],
     };
     await page.addInitScript((kept) => localStorage.setItem("tenka.page.game", JSON.stringify(kept)), old);

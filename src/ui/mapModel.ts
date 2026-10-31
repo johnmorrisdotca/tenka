@@ -11,7 +11,10 @@ import type { TenkaContinentKey, TenkaGame, TenkaMapKey, TenkaMapMarks, TenkaSha
  * console.log(TENKA_MAP_SHAPES);
  * ```
  */
-export const TENKA_MAP_SHAPES: Readonly<Record<TenkaMapKey, TenkaShapes>> = { world: TENKA_SHAPES, europe: TENKA_EUROPE_SHAPES };
+export const TENKA_MAP_SHAPES: Readonly<Record<TenkaMapKey, TenkaShapes>> = {
+  world: TENKA_SHAPES,
+  europe: TENKA_EUROPE_SHAPES,
+};
 
 /** How a game's map is drawn: the world unless the game says otherwise.
  *
@@ -125,13 +128,24 @@ export const NO_MARKS: TenkaMapMarks = { chosen: null, reach: [], target: null }
  * console.log(tenkaMapModel(game).lands.length);
  * ```
  */
-export function tenkaMapModel(game: Pick<TenkaGame, "owners" | "armies" | "map">, marks: TenkaMapMarks = NO_MARKS, colours?: readonly string[]): TenkaMapModel {
+export function tenkaMapModel(
+  game: Pick<TenkaGame, "owners" | "armies" | "map">,
+  marks: TenkaMapMarks = NO_MARKS,
+  colours?: readonly string[],
+): TenkaMapModel {
   const reach = new Set(marks.reach);
   const shapes = tenkaShapesOf(game.map);
   const { territories } = tenkaMapOf(game.map);
   const lands = shapes.outlines.map((outline, territory): TenkaLand => {
     const owner = game.owners[territory] ?? -1;
-    const ring: TenkaRing = marks.target === territory ? "target" : marks.chosen === territory ? "chosen" : reach.has(territory) ? "reach" : null;
+    const ring: TenkaRing =
+      marks.target === territory
+        ? "target"
+        : marks.chosen === territory
+          ? "chosen"
+          : reach.has(territory)
+            ? "reach"
+            : null;
     const label = shapes.labels[territory]!;
     return {
       territory,
@@ -145,7 +159,13 @@ export function tenkaMapModel(game: Pick<TenkaGame, "owners" | "armies" | "map">
       owner,
     };
   });
-  return { width: shapes.width, height: shapes.height, lands, seaLines: shapes.seaLines, continentBorders: shapes.continentBorders };
+  return {
+    width: shapes.width,
+    height: shapes.height,
+    lands,
+    seaLines: shapes.seaLines,
+    continentBorders: shapes.continentBorders,
+  };
 }
 
 /** The territory whose counter is nearest a point of the map, within `reach` map units, or null.
@@ -218,7 +238,12 @@ export type TenkaArrow = "left" | "right" | "up" | "down";
  * console.log(landInDirection(0,"right"));
  * ```
  */
-export function landInDirection(from: number, arrow: TenkaArrow, map: TenkaMapKey = "world", view?: TenkaView): number | null {
+export function landInDirection(
+  from: number,
+  arrow: TenkaArrow,
+  map: TenkaMapKey = "world",
+  view?: TenkaView,
+): number | null {
   const labels = tenkaShapesOf(map).labels;
   const start = labels[from];
   if (start === undefined) return null;
@@ -227,7 +252,8 @@ export function landInDirection(from: number, arrow: TenkaArrow, map: TenkaMapKe
   let bestScore = Infinity;
   labels.forEach(([x, y], territory) => {
     if (territory === from) return;
-    if (view !== undefined && (x! < view[0] || x! > view[0] + view[2] || y! < view[1] || y! > view[1] + view[3])) return;
+    if (view !== undefined && (x! < view[0] || x! > view[0] + view[2] || y! < view[1] || y! > view[1] + view[3]))
+      return;
     const along = (x! - start[0]!) * dx! + (y! - start[1]!) * dy!;
     if (along <= 0) return;
     const across = Math.abs((x! - start[0]!) * dy! - (y! - start[1]!) * dx!);

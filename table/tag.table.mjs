@@ -4,7 +4,9 @@ import { expect, test } from "@playwright/test";
 import { tenkaDailySeed } from "../dist/index.js";
 import { ROOT, open, sound, tap } from "./table.mjs";
 
-test("the table in a tag is on the page, played by the computer in turn, and speaks the page's language", async ({ page }) => {
+test("the table in a tag is on the page, played by the computer in turn, and speaks the page's language", async ({
+  page,
+}) => {
   const errors = await open(page);
   const tag = page.locator('[data-testid="tag"] [data-testid="tk-root"]');
   await expect(tag).toHaveCount(1);
@@ -38,7 +40,9 @@ test("Today's game deals the day's seed, whatever the set-up", async ({ page }) 
 test("Copy link copies a link that deals the same game, and the address is read back", async ({ page }) => {
   // The page is served over http, where a browser keeps no clipboard; this one is a stand-in that remembers what was written.
   await page.addInitScript(() => {
-    Object.defineProperty(navigator, "clipboard", { value: { writeText: async (text) => void (window.__copied = text) } });
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: async (text) => void (window.__copied = text) },
+    });
   });
   const errors = await open(page, "?seed=2026&players=4&rounds=10&map=europe&delay=0&lang=en", 49);
   await expect(page.locator('#table [data-testid="tk-player"]')).toHaveCount(4);
@@ -50,7 +54,13 @@ test("Copy link copies a link that deals the same game, and the address is read 
   await expect(page.locator("#share")).toHaveText("Copied");
   const copied = new URL(await page.evaluate(() => window.__copied));
   expect(copied.origin).toBe("http://tenka.test");
-  expect(Object.fromEntries(copied.searchParams)).toEqual({ seed: "2026", players: "4", rounds: "10", map: "europe", lang: "en" });
+  expect(Object.fromEntries(copied.searchParams)).toEqual({
+    seed: "2026",
+    players: "4",
+    rounds: "10",
+    map: "europe",
+    lang: "en",
+  });
   // The button says what it is for again.
   await expect(page.locator("#share")).toHaveText("Copy link");
   await sound(page, errors);
@@ -68,7 +78,9 @@ test("the tag's attributes are read again when they change, and each move is an 
   const tag = page.locator('[data-testid="tag"]');
   await page.evaluate(() => {
     window.__moves = [];
-    document.getElementById("tag").addEventListener("tenka-change", (event) => window.__moves.push(event.detail.game.moves.length));
+    document
+      .getElementById("tag")
+      .addEventListener("tenka-change", (event) => window.__moves.push(event.detail.game.moves.length));
   });
   // People taking turns on one device, three of them, the whole map.
   await tag.evaluate((el) => {

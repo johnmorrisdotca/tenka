@@ -1,4 +1,9 @@
-import { TENKA_LEAST_REINFORCEMENT, TENKA_NAME_MOST, TENKA_PHASES, TENKA_TERRITORIES_PER_ARMY } from "./tenka.constants.ts";
+import {
+  TENKA_LEAST_REINFORCEMENT,
+  TENKA_NAME_MOST,
+  TENKA_PHASES,
+  TENKA_TERRITORIES_PER_ARMY,
+} from "./tenka.constants.ts";
 import type { TenkaGame, TenkaOwner, TenkaSeat, TenkaMap } from "./tenka.types.ts";
 import { shuffled } from "./tenkaDice.ts";
 import { TENKA_MAPS, continentsHeld, tenkaMapOf } from "./tenkaMap.ts";
@@ -99,8 +104,15 @@ export function armiesHeld(game: Pick<TenkaGame, "owners" | "armies">, owner: Te
  * console.log(reinforcementFor(game.owners,0));
  * ```
  */
-export function reinforcementFor(owners: readonly TenkaOwner[], seat: TenkaSeat, map: TenkaMap = TENKA_MAPS.world): number {
-  const fromLand = Math.max(TENKA_LEAST_REINFORCEMENT, Math.floor(territoriesHeld(owners, seat) / TENKA_TERRITORIES_PER_ARMY));
+export function reinforcementFor(
+  owners: readonly TenkaOwner[],
+  seat: TenkaSeat,
+  map: TenkaMap = TENKA_MAPS.world,
+): number {
+  const fromLand = Math.max(
+    TENKA_LEAST_REINFORCEMENT,
+    Math.floor(territoriesHeld(owners, seat) / TENKA_TERRITORIES_PER_ARMY),
+  );
   return fromLand + continentsHeld(owners, seat, map).reduce((sum, continent) => sum + continent.bonus, 0);
 }
 
@@ -173,7 +185,14 @@ export function beginTurn(game: TenkaGame, seat: TenkaSeat, round: number): Tenk
  * ```
  */
 export function finished(game: TenkaGame, winners: readonly TenkaSeat[]): TenkaGame {
-  return { ...game, phase: TENKA_PHASES.over, reserve: 0, occupying: null, shifting: null, winners: [...winners].sort((a, b) => a - b) };
+  return {
+    ...game,
+    phase: TENKA_PHASES.over,
+    reserve: 0,
+    occupying: null,
+    shifting: null,
+    winners: [...winners].sort((a, b) => a - b),
+  };
 }
 
 /**
@@ -192,7 +211,9 @@ export function finished(game: TenkaGame, winners: readonly TenkaSeat[]): TenkaG
  * ```
  */
 export function counted(game: TenkaGame): TenkaGame {
-  const standing = game.players.flatMap((_, seat) => (game.out[seat] ? [] : [{ seat, held: territoriesHeld(game.owners, seat), armies: armiesHeld(game, seat) }]));
+  const standing = game.players.flatMap((_, seat) =>
+    game.out[seat] ? [] : [{ seat, held: territoriesHeld(game.owners, seat), armies: armiesHeld(game, seat) }],
+  );
   const most = Math.max(...standing.map((one) => one.held));
   const level = standing.filter((one) => one.held === most);
   const mostArmies = Math.max(...level.map((one) => one.armies));

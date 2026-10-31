@@ -1,14 +1,44 @@
 /* What is Tenka's own on its demo page. The family's look is family.css, which this never repeats. */
-:root { --intro-room: 9.5rem; --intro-room-wide: 5.5rem; }
-.setup { margin: 0 0 16px; }
-.setup .fam-seg button { min-width: 44px; padding: 0 14px; }
-#table { min-height: 320px; }
+:root {
+  --intro-room: 9.5rem;
+  --intro-room-wide: 5.5rem;
+}
+.setup {
+  margin: 0 0 16px;
+}
+.setup .fam-seg button {
+  min-width: 44px;
+  padding: 0 14px;
+}
+#table {
+  min-height: 320px;
+}
 /* The table's record is a <pre>: it keeps the table's own small print inside the family's box. */
-.tk-root .tk-log { padding: 8px 10px; border-radius: 8px; }
-.more li > button code { overflow-wrap: anywhere; }
-.tag tenka-table { display: block; margin-top: 10px; }
-.tag .tk-root { --tk-ink: var(--ink); --tk-panel: var(--surface); --tk-font: var(--font); --tk-accent: var(--felt); --tk-accent-ink: var(--felt-ink); }
-.fam-button[data-said="true"] { opacity: .8; }
+.tk-root .tk-log {
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+.more li > button code {
+  overflow-wrap: anywhere;
+}
+.tag tenka-table {
+  display: block;
+  margin-top: 10px;
+}
+.tag .tk-root {
+  --tk-ink: var(--ink);
+  --tk-panel: var(--surface);
+  --tk-font: var(--font);
+  --tk-accent: var(--felt);
+  --tk-accent-ink: var(--felt-ink);
+}
+.fam-button[data-said="true"] {
+  opacity: 0.8;
+}
 
 /* Keep navigation width stable across languages. */
-header nav a[data-say="pageDocs"] { inline-size: 8rem; justify-content: center; flex: none; }
+header nav a[data-say="pageDocs"] {
+  inline-size: 8rem;
+  justify-content: center;
+  flex: none;
+}

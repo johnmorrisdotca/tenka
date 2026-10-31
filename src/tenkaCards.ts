@@ -24,7 +24,10 @@ import { TENKA_MAPS, TENKA_TERRITORY_COUNT, boardOf } from "./tenkaMap.ts";
  * console.log(TENKA_DECK);
  * ```
  */
-export const TENKA_DECK: readonly TenkaCard[] = Array.from({ length: TENKA_TERRITORY_COUNT + TENKA_WILD_CARDS }, (_, card) => card);
+export const TENKA_DECK: readonly TenkaCard[] = Array.from(
+  { length: TENKA_TERRITORY_COUNT + TENKA_WILD_CARDS },
+  (_, card) => card,
+);
 
 /** Every card of a game on this map: a card for each territory, numbered as the territories are, then the wild cards.
  *

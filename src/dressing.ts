@@ -20,7 +20,13 @@
  * mountTenka(document.getElementById("table")!, { dressing: tenkaDressing() });
  * ```
  */
-import { createRollSound, mountDie, type DieHandle, type RandomSource, type RollSound } from "@johnmorrisdotca/korokoro";
+import {
+  createRollSound,
+  mountDie,
+  type DieHandle,
+  type RandomSource,
+  type RollSound,
+} from "@johnmorrisdotca/korokoro";
 import { cardBackSvg, type CardBackOptions } from "@johnmorrisdotca/toranpu/card-backs";
 import { cardFaceSvg } from "@johnmorrisdotca/toranpu/card-faces";
 
@@ -128,7 +134,8 @@ export function tenkaDressing(options: TenkaDressingOptions = {}): TenkaDressing
         "--kk-solo": "var(--tk-die-size, 34px)",
         "--kk-die": how.side === "attack" ? "var(--tk-attack)" : "var(--tk-defend)",
         "--kk-die-ink": how.side === "attack" ? "var(--tk-attack-ink)" : "var(--tk-defend-ink)",
-        "--kk-die-edge": how.side === "attack" ? "rgba(0,0,0,.4)" : "color-mix(in srgb, var(--tk-defend-ink) 45%, transparent)",
+        "--kk-die-edge":
+          how.side === "attack" ? "rgba(0,0,0,.4)" : "color-mix(in srgb, var(--tk-defend-ink) 45%, transparent)",
       } as const;
       // A die that has only just been thrown is a rollable one made to land where the game threw it; any other is a picture of its face.
       const tumbling = how.tumble && ms > 0;

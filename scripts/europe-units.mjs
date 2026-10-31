@@ -24,15 +24,41 @@ export const FRAME = { west: -12, east: 44, north: 66.5, south: 31 };
  */
 export const CUTS = {
   /** Bavaria north of the Danube is Franconia, south of it Bavaria. */
-  bavaria: { line: [[8.6013, 48.6173], [14.4017, 49.1033]], left: "franconia", right: "bavaria" },
+  bavaria: {
+    line: [
+      [8.6013, 48.6173],
+      [14.4017, 49.1033],
+    ],
+    left: "franconia",
+    right: "bavaria",
+  },
   /** Lower Saxony west of Hamburg's longitude is Friesland's, east of it Saxony's. */
-  lowerSaxony: { line: [[9.9013, 51.0011], [9.9013, 54.5013]], left: "friesland", right: "saxony" },
+  lowerSaxony: {
+    line: [
+      [9.9013, 51.0011],
+      [9.9013, 54.5013],
+    ],
+    left: "friesland",
+    right: "saxony",
+  },
   /** The Karelian Isthmus and everything north of it, which would touch Finland, is left off; Leningrad's south is Novgorod's. */
-  leningrad: { line: [[26.0013, 59.8011], [37.0017, 62.1013]], left: null, right: "novgorod" },
+  leningrad: {
+    line: [
+      [26.0013, 59.8011],
+      [37.0017, 62.1013],
+    ],
+    left: null,
+    right: "novgorod",
+  },
 };
 
 /** A unit's name for matching: lower case, no accents, no punctuation. */
-export const plain = (name) => (name ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+export const plain = (name) =>
+  (name ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
 
 /** Sets of unit names, plain, for the countries that are shared out by name. */
 const names = (list) => new Set(list.map(plain));
@@ -47,12 +73,49 @@ const GERMANY = {
 };
 
 const FRANCE = {
-  lorraine: names(["Nord", "Pas-de-Calais", "Aisne", "Ardennes", "Marne", "Aube", "Haute-Marne", "Meuse", "Meurthe-et-Moselle", "Moselle", "Vosges", "Bas-Rhin", "Haute-Rhin"]),
+  lorraine: names([
+    "Nord",
+    "Pas-de-Calais",
+    "Aisne",
+    "Ardennes",
+    "Marne",
+    "Aube",
+    "Haute-Marne",
+    "Meuse",
+    "Meurthe-et-Moselle",
+    "Moselle",
+    "Vosges",
+    "Bas-Rhin",
+    "Haute-Rhin",
+  ]),
   normandy: names(["Manche", "Calvados", "Orne", "Eure", "Seine-Maritime"]),
   brittany: names(["Finistère", "Côtes-d'Armor", "Morbihan", "Ille-et-Vilaine"]),
   burgundy: names([
-    "Yonne", "Côte-d'Or", "Saône-et-Loire", "Nièvre", "Jura", "Doubs", "Haute-Saône", "Territoire de Belfort", "Ain", "Rhône", "Loire", "Isère", "Savoie", "Haute-Savoie",
-    "Drôme", "Ardèche", "Hautes-Alpes", "Alpes-de-Haute-Provence", "Alpes-Maritimes", "Var", "Vaucluse", "Bouches-du-Rhône", "Gard", "Haute-Corse", "Corse-du-Sud",
+    "Yonne",
+    "Côte-d'Or",
+    "Saône-et-Loire",
+    "Nièvre",
+    "Jura",
+    "Doubs",
+    "Haute-Saône",
+    "Territoire de Belfort",
+    "Ain",
+    "Rhône",
+    "Loire",
+    "Isère",
+    "Savoie",
+    "Haute-Savoie",
+    "Drôme",
+    "Ardèche",
+    "Hautes-Alpes",
+    "Alpes-de-Haute-Provence",
+    "Alpes-Maritimes",
+    "Var",
+    "Vaucluse",
+    "Bouches-du-Rhône",
+    "Gard",
+    "Haute-Corse",
+    "Corse-du-Sud",
   ]),
 };
 
@@ -66,7 +129,15 @@ const SPAIN = {
 };
 
 const ITALY = {
-  lombardy: names(["Valle d'Aosta", "Piemonte", "Lombardia", "Trentino-Alto Adige", "Liguria", "Emilia-Romagna", "Veneto"]),
+  lombardy: names([
+    "Valle d'Aosta",
+    "Piemonte",
+    "Lombardia",
+    "Trentino-Alto Adige",
+    "Liguria",
+    "Emilia-Romagna",
+    "Veneto",
+  ]),
   bavaria: names(["Friuli-Venezia Giulia"]),
   rome: names(["Toscana", "Umbria", "Lazio", "Marche"]),
   kingdomOfSicily: names(["Abruzzo", "Molise", "Campania", "Apulia", "Basilicata", "Calabria", "Sicily"]),
@@ -88,7 +159,19 @@ const LIBYA = {
 };
 
 const ROMANIA = {
-  galicia: names(["Botosani", "Iasi", "Vaslui", "Galati", "Braila", "Tulcea", "Constanta", "Neamt", "Bacau", "Vrancea", "Suceava"]),
+  galicia: names([
+    "Botosani",
+    "Iasi",
+    "Vaslui",
+    "Galati",
+    "Braila",
+    "Tulcea",
+    "Constanta",
+    "Neamt",
+    "Bacau",
+    "Vrancea",
+    "Suceava",
+  ]),
 };
 
 const UKRAINE = {
@@ -100,7 +183,23 @@ const RUSSIA = {
   off: names(["Murmansk", "Karelia"]),
   prussia: names(["Kaliningrad"]),
   novgorod: names(["City of St. Petersburg", "Novgorod", "Vologda", "Arkhangel'sk", "Nenets", "Komi", "Kostroma"]),
-  rusland: names(["Rostov", "Krasnodar", "Adygey", "Karachay-Cherkess", "Kabardin-Balkar", "North Ossetia", "Ingush", "Chechnya", "Dagestan", "Stavropol'", "Kalmyk", "Astrakhan'", "Volgograd", "Crimea", "Sevastopol"]),
+  rusland: names([
+    "Rostov",
+    "Krasnodar",
+    "Adygey",
+    "Karachay-Cherkess",
+    "Kabardin-Balkar",
+    "North Ossetia",
+    "Ingush",
+    "Chechnya",
+    "Dagestan",
+    "Stavropol'",
+    "Kalmyk",
+    "Astrakhan'",
+    "Volgograd",
+    "Crimea",
+    "Sevastopol",
+  ]),
 };
 
 /** Whichever of the sets in `table` holds the unit's name, or `fallback`. */
@@ -108,15 +207,63 @@ const inTable = (table, unit, fallback) => Object.keys(table).find((key) => tabl
 
 /** Countries given whole to a territory, by Natural Earth's ADM0_A3 code. */
 const WHOLE = {
-  IRL: "ireland", NOR: "norway", SWE: "sweden", FIN: "finland", DNK: "denmark", NLD: "friesland", BEL: "lorraine", LUX: "lorraine", PRT: "portugal",
-  SMR: "rome", VAT: "rome", MLT: "kingdomOfSicily", CHE: "swabia", LIE: "swabia", AUT: "bavaria", SVK: "hungary", HUN: "hungary", MDA: "galicia",
-  BLR: "polotsk", LTU: "lithuania", LVA: "lithuania", EST: "estonia", TUR: "turkey", CYP: "turkey", CYN: "turkey", GRC: "greece", BGR: "bulgaria",
-  SRB: "serbia", KOS: "serbia", MKD: "serbia", ALB: "serbia", MNE: "serbia", BIH: "venice", HRV: "venice", SVN: "venice",
-  MAR: "morocco", DZA: "algeria", TUN: "tunisia", AND: "barcelona", MCO: "burgundy",
+  IRL: "ireland",
+  NOR: "norway",
+  SWE: "sweden",
+  FIN: "finland",
+  DNK: "denmark",
+  NLD: "friesland",
+  BEL: "lorraine",
+  LUX: "lorraine",
+  PRT: "portugal",
+  SMR: "rome",
+  VAT: "rome",
+  MLT: "kingdomOfSicily",
+  CHE: "swabia",
+  LIE: "swabia",
+  AUT: "bavaria",
+  SVK: "hungary",
+  HUN: "hungary",
+  MDA: "galicia",
+  BLR: "polotsk",
+  LTU: "lithuania",
+  LVA: "lithuania",
+  EST: "estonia",
+  TUR: "turkey",
+  CYP: "turkey",
+  CYN: "turkey",
+  GRC: "greece",
+  BGR: "bulgaria",
+  SRB: "serbia",
+  KOS: "serbia",
+  MKD: "serbia",
+  ALB: "serbia",
+  MNE: "serbia",
+  BIH: "venice",
+  HRV: "venice",
+  SVN: "venice",
+  MAR: "morocco",
+  DZA: "algeria",
+  TUN: "tunisia",
+  AND: "barcelona",
+  MCO: "burgundy",
 };
 
 /** Every country the map draws. */
-export const COUNTRIES = new Set([...Object.keys(WHOLE), "GBR", "DEU", "FRA", "ESP", "ITA", "CZE", "POL", "LBY", "ROU", "UKR", "RUS"]);
+export const COUNTRIES = new Set([
+  ...Object.keys(WHOLE),
+  "GBR",
+  "DEU",
+  "FRA",
+  "ESP",
+  "ITA",
+  "CZE",
+  "POL",
+  "LBY",
+  "ROU",
+  "UKR",
+  "RUS",
+]);
 
 /**
  * What one first-level unit goes to: a territory's key, `null` to leave it off the map, or `{ cut }` (a key of `CUTS`)
@@ -128,7 +275,11 @@ export function territoryOf(code, unit, region, subunit) {
     case "GBR":
       return { ENG: "england", SCT: "scotland", WLS: "wales", NIR: "ireland" }[subunit] ?? null;
     case "DEU":
-      return plain(unit) === plain("Bayern") ? { cut: "bavaria" } : plain(unit) === plain("Niedersachsen") ? { cut: "lowerSaxony" } : inTable(GERMANY, unit, "lorraine");
+      return plain(unit) === plain("Bayern")
+        ? { cut: "bavaria" }
+        : plain(unit) === plain("Niedersachsen")
+          ? { cut: "lowerSaxony" }
+          : inTable(GERMANY, unit, "lorraine");
     case "FRA":
       return inTable(FRANCE, unit, "france");
     case "ESP":

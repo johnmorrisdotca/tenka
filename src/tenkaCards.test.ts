@@ -46,7 +46,8 @@ describe("the cards", () => {
       [1, 2, 3],
     ]);
     // Five cards always hold a set: that is why five must be traded.
-    for (let a = 0; a < 44; a += 7) expect(setsIn([a % 44, (a + 1) % 44, (a + 3) % 44, (a + 4) % 44, (a + 6) % 44]).length).toBeGreaterThan(0);
+    for (let a = 0; a < 44; a += 7)
+      expect(setsIn([a % 44, (a + 1) % 44, (a + 3) % 44, (a + 4) % 44, (a + 6) % 44]).length).toBeGreaterThan(0);
   });
 
   it("trade on the escalating schedule: 4, 6, 8, 10, 12, 15, then five more each", () => {

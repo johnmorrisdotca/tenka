@@ -261,7 +261,8 @@ const JA: TenkaStrings = {
   attackTo: "{name}: {land}から攻撃します。攻撃する隣の領土をタップしてください。",
   attackReady: "{name}: {from}から{to}を攻撃します。",
   occupySay: "{name}: {land}を占領しました。何部隊進めますか。",
-  fortifyFrom: "{name}: つながっている自分の領土の間で、部隊を一度だけ移動できます。移動しないときは手番を終えてください。",
+  fortifyFrom:
+    "{name}: つながっている自分の領土の間で、部隊を一度だけ移動できます。移動しないときは手番を終えてください。",
   fortifyTo: "{name}: {land}から移動します。移動先をタップしてください。",
   fortifyReady: "{name}: {from}から{to}へ。",
   against: "対",

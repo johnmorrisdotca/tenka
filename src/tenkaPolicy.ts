@@ -60,17 +60,27 @@ export function sensibleTenkaMove(game: TenkaGame, random: () => number): TenkaM
       // Everything on one front territory, the strongest one mostly: a stack that can break through, as players build.
       const front = own.filter((territory) => onTheFront(game, territory));
       const choices = front.length > 0 ? front : own;
-      const strongest = choices.reduce((best, territory) => (game.armies[territory] > game.armies[best] ? territory : best));
-      return { kind: TENKA_MOVES.place, territory: random() < 0.75 ? strongest : pick(choices, random), armies: game.reserve };
+      const strongest = choices.reduce((best, territory) =>
+        game.armies[territory] > game.armies[best] ? territory : best,
+      );
+      return {
+        kind: TENKA_MOVES.place,
+        territory: random() < 0.75 ? strongest : pick(choices, random),
+        armies: game.reserve,
+      };
     }
     case TENKA_PHASES.attack: {
       // Only with the odds: three armies at least, and more than the defender. The widest margin mostly, until it is decided.
       const good = attacksOpen(game).filter(
-        (move) => move.kind === TENKA_MOVES.blitz && game.armies[move.from] >= 3 && game.armies[move.from] > game.armies[move.to],
+        (move) =>
+          move.kind === TENKA_MOVES.blitz &&
+          game.armies[move.from] >= 3 &&
+          game.armies[move.from] > game.armies[move.to],
       );
       if (good.length === 0 || random() < 0.05) return { kind: TENKA_MOVES.endAttack };
       if (random() < 0.3) return pick(good, random);
-      const margin = (move: TenkaMove) => (move.kind === TENKA_MOVES.blitz ? game.armies[move.from] - game.armies[move.to] : 0);
+      const margin = (move: TenkaMove) =>
+        move.kind === TENKA_MOVES.blitz ? game.armies[move.from] - game.armies[move.to] : 0;
       return good.reduce((best, move) => (margin(move) > margin(best) ? move : best));
     }
     case TENKA_PHASES.occupy: {

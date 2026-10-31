@@ -18,7 +18,12 @@ const BOX_WIDTH = 100;
 const BOX_HEIGHT = 140;
 
 /** The ink and the symbol of each kind of army. */
-const KIND_INK: Readonly<Record<TenkaCardKind, string>> = { land: "#7b5b2e", sea: "#1f5f8b", air: "#7a4e9c", wild: "#2f5d4a" };
+const KIND_INK: Readonly<Record<TenkaCardKind, string>> = {
+  land: "#7b5b2e",
+  sea: "#1f5f8b",
+  air: "#7a4e9c",
+  wild: "#2f5d4a",
+};
 
 /** The symbols, each drawn in a box 24 by 24: a castle for land, a ship for the sea, a plane for the air. */
 const SYMBOL_PATHS: Readonly<Record<Exclude<TenkaCardKind, "wild">, string>> = {
@@ -28,9 +33,23 @@ const SYMBOL_PATHS: Readonly<Record<Exclude<TenkaCardKind, "wild">, string>> = {
 };
 
 /** The colours the continents are filled with on a card: a muted, distinct run, taken in the order the map lists them. */
-const CONTINENT_FILLS = ["#e1bd63", "#d0766b", "#7b9bcf", "#c99458", "#8dba7b", "#b08dc3", "#8cc1c1", "#d9a0b2", "#aab36a", "#c58c8c", "#8f9ec9", "#b9b08a"] as const;
+const CONTINENT_FILLS = [
+  "#e1bd63",
+  "#d0766b",
+  "#7b9bcf",
+  "#c99458",
+  "#8dba7b",
+  "#b08dc3",
+  "#8cc1c1",
+  "#d9a0b2",
+  "#aab36a",
+  "#c58c8c",
+  "#8f9ec9",
+  "#b9b08a",
+] as const;
 
-const escapeXml = (text: string): string => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const escapeXml = (text: string): string =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** The id of a card in Toranpu's hands: `tenka-world-12` for the world's twelfth territory, `tenka-wild` for a wild card.
  *
@@ -82,13 +101,23 @@ function nameLines(name: string, language: TenkaLocale): string {
   if (words.length > 1 && name.length * wide * 12 > 84) {
     // Break at the space nearest the middle.
     let best = 1;
-    for (let at = 1; at < words.length; at += 1) if (Math.abs(words.slice(0, at).join(" ").length - name.length / 2) < Math.abs(words.slice(0, best).join(" ").length - name.length / 2)) best = at;
+    for (let at = 1; at < words.length; at += 1)
+      if (
+        Math.abs(words.slice(0, at).join(" ").length - name.length / 2) <
+        Math.abs(words.slice(0, best).join(" ").length - name.length / 2)
+      )
+        best = at;
     lines = [words.slice(0, best).join(" "), words.slice(best).join(" ")];
   }
   const longest = Math.max(...lines.map((line) => line.length));
   const size = Math.min(language === "ja" ? 13 : 12.5, 86 / (longest * wide + 0.001));
   const top = lines.length === 1 ? 24 : 17.5;
-  return lines.map((line, at) => `<text x="50" y="${round(top + at * (size + 1.5))}" text-anchor="middle" font-size="${round(size)}" font-weight="700" font-family="system-ui, -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif" fill="#1f2320">${escapeXml(line)}</text>`).join("");
+  return lines
+    .map(
+      (line, at) =>
+        `<text x="50" y="${round(top + at * (size + 1.5))}" text-anchor="middle" font-size="${round(size)}" font-weight="700" font-family="system-ui, -apple-system, 'Hiragino Sans', 'Yu Gothic', sans-serif" fill="#1f2320">${escapeXml(line)}</text>`,
+    )
+    .join("");
 }
 
 const round = (value: number): number => Math.round(value * 100) / 100;
@@ -119,7 +148,10 @@ function territoryCard(map: TenkaMapKey, territory: number, language: TenkaLocal
   const kind = cardKind(territory, board) as Exclude<TenkaCardKind, "wild">;
   const words = TENKA_STRINGS[language];
   const name = territoryNameIn(words, data.key) || data.name;
-  const continent = Math.max(0, board.continents.findIndex((one) => one.key === data.continent));
+  const continent = Math.max(
+    0,
+    board.continents.findIndex((one) => one.key === data.continent),
+  );
   const fill = CONTINENT_FILLS[continent % CONTINENT_FILLS.length]!;
   const [vx, vy, vw, vh] = frameOf(map, territory);
   const outline = tenkaShapesOf(map).outlines[territory]!;
@@ -179,7 +211,10 @@ export function tenkaCardDesign(): CardDesign {
       if ("wild" in found) return words.wild;
       const data = tenkaMapOf(found.map).territories[found.territory]!;
       const kinds = { land: words.kindLand, sea: words.kindSea, air: words.kindAir, wild: words.wild };
-      return tenkaSay(words.card, { kind: kinds[cardKind(found.territory, tenkaMapOf(found.map))], land: territoryNameIn(words, data.key) || data.name });
+      return tenkaSay(words.card, {
+        kind: kinds[cardKind(found.territory, tenkaMapOf(found.map))],
+        land: territoryNameIn(words, data.key) || data.name,
+      });
     },
   };
 }

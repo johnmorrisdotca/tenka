@@ -23,7 +23,16 @@ describe("a die made to land on the face the game threw", () => {
 
   it("is a way of drawing only: the dressing reaches nothing that plays the game or throws its dice", () => {
     const text = readFileSync("src/dressing.ts", "utf8") + readFileSync("src/dressingCards.ts", "utf8");
-    for (const file of ["tenka.ts", "tenkaDice.ts", "tenkaTurn.ts", "tenkaMoves.ts", "tenkaPolicy.ts", "tenkaStart.ts", "tenkaKeep.ts"]) expect(text, file).not.toContain(`./${file}`);
+    for (const file of [
+      "tenka.ts",
+      "tenkaDice.ts",
+      "tenkaTurn.ts",
+      "tenkaMoves.ts",
+      "tenkaPolicy.ts",
+      "tenkaStart.ts",
+      "tenkaKeep.ts",
+    ])
+      expect(text, file).not.toContain(`./${file}`);
     expect(text).not.toMatch(/Math\.random/);
   });
 });
@@ -32,12 +41,14 @@ describe("a card's id", () => {
   it("names a map and a territory, or the wild card, and nothing else", () => {
     for (const map of TENKA_MAP_LIST) {
       const count = tenkaMapOf(map).territories.length;
-      for (let territory = 0; territory < count; territory += 1) expect(tenkaCardOfId(tenkaCardId(map, territory))).toEqual({ map, territory });
+      for (let territory = 0; territory < count; territory += 1)
+        expect(tenkaCardOfId(tenkaCardId(map, territory))).toEqual({ map, territory });
       expect(tenkaCardOfId(tenkaCardId(map, count))).toBeNull();
     }
     expect(tenkaCardId("world", null)).toBe("tenka-wild");
     expect(tenkaCardOfId("tenka-wild")).toEqual({ wild: true });
-    for (const junk of ["KS", "tenka-mars-3", "tenka-world-", "tenka-world-x", "", "tenka-world-3-4"]) expect(tenkaCardOfId(junk), junk).toBeNull();
+    for (const junk of ["KS", "tenka-mars-3", "tenka-world-", "tenka-world-x", "", "tenka-world-3-4"])
+      expect(tenkaCardOfId(junk), junk).toBeNull();
   });
 });
 
@@ -57,8 +68,13 @@ describe("Tenka's cards as a Toranpu design", () => {
           expect(svg).toContain(`d="${shapes.outlines[territory]}"`);
           const name = territoryNameIn(words, data.key) || data.name;
           // The name is written on one line or two, ahead of the picture.
-          const written = [...svg!.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].map((found) => found[1]!.replace(/&amp;/g, "&"));
-          expect(written.slice(0, 2).join(" ").startsWith(name), `${map} ${territory} ${language}: ${written.slice(0, 2)}`).toBe(true);
+          const written = [...svg!.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].map((found) =>
+            found[1]!.replace(/&amp;/g, "&"),
+          );
+          expect(
+            written.slice(0, 2).join(" ").startsWith(name),
+            `${map} ${territory} ${language}: ${written.slice(0, 2)}`,
+          ).toBe(true);
         });
       }
     }
@@ -70,7 +86,8 @@ describe("Tenka's cards as a Toranpu design", () => {
       tenkaMapOf(map).territories.forEach((_, territory) => {
         const kind = cardKind(territory, tenkaMapOf(map)) as keyof typeof symbols;
         const svg = cardFaceSvg(tenkaCardId(map, territory), { design, title: "" })!;
-        for (const [other, path] of Object.entries(symbols)) expect(svg.includes(path), `${map} ${territory} ${other}`).toBe(other === kind);
+        for (const [other, path] of Object.entries(symbols))
+          expect(svg.includes(path), `${map} ${territory} ${other}`).toBe(other === kind);
       });
     }
     const wild = cardFaceSvg("tenka-wild", { design, title: "" })!;
@@ -86,7 +103,10 @@ describe("Tenka's cards as a Toranpu design", () => {
       for (const map of TENKA_MAP_LIST) {
         const board = tenkaMapOf(map);
         board.territories.forEach((data, territory) => {
-          const want = tenkaSay(words.card, { kind: kinds[cardKind(territory, board)], land: territoryNameIn(words, data.key) || data.name });
+          const want = tenkaSay(words.card, {
+            kind: kinds[cardKind(territory, board)],
+            land: territoryNameIn(words, data.key) || data.name,
+          });
           expect(design.label!(tenkaCardId(map, territory), language)).toBe(want);
         });
       }
@@ -118,11 +138,22 @@ describe("Tenka's own back", () => {
 });
 
 describe("where the other packages are reached", () => {
-  const sources = (readdirSync("src", { recursive: true }) as string[]).filter((path) => /\.(ts|tsx)$/.test(path) && !/\.test\./.test(path));
+  const sources = (readdirSync("src", { recursive: true }) as string[]).filter(
+    (path) => /\.(ts|tsx)$/.test(path) && !/\.test\./.test(path),
+  );
   const peers = /"@johnmorrisdotca\/(korokoro|toranpu)/;
 
   it("only the dressing entry and its cards reach Korokoro or Toranpu: the rules, the map and the plain table need neither", () => {
-    const importing = sources.filter((path) => peers.test(readFileSync(`src/${path}`, "utf8").split("\n").filter((line) => /^(import|export)\b.*\bfrom\b/.test(line)).join("\n"))).sort();
+    const importing = sources
+      .filter((path) =>
+        peers.test(
+          readFileSync(`src/${path}`, "utf8")
+            .split("\n")
+            .filter((line) => /^(import|export)\b.*\bfrom\b/.test(line))
+            .join("\n"),
+        ),
+      )
+      .sort();
     expect(importing).toEqual(["dressing.ts", "dressingCards.ts"]);
   });
 

@@ -1,7 +1,7 @@
 {
   "name": "@johnmorrisdotca/tenka",
   "version": "2.2.0",
-  "description": "Tenka \u5929\u4e0b \u2014 World conquest strategy game: seeded rules for two to six, world and Europe maps, dice, cards, saved games and a playable table for React, Vue, Svelte, Angular or plain HTML. Zero dependencies.",
+  "description": "Tenka 天下 — World conquest strategy game: seeded rules for two to six, world and Europe maps, dice, cards, saved games and a playable table for React, Vue, Svelte, Angular or plain HTML. Zero dependencies.",
   "keywords": [
     "ai",
     "angular",
@@ -133,7 +133,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "lint": "eslint .",
+    "lint": "biome check .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:table": "pnpm test:demo",
@@ -150,7 +150,8 @@
     "docs:site": "pnpm build && node scripts/docs-site.mjs build",
     "docs:check": "pnpm build && node scripts/docs-site.mjs check",
     "size": "node scripts/docs-site.mjs size",
-    "test:demo": "pnpm site && node scripts/docs-site.mjs build && playwright test"
+    "test:demo": "pnpm site && node scripts/docs-site.mjs build && playwright test",
+    "format": "biome check --write ."
   },
   "peerDependencies": {
     "@johnmorrisdotca/korokoro": ">=1.15.0 <2",
@@ -169,21 +170,18 @@
     }
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
+    "@biomejs/biome": "2.6.4",
     "@johnmorrisdotca/korokoro": "1.15.0",
     "@johnmorrisdotca/toranpu": "2.14.0",
     "@playwright/test": "^1.63.0",
     "@types/react": "^19.0.0",
-    "eslint": "^9.0.0",
+    "esbuild": "^0.28.0",
     "eslint-plugin-react-hooks": "^5.0.0",
-    "globals": "^16.0.0",
+    "marked": "^18.0.0",
+    "pagefind": "^1.5.2",
     "react": "^19.0.0",
     "typescript": "^5.9.0",
-    "typescript-eslint": "^8.0.0",
-    "vitest": "^5.0.0",
-    "pagefind": "^1.5.2",
-    "marked": "^18.0.0",
-    "esbuild": "^0.28.0"
+    "vitest": "^5.0.0"
   },
   "publishConfig": {
     "access": "public"

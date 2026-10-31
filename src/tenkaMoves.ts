@@ -68,11 +68,16 @@ export function tenkaMoves(game: TenkaGame): TenkaMove[] {
     case TENKA_PHASES.setUp:
       return own(game).map((territory) => ({ kind: TENKA_MOVES.place, territory, armies: 1 }));
     case TENKA_PHASES.reinforce: {
-      const trades: TenkaMove[] = setsIn(game.hands[game.toPlay], tenkaMapOf(game)).map((cards) => ({ kind: TENKA_MOVES.trade, cards }));
+      const trades: TenkaMove[] = setsIn(game.hands[game.toPlay], tenkaMapOf(game)).map((cards) => ({
+        kind: TENKA_MOVES.trade,
+        cards,
+      }));
       if (mustTrade(game)) return trades;
       // One army, or all the rest: every spread of the turn's armies is a run of these (`playTenka`).
       const counts = game.reserve > 1 ? [1, game.reserve] : [1];
-      const places: TenkaMove[] = own(game).flatMap((territory) => counts.map((armies) => ({ kind: TENKA_MOVES.place, territory, armies })));
+      const places: TenkaMove[] = own(game).flatMap((territory) =>
+        counts.map((armies) => ({ kind: TENKA_MOVES.place, territory, armies })),
+      );
       return [...trades, ...places];
     }
     case TENKA_PHASES.attack:
@@ -84,7 +89,9 @@ export function tenkaMoves(game: TenkaGame): TenkaMove[] {
     case TENKA_PHASES.fortify: {
       const pairs: TenkaMove[] = own(game)
         .filter((from) => game.armies[from] >= 2)
-        .flatMap((from) => connectedOwn(game.owners, from, tenkaMapOf(game)).map((to) => ({ kind: TENKA_MOVES.fortify, from, to })));
+        .flatMap((from) =>
+          connectedOwn(game.owners, from, tenkaMapOf(game)).map((to) => ({ kind: TENKA_MOVES.fortify, from, to })),
+        );
       return [...pairs, { kind: TENKA_MOVES.endTurn }];
     }
     case TENKA_PHASES.shift:

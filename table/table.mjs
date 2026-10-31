@@ -9,7 +9,13 @@ import { expect, test } from "@playwright/test";
 import { TENKA_TERRITORIES } from "../dist/index.js";
 
 const site = join(dirname(fileURLToPath(import.meta.url)), "..", "site");
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml" };
+const TYPES = {
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".svg": "image/svg+xml",
+};
 
 export const ROOT = '#table [data-testid="tk-root"]';
 /** The table when it is a person's turn. */
@@ -17,15 +23,20 @@ export const WAITING = `${ROOT}[data-waiting="true"]`;
 
 /** Open the demo with a query, and collect anything the page complains of. The computer moves at once unless the query says otherwise. `missing` names paths (folders, by their start) the page is told are not there. */
 export async function open(page, query = "?seed=7&delay=0&lang=en", lands = 42, missing = []) {
-  if (!existsSync(join(site, "index.html"))) throw new Error("site/ is not built: run `pnpm site` first (`pnpm test:table` does)");
+  if (!existsSync(join(site, "index.html")))
+    throw new Error("site/ is not built: run `pnpm site` first (`pnpm test:table` does)");
   const errors = [];
   page.on("pageerror", (error) => errors.push(String(error)));
   page.on("console", (message) => message.type() === "error" && errors.push(message.text()));
   await page.route("http://tenka.test/**", (route) => {
     const { pathname } = new URL(route.request().url());
     const file = join(site, pathname === "/" ? "index.html" : pathname);
-    if (!existsSync(file) || missing.some((start) => pathname.startsWith(start))) return route.fulfill({ status: 404, body: "" });
-    return route.fulfill({ body: readFileSync(file), contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream" });
+    if (!existsSync(file) || missing.some((start) => pathname.startsWith(start)))
+      return route.fulfill({ status: 404, body: "" });
+    return route.fulfill({
+      body: readFileSync(file),
+      contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream",
+    });
   });
   await page.goto(`http://tenka.test/${query}`);
   await expect(page.locator(`${ROOT} .tk-land`)).toHaveCount(lands);
@@ -68,11 +79,18 @@ export function state(page) {
       controls: all('#table [data-testid="tk-controls"] button').map((b) => b.textContent),
       dice: q('#table [data-testid="tk-dice"]').textContent,
       // The numbers on the dice of the last throw, by side, as the table says they are (every die carries its face, drawn plain or dressed).
-      faces: { attack: all("#table .tk-attack .tk-die").map((d) => Number(d.dataset.face)), defend: all("#table .tk-defend .tk-die").map((d) => Number(d.dataset.face)) },
+      faces: {
+        attack: all("#table .tk-attack .tk-die").map((d) => Number(d.dataset.face)),
+        defend: all("#table .tk-defend .tk-die").map((d) => Number(d.dataset.face)),
+      },
       players: all('#table [data-testid="tk-player"]').map((p) => p.textContent),
       views: all("#table .tk-zoom button").map((b) => b.textContent),
       viewBox: q("#table .tk-map").getAttribute("viewBox"),
-      lands: all("#table .tk-land").map((l) => ({ owner: Number(l.dataset.owner), armies: Number(l.dataset.armies), name: l.querySelector("title")?.textContent ?? `no title: ${l.outerHTML.slice(0, 120)}` })),
+      lands: all("#table .tk-land").map((l) => ({
+        owner: Number(l.dataset.owner),
+        armies: Number(l.dataset.armies),
+        name: l.querySelector("title")?.textContent ?? `no title: ${l.outerHTML.slice(0, 120)}`,
+      })),
       seaLinks: all("#table .tk-sea-link").length,
       rings: all("#table .tk-ring").length,
       log: q('#table [data-testid="tk-log"]')?.textContent ?? "",
@@ -84,7 +102,10 @@ export function state(page) {
       // Anything to be tapped that is smaller than a fingertip. Links in running text are words, not targets; the map's counters are reached through a continent's view.
       small: all("button, input, select, textarea, summary, nav a, footer .family a")
         .filter((e) => box(e).width > 0 && !e.hidden && (box(e).height < 43.5 || box(e).width < 43.5))
-        .map((e) => `${e.dataset.testid ?? e.className ?? e.tagName} “${e.textContent.trim().slice(0, 20)}”: ${Math.round(box(e).width)}×${Math.round(box(e).height)}`),
+        .map(
+          (e) =>
+            `${e.dataset.testid ?? e.className ?? e.tagName} “${e.textContent.trim().slice(0, 20)}”: ${Math.round(box(e).width)}×${Math.round(box(e).height)}`,
+        ),
     };
   });
 }

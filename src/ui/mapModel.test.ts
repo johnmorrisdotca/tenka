@@ -54,7 +54,12 @@ describe("the map drawn for a game", () => {
     const labels = TENKA_SHAPES.labels;
     for (const from of [0, 10, 20, 35]) {
       const [x, y] = labels[from]!;
-      for (const [arrow, along] of [["left", (lx: number) => x! - lx], ["right", (lx: number) => lx - x!], ["up", (_: number, ly: number) => y! - ly], ["down", (_: number, ly: number) => ly - y!]] as const) {
+      for (const [arrow, along] of [
+        ["left", (lx: number) => x! - lx],
+        ["right", (lx: number) => lx - x!],
+        ["up", (_: number, ly: number) => y! - ly],
+        ["down", (_: number, ly: number) => ly - y!],
+      ] as const) {
         const there = landInDirection(from, arrow);
         if (there === null) continue;
         expect(there).not.toBe(from);

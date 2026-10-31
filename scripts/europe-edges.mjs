@@ -20,7 +20,19 @@
  */
 
 /** The regions, in the order the territories run: each key, and the territories that belong to it are those listing it. */
-export const EUROPE_REGION_KEYS = ["britishIsles", "scandinavia", "iberia", "maghreb", "france", "germany", "centralEurope", "italy", "balkans", "baltic", "easternEurope"];
+export const EUROPE_REGION_KEYS = [
+  "britishIsles",
+  "scandinavia",
+  "iberia",
+  "maghreb",
+  "france",
+  "germany",
+  "centralEurope",
+  "italy",
+  "balkans",
+  "baltic",
+  "easternEurope",
+];
 
 /** The forty-nine territories, region by region: key, name and region. */
 export const EUROPE_TERRITORY_LIST = [

@@ -24,7 +24,10 @@ const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 
 /** Every fenced block of the README: its language and its text. */
 // A fence may carry a flag after its language (`ts no-run`, `ts no-check`): such a block is one the master check types or skips, and its kind says so.
-const blocks = [...readme.matchAll(/^```([\w-]*)([^\n]*)\n([\s\S]*?)^```$/gm)].map((found) => ({ lang: `${found[1]}${found[2].trim() === "" ? "" : ` ${found[2].trim()}`}`, text: found[3] }));
+const blocks = [...readme.matchAll(/^```([\w-]*)([^\n]*)\n([\s\S]*?)^```$/gm)].map((found) => ({
+  lang: `${found[1]}${found[2].trim() === "" ? "" : ` ${found[2].trim()}`}`,
+  text: found[3],
+}));
 
 /** The entries of the package, as a block of the README imports them, and the source each one is. */
 const ENTRIES = {
@@ -40,7 +43,8 @@ const ENTRIES = {
  */
 function runnable(text) {
   let out = text;
-  for (const [name, file] of Object.entries(ENTRIES)) out = out.replaceAll(`from "${name}"`, `from ${JSON.stringify(pathToFileURL(resolve(file)).href)}`);
+  for (const [name, file] of Object.entries(ENTRIES))
+    out = out.replaceAll(`from "${name}"`, `from ${JSON.stringify(pathToFileURL(resolve(file)).href)}`);
   const lines = out.split("\n").map((line) => {
     const named = /^(\s*)(?:const|let) (\w+) = .*; \/\/ → (.*)$/.exec(line);
     if (named !== null) return `${line}\n__is(${named[2]}, (${named[3]}), ${JSON.stringify(line.trim())});`;
@@ -54,7 +58,20 @@ function runnable(text) {
 describe("the README's examples", () => {
   it("every block is of a kind a check runs, or is a line for a terminal", () => {
     // ts, json and csv here; html, jsx, vue, svelte and ts no-check (Angular) in scripts/check-frameworks.mjs; no-run blocks need a browser; the Architecture's tree is in docs/ARCHITECTURE.md.
-    expect([...new Set(blocks.map((block) => block.lang))].sort()).toEqual(["css", "html", "js no-run", "json", "jsx", "jsx no-check", "sh", "svelte", "ts", "ts no-check", "ts no-run", "vue"]);
+    expect([...new Set(blocks.map((block) => block.lang))].sort()).toEqual([
+      "css",
+      "html",
+      "js no-run",
+      "json",
+      "jsx",
+      "jsx no-check",
+      "sh",
+      "svelte",
+      "ts",
+      "ts no-check",
+      "ts no-run",
+      "vue",
+    ]);
   });
 
   it("every TypeScript example runs, and every value it states is the value it comes to", async () => {
@@ -104,8 +121,17 @@ function table(heading) {
   const from = readme.indexOf(heading);
   if (from < 0) throw new Error(`the README has no “${heading}”`);
   const rows = [];
-  for (const line of readme.slice(from).split("\n").slice(heading.startsWith("|") ? 0 : 1)) {
-    if (line.startsWith("|")) rows.push(line.split(/(?<!\\)\|/).slice(1, -1).map((cell) => cell.trim()));
+  for (const line of readme
+    .slice(from)
+    .split("\n")
+    .slice(heading.startsWith("|") ? 0 : 1)) {
+    if (line.startsWith("|"))
+      rows.push(
+        line
+          .split(/(?<!\\)\|/)
+          .slice(1, -1)
+          .map((cell) => cell.trim()),
+      );
     else if (rows.length > 0) break;
   }
   return rows.slice(2);
@@ -145,12 +171,30 @@ describe("the README's tables", () => {
       expect(rows.length).toBeGreaterThan(4);
       for (const row of rows) for (const name of codes(row[2])) expect(tenka[name], name).toBeDefined();
     }
-    for (const heading of ["## Playing", "## The map's facts", "## Cards and dice", "## Keeping and export", "## The day's seed", "## Taps and words"]) {
+    for (const heading of [
+      "## Playing",
+      "## The map's facts",
+      "## Cards and dice",
+      "## Keeping and export",
+      "## The day's seed",
+      "## Taps and words",
+    ]) {
       for (const [names] of table(heading)) {
         for (const code of codes(names)) expect(tenka[code.replace(/\(.*$/, "")], code).toBeDefined();
       }
     }
-    for (const name of ["mountTenka", "tenkaMapModel", "tenkaMapSvg", "continentView", "nearestLand", "TENKA_SEAT_COLOURS", "TENKA_NEUTRAL_COLOUR", "ownerColour", "NO_MARKS", "TENKA_STYLE"]) {
+    for (const name of [
+      "mountTenka",
+      "tenkaMapModel",
+      "tenkaMapSvg",
+      "continentView",
+      "nearestLand",
+      "TENKA_SEAT_COLOURS",
+      "TENKA_NEUTRAL_COLOUR",
+      "ownerColour",
+      "NO_MARKS",
+      "TENKA_STYLE",
+    ]) {
       expect(readme, name).toContain(`\`${name}`);
       expect(ui[name], name).toBeDefined();
     }
@@ -158,25 +202,37 @@ describe("the README's tables", () => {
 
   it("every export of the main entry is named in the README", async () => {
     const tenka = await import("./index.ts");
-    for (const name of Object.keys(tenka)) expect(readme.includes(`\`${name}`), `${name} is documented in the README`).toBe(true);
+    for (const name of Object.keys(tenka))
+      expect(readme.includes(`\`${name}`), `${name} is documented in the README`).toBe(true);
   });
 
   it("the element's attributes are the ones listed", () => {
-    expect(table("| Attribute | Default | What it does |").map(([name]) => codes(name)[0])).toEqual(TenkaTable.observedAttributes);
+    expect(table("| Attribute | Default | What it does |").map(([name]) => codes(name)[0])).toEqual(
+      TenkaTable.observedAttributes,
+    );
   });
 
   it("the table's options and handle are the ones listed", () => {
     const source = readFileSync("src/ui/mount.ts", "utf8");
-    const fields = (type) => [...new RegExp(`export type ${type} = \\{([\\s\\S]*?)\\n\\};`).exec(source)[1].matchAll(/^ {2}(\w+)\??:/gm)].map((found) => found[1]);
-    expect(table("| Option | Default | What it does |").map(([name]) => codes(name)[0])).toEqual(fields("TenkaTableOptions"));
-    expect(table("| Handle | What it does |").map(([name]) => codes(name)[0].replace(/\(.*$/, ""))).toEqual(fields("TenkaTableHandle"));
+    const fields = (type) =>
+      [...new RegExp(`export type ${type} = \\{([\\s\\S]*?)\\n\\};`).exec(source)[1].matchAll(/^ {2}(\w+)\??:/gm)].map(
+        (found) => found[1],
+      );
+    expect(table("| Option | Default | What it does |").map(([name]) => codes(name)[0])).toEqual(
+      fields("TenkaTableOptions"),
+    );
+    expect(table("| Handle | What it does |").map(([name]) => codes(name)[0].replace(/\(.*$/, ""))).toEqual(
+      fields("TenkaTableHandle"),
+    );
   });
 });
 
 describe("the documents made from the source", () => {
   it("docs/strings-ja.md lists every string in both languages", () => {
     const cell = (text) => (text === "" ? "*(nothing)*" : text.replace(/\|/g, "\\|").replace(/^ | $/g, "␠"));
-    const rows = Object.keys(TENKA_STRINGS.en).map((name) => `| \`${name}\` | ${cell(TENKA_STRINGS.en[name])} | ${cell(TENKA_STRINGS.ja[name])} |`);
+    const rows = Object.keys(TENKA_STRINGS.en).map(
+      (name) => `| \`${name}\` | ${cell(TENKA_STRINGS.en[name])} | ${cell(TENKA_STRINGS.ja[name])} |`,
+    );
     const made = `# Tenka's words, in English and Japanese
 
 Made from \`src/strings.ts\` by \`pnpm docs:make\`; a test fails if the two differ, so this list is never out of date.
@@ -203,12 +259,17 @@ describe("the demo's look", () => {
     const css = readFileSync("demo/family.css", "utf8");
     const first = css.indexOf("\n");
     expect(css.slice(0, first)).toBe(`/* sha256 of every line after this one: ${FAMILY_CSS} */`);
-    expect(createHash("sha256").update(css.slice(first + 1)).digest("hex")).toBe(FAMILY_CSS);
+    expect(
+      createHash("sha256")
+        .update(css.slice(first + 1))
+        .digest("hex"),
+    ).toBe(FAMILY_CSS);
   });
 
   it("Tenka's own stylesheet leaves the family's colours and type alone", () => {
     const own = readFileSync("demo/tenka.css", "utf8");
-    for (const name of ["--page", "--ink", "--muted", "--rule", "--surface", "--felt", "--accent", "--font", "--mono"]) expect(own, name).not.toMatch(new RegExp(`${name}\\s*:`));
+    for (const name of ["--page", "--ink", "--muted", "--rule", "--surface", "--felt", "--accent", "--font", "--mono"])
+      expect(own, name).not.toMatch(new RegExp(`${name}\\s*:`));
     expect(own).not.toMatch(/font-family/);
   });
 });
@@ -229,21 +290,71 @@ describe("the package", () => {
   it("lists every package of the family, with its kana, as the demo's footer does", () => {
     const family = FAMILY;
     expect(family.length).toBeGreaterThanOrEqual(16);
-    const block = readme.slice(readme.indexOf("### The family"), readme.indexOf("\n## ", readme.indexOf("### The family")));
+    const block = readme.slice(
+      readme.indexOf("### The family"),
+      readme.indexOf("\n## ", readme.indexOf("### The family")),
+    );
     for (const { id, name, kana } of family) expect(block, id).toContain(`- [${name}](${familyRepo(id)}) (${kana}`);
-    const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight", "twenty-nine", "thirty", "thirty-one", "thirty-two"];
+    const words = [
+      "zero",
+      "one",
+      "two",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "eleven",
+      "twelve",
+      "thirteen",
+      "fourteen",
+      "fifteen",
+      "sixteen",
+      "seventeen",
+      "eighteen",
+      "nineteen",
+      "twenty",
+      "twenty-one",
+      "twenty-two",
+      "twenty-three",
+      "twenty-four",
+      "twenty-five",
+      "twenty-six",
+      "twenty-seven",
+      "twenty-eight",
+      "twenty-nine",
+      "thirty",
+      "thirty-one",
+      "thirty-two",
+    ];
     expect(block).toContain(`one of ${words[family.length]} packages`);
     expect([...block.matchAll(/^- \[/gm)]).toHaveLength(family.length);
     expect(FAMILY).toContainEqual({ id: "tenka", name: "Tenka", kana: "天下" });
   });
 
   it("has the files a visitor looks for: issue templates, a pull request template, a security policy", () => {
-    for (const file of [".github/ISSUE_TEMPLATE/report-a-bug.md", ".github/ISSUE_TEMPLATE/suggest-a-feature.md", ".github/ISSUE_TEMPLATE/fix-a-translation.md", ".github/ISSUE_TEMPLATE/add-my-project.md", ".github/ISSUE_TEMPLATE/config.yml", ".github/pull_request_template.md", "SECURITY.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "LICENSE"]) expect(existsSync(file), file).toBe(true);
+    for (const file of [
+      ".github/ISSUE_TEMPLATE/report-a-bug.md",
+      ".github/ISSUE_TEMPLATE/suggest-a-feature.md",
+      ".github/ISSUE_TEMPLATE/fix-a-translation.md",
+      ".github/ISSUE_TEMPLATE/add-my-project.md",
+      ".github/ISSUE_TEMPLATE/config.yml",
+      ".github/pull_request_template.md",
+      "SECURITY.md",
+      "CONTRIBUTING.md",
+      "CODE_OF_CONDUCT.md",
+      "LICENSE",
+    ])
+      expect(existsSync(file), file).toBe(true);
     expect(readme).toContain("issues/new?template=fix-a-translation.md");
   });
 
   it("keeps SECURITY.md and CODE_OF_CONDUCT.md equal to the family's master text (the shared .github repository), a copy of which is kept in scripts/community", () => {
-    for (const file of ["SECURITY.md", "CODE_OF_CONDUCT.md"]) expect(readFileSync(file, "utf8"), file).toBe(readFileSync(`scripts/community/${file}`, "utf8"));
+    for (const file of ["SECURITY.md", "CODE_OF_CONDUCT.md"])
+      expect(readFileSync(file, "utf8"), file).toBe(readFileSync(`scripts/community/${file}`, "utf8"));
   });
 
   it("its description and keywords are fit for npm", () => {
@@ -263,7 +374,15 @@ describe("the package", () => {
 
   it("every export of every entry has a doc comment", () => {
     const entries = ["src/index.ts", "src/ui.ts", "src/react.tsx", "src/shapes.ts", "src/dressing.ts"];
-    const program = ts.createProgram(entries, { allowImportingTsExtensions: true, noEmit: true, jsx: ts.JsxEmit.ReactJSX, moduleResolution: ts.ModuleResolutionKind.Bundler, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020, skipLibCheck: true });
+    const program = ts.createProgram(entries, {
+      allowImportingTsExtensions: true,
+      noEmit: true,
+      jsx: ts.JsxEmit.ReactJSX,
+      moduleResolution: ts.ModuleResolutionKind.Bundler,
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ES2020,
+      skipLibCheck: true,
+    });
     const checker = program.getTypeChecker();
     const bare = [];
     let count = 0;
@@ -271,7 +390,8 @@ describe("the package", () => {
       for (const symbol of checker.getExportsOfModule(checker.getSymbolAtLocation(program.getSourceFile(entry)))) {
         const real = symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
         count += 1;
-        if (ts.displayPartsToString(real.getDocumentationComment(checker)).trim() === "") bare.push(`${entry}: ${symbol.name}`);
+        if (ts.displayPartsToString(real.getDocumentationComment(checker)).trim() === "")
+          bare.push(`${entry}: ${symbol.name}`);
       }
     }
     expect(count).toBeGreaterThan(120);

@@ -51,10 +51,19 @@ function canLeave(game: TenkaGame, territory: number): boolean {
 export function choiceNow(game: TenkaGame, choice: TenkaChoice): TenkaChoice {
   switch (game.phase) {
     case TENKA_PHASES.reinforce:
-      return { ...NO_CHOICE, placedOn: choice.placedOn !== null && isOwn(game, choice.placedOn) ? choice.placedOn : null };
+      return {
+        ...NO_CHOICE,
+        placedOn: choice.placedOn !== null && isOwn(game, choice.placedOn) ? choice.placedOn : null,
+      };
     case TENKA_PHASES.attack: {
       const from = choice.from !== null && canLeave(game, choice.from) ? choice.from : null;
-      const to = from !== null && choice.to !== null && !isOwn(game, choice.to) && areNeighbours(from, choice.to, tenkaMapOf(game)) ? choice.to : null;
+      const to =
+        from !== null &&
+        choice.to !== null &&
+        !isOwn(game, choice.to) &&
+        areNeighbours(from, choice.to, tenkaMapOf(game))
+          ? choice.to
+          : null;
       return { ...NO_CHOICE, from, to };
     }
     case TENKA_PHASES.occupy: {
@@ -65,9 +74,17 @@ export function choiceNow(game: TenkaGame, choice: TenkaChoice): TenkaChoice {
     }
     case TENKA_PHASES.fortify: {
       const from = choice.from !== null && canLeave(game, choice.from) ? choice.from : null;
-      const to = from !== null && choice.to !== null && connectedOwn(game.owners, from, tenkaMapOf(game)).includes(choice.to) ? choice.to : null;
+      const to =
+        from !== null && choice.to !== null && connectedOwn(game.owners, from, tenkaMapOf(game)).includes(choice.to)
+          ? choice.to
+          : null;
       const most = from === null ? 0 : game.armies[from] - 1;
-      return { ...NO_CHOICE, from, to, armies: to === null ? 0 : choice.armies >= 1 && choice.armies <= most ? choice.armies : most };
+      return {
+        ...NO_CHOICE,
+        from,
+        to,
+        armies: to === null ? 0 : choice.armies >= 1 && choice.armies <= most ? choice.armies : most,
+      };
     }
     default:
       return NO_CHOICE;
@@ -89,7 +106,11 @@ export function choiceNow(game: TenkaGame, choice: TenkaChoice): TenkaChoice {
  * console.log(tapTerritory(game,choice,0));
  * ```
  */
-export function tapTerritory(game: TenkaGame, choice: TenkaChoice, territory: number): { choice: TenkaChoice; move: TenkaMove | null } {
+export function tapTerritory(
+  game: TenkaGame,
+  choice: TenkaChoice,
+  territory: number,
+): { choice: TenkaChoice; move: TenkaMove | null } {
   const now = choiceNow(game, choice);
   switch (game.phase) {
     case TENKA_PHASES.setUp:
@@ -100,7 +121,8 @@ export function tapTerritory(game: TenkaGame, choice: TenkaChoice, territory: nu
     case TENKA_PHASES.attack:
       if (territory === now.from) return { choice: NO_CHOICE, move: null };
       if (canLeave(game, territory)) return { choice: { ...NO_CHOICE, from: territory }, move: null };
-      if (now.from !== null && !isOwn(game, territory) && areNeighbours(now.from, territory, tenkaMapOf(game))) return { choice: { ...now, to: territory }, move: null };
+      if (now.from !== null && !isOwn(game, territory) && areNeighbours(now.from, territory, tenkaMapOf(game)))
+        return { choice: { ...now, to: territory }, move: null };
       return { choice: now, move: null };
     case TENKA_PHASES.fortify:
       if (territory === now.from) return { choice: NO_CHOICE, move: null };
@@ -134,13 +156,18 @@ export function marksFor(game: TenkaGame, choice: TenkaChoice): TenkaMapMarks {
     case TENKA_PHASES.attack:
       return {
         chosen: now.from,
-        reach: now.from === null ? [] : tenkaNeighbours(now.from, tenkaMapOf(game)).filter((next) => !isOwn(game, next)),
+        reach:
+          now.from === null ? [] : tenkaNeighbours(now.from, tenkaMapOf(game)).filter((next) => !isOwn(game, next)),
         target: now.to,
       };
     case TENKA_PHASES.occupy:
       return { chosen: now.from, reach: [], target: now.to };
     case TENKA_PHASES.fortify:
-      return { chosen: now.from, reach: now.from === null ? [] : connectedOwn(game.owners, now.from, tenkaMapOf(game)), target: now.to };
+      return {
+        chosen: now.from,
+        reach: now.from === null ? [] : connectedOwn(game.owners, now.from, tenkaMapOf(game)),
+        target: now.to,
+      };
     case TENKA_PHASES.reinforce:
       return { chosen: now.placedOn, reach: [], target: null };
     default:

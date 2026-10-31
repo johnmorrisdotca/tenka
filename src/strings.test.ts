@@ -17,7 +17,8 @@ describe("the words, in English and Japanese", () => {
   });
 
   it("a Japanese line fills the same braces as its English", () => {
-    for (const name of Object.keys(TENKA_STRINGS.en) as (keyof typeof TENKA_STRINGS.en)[]) expect(braces(TENKA_STRINGS.ja[name]), name).toEqual(braces(TENKA_STRINGS.en[name]));
+    for (const name of Object.keys(TENKA_STRINGS.en) as (keyof typeof TENKA_STRINGS.en)[])
+      expect(braces(TENKA_STRINGS.ja[name]), name).toEqual(braces(TENKA_STRINGS.en[name]));
   });
 
   it("every territory and continent has a name in both, and the English is the map's own", () => {
@@ -29,7 +30,9 @@ describe("the words, in English and Japanese", () => {
       expect(continentNameIn(TENKA_STRINGS.en, continent.key)).toBe(continent.name);
       expect(continentNameIn(TENKA_STRINGS.ja, continent.key), continent.key).not.toBe("");
     }
-    expect(new Set(TENKA_TERRITORIES.map((territory) => territoryNameIn(TENKA_STRINGS.ja, territory.key))).size).toBe(42);
+    expect(new Set(TENKA_TERRITORIES.map((territory) => territoryNameIn(TENKA_STRINGS.ja, territory.key))).size).toBe(
+      42,
+    );
     expect(territoryNameIn(TENKA_STRINGS.en, "atlantis")).toBe("");
   });
 

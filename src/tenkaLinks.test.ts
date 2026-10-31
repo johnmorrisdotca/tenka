@@ -63,14 +63,21 @@ describe("Tenka's links between continents", () => {
   });
 
   it("gives Greenland four ways out, to both sides of the Atlantic", () => {
-    expect(tenkaNeighbours(at("greenland")).map((one) => TENKA_TERRITORIES[one].key).sort()).toEqual(["iceland", "northwestTerritory", "ontario", "quebec"]);
+    expect(
+      tenkaNeighbours(at("greenland"))
+        .map((one) => TENKA_TERRITORIES[one].key)
+        .sort(),
+    ).toEqual(["iceland", "northwestTerritory", "ontario", "quebec"]);
   });
 
   it("draws every sea link as a line long enough to read as a crossing, and the Bering Strait off both edges", () => {
     const links = TENKA_TERRITORIES.reduce((sum, territory) => sum + territory.sea.length, 0) / 2;
     // One line for each link, and one more for the link that goes off one edge and on at the other.
     expect(TENKA_SHAPES.seaLines.length).toBe(links + TENKA_SHAPES.wraps.length);
-    const [west, east] = [TENKA_SHAPES.seaLines.filter(([, , x2]) => x2 === 0), TENKA_SHAPES.seaLines.filter(([x1]) => x1 === TENKA_SHAPES.width)];
+    const [west, east] = [
+      TENKA_SHAPES.seaLines.filter(([, , x2]) => x2 === 0),
+      TENKA_SHAPES.seaLines.filter(([x1]) => x1 === TENKA_SHAPES.width),
+    ];
     expect(west.length).toBe(1);
     expect(east.length).toBe(1);
     for (const [x1, y1, x2, y2] of TENKA_SHAPES.seaLines) {
@@ -87,17 +94,39 @@ describe("Tenka's links between continents", () => {
         const [mx, my] = [(x1 + x2) / 2, (y1 + y2) / 2];
         return Math.hypot(mx - (p[0] + q[0]) / 2, my - (p[1] + q[1]) / 2) < 2 && Math.hypot(x2 - x1, y2 - y1) >= 90;
       });
-    for (const [a, b] of [["madagascar", "southAfrica"], ["madagascar", "eastAfrica"], ["indonesia", "newGuinea"], ["indonesia", "westernAustralia"], ["newGuinea", "westernAustralia"], ["newGuinea", "easternAustralia"]]) {
+    for (const [a, b] of [
+      ["madagascar", "southAfrica"],
+      ["madagascar", "eastAfrica"],
+      ["indonesia", "newGuinea"],
+      ["indonesia", "westernAustralia"],
+      ["newGuinea", "westernAustralia"],
+      ["newGuinea", "easternAustralia"],
+    ]) {
       expect(drawn(a, b), `${a}–${b}`).toBe(true);
     }
   });
 
   it("draws Iceland's crossings: a line each to Greenland, Britain and Scandinavia, all starting on Iceland", () => {
     const ICELAND = [850, 208]; // Iceland's place on the map, in its units
-    const [greenland, britain, scandinavia] = [TENKA_SHAPES.boxes[at("greenland")], TENKA_SHAPES.boxes[at("greatBritain")], TENKA_SHAPES.boxes[at("scandinavia")]];
-    const within = ([x, y]: number[], [left, top, right, bottom]: readonly number[], slack: number) => x >= left - slack && x <= right + slack && y >= top - slack && y <= bottom + slack;
+    const [greenland, britain, scandinavia] = [
+      TENKA_SHAPES.boxes[at("greenland")],
+      TENKA_SHAPES.boxes[at("greatBritain")],
+      TENKA_SHAPES.boxes[at("scandinavia")],
+    ];
+    const within = ([x, y]: number[], [left, top, right, bottom]: readonly number[], slack: number) =>
+      x >= left - slack && x <= right + slack && y >= top - slack && y <= bottom + slack;
     const fromIceland = TENKA_SHAPES.seaLines
-      .map(([x1, y1, x2, y2]) => (Math.hypot(x1 - ICELAND[0], y1 - ICELAND[1]) < Math.hypot(x2 - ICELAND[0], y2 - ICELAND[1]) ? [[x1, y1], [x2, y2]] : [[x2, y2], [x1, y1]]))
+      .map(([x1, y1, x2, y2]) =>
+        Math.hypot(x1 - ICELAND[0], y1 - ICELAND[1]) < Math.hypot(x2 - ICELAND[0], y2 - ICELAND[1])
+          ? [
+              [x1, y1],
+              [x2, y2],
+            ]
+          : [
+              [x2, y2],
+              [x1, y1],
+            ],
+      )
       .filter(([near]) => Math.hypot(near[0] - ICELAND[0], near[1] - ICELAND[1]) < 40);
     expect(fromIceland.some(([, far]) => within(far, greenland, 40))).toBe(true);
     expect(fromIceland.some(([, far]) => within(far, britain, 40))).toBe(true);
@@ -105,7 +134,9 @@ describe("Tenka's links between continents", () => {
   });
 
   it("tags the wrap with Alaska at the west edge and Kamchatka at the east, on the same row as the lines", () => {
-    expect(TENKA_SHAPES.wraps.map(([west, east]) => [TENKA_TERRITORIES[west].key, TENKA_TERRITORIES[east].key])).toEqual([["alaska", "kamchatka"]]);
+    expect(
+      TENKA_SHAPES.wraps.map(([west, east]) => [TENKA_TERRITORIES[west].key, TENKA_TERRITORIES[east].key]),
+    ).toEqual([["alaska", "kamchatka"]]);
     const [, , row] = TENKA_SHAPES.wraps[0];
     expect(row).toBeGreaterThan(0);
     expect(row).toBeLessThan(TENKA_SHAPES.height);

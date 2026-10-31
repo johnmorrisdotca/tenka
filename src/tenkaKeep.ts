@@ -183,5 +183,8 @@ export function decodeTenka(text: string | null): TenkaGame | null {
   if (map !== undefined && !(typeof map === "string" && map in TENKA_MAPS)) return null;
   const read = moves.map(readTenkaMove);
   if (read.some((move) => move === null)) return null;
-  return replayTenka({ seed, players: players as string[], rounds, placing, map: (map as TenkaMapKey | undefined) ?? "world" }, read as TenkaMove[]);
+  return replayTenka(
+    { seed, players: players as string[], rounds, placing, map: (map as TenkaMapKey | undefined) ?? "world" },
+    read as TenkaMove[],
+  );
 }

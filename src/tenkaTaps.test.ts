@@ -23,7 +23,11 @@ function world(phase: TenkaGame["phase"], own: string[], armies: Record<string, 
 describe("a tap on the map", () => {
   it("places one army on your own territory while placing, and nothing on somebody else's", () => {
     const game = world(TENKA_PHASES.reinforce, ["brazil"]);
-    expect(tapTerritory(game, NO_CHOICE, at("brazil")).move).toEqual({ kind: "place", territory: at("brazil"), armies: 1 });
+    expect(tapTerritory(game, NO_CHOICE, at("brazil")).move).toEqual({
+      kind: "place",
+      territory: at("brazil"),
+      armies: 1,
+    });
     expect(tapTerritory(game, NO_CHOICE, at("brazil")).choice.placedOn).toBe(at("brazil"));
     expect(tapTerritory(game, NO_CHOICE, at("peru")).move).toBeNull();
   });
@@ -59,8 +63,18 @@ describe("a tap on the map", () => {
     const chosen = { ...NO_CHOICE, from: at("brazil"), to: at("peru") };
     expect(choiceNow(game, chosen)).toEqual(chosen);
     // Brazil down to one army: nothing to attack with.
-    expect(choiceNow({ ...game, armies: game.armies.map((count, territory) => (territory === at("brazil") ? 1 : count)) }, chosen)).toEqual(NO_CHOICE);
+    expect(
+      choiceNow(
+        { ...game, armies: game.armies.map((count, territory) => (territory === at("brazil") ? 1 : count)) },
+        chosen,
+      ),
+    ).toEqual(NO_CHOICE);
     // The Andes taken: no longer a target.
-    expect(choiceNow({ ...game, owners: game.owners.map((owner, territory) => (territory === at("peru") ? 0 : owner)) }, chosen).to).toBeNull();
+    expect(
+      choiceNow(
+        { ...game, owners: game.owners.map((owner, territory) => (territory === at("peru") ? 0 : owner)) },
+        chosen,
+      ).to,
+    ).toBeNull();
   });
 });

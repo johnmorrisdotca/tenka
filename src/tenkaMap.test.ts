@@ -2,7 +2,14 @@ import { statSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { TENKA_CONTINENTS, TENKA_TERRITORIES, TENKA_TERRITORY_COUNT, connectedOwn, continentsHeld, tenkaNeighbours } from "./tenkaMap.ts";
+import {
+  TENKA_CONTINENTS,
+  TENKA_TERRITORIES,
+  TENKA_TERRITORY_COUNT,
+  connectedOwn,
+  continentsHeld,
+  tenkaNeighbours,
+} from "./tenkaMap.ts";
 import { TENKA_SHAPES } from "./tenkaShapes.data.ts";
 import type { TenkaContinentKey } from "./tenka.types.ts";
 
@@ -32,18 +39,32 @@ describe("Tenka's world", () => {
     expect(TENKA_TERRITORY_COUNT).toBe(42);
     expect(new Set(TENKA_TERRITORIES.map((territory) => territory.key)).size).toBe(42);
     expect(new Set(TENKA_TERRITORIES.map((territory) => territory.name)).size).toBe(42);
-    expect(TENKA_CONTINENTS.map((continent) => continent.key)).toEqual(["northAmerica", "southAmerica", "europe", "africa", "asia", "australia"]);
+    expect(TENKA_CONTINENTS.map((continent) => continent.key)).toEqual([
+      "northAmerica",
+      "southAmerica",
+      "europe",
+      "africa",
+      "asia",
+      "australia",
+    ]);
     expect(TENKA_CONTINENTS.reduce((sum, continent) => sum + continent.territories.length, 0)).toBe(42);
   });
 
   it("reaches every territory from every other, by land or sea", () => {
-    for (let start = 0; start < TENKA_TERRITORY_COUNT; start += 1) expect(reachable(start).size).toBe(TENKA_TERRITORY_COUNT);
+    for (let start = 0; start < TENKA_TERRITORY_COUNT; start += 1)
+      expect(reachable(start).size).toBe(TENKA_TERRITORY_COUNT);
   });
 
   it("sees every border from both sides, never a territory beside itself, never a border twice", () => {
     TENKA_TERRITORIES.forEach((territory, at) => {
-      for (const other of territory.land) expect(TENKA_TERRITORIES[other].land, `${territory.key} and ${TENKA_TERRITORIES[other].key} by land`).toContain(at);
-      for (const other of territory.sea) expect(TENKA_TERRITORIES[other].sea, `${territory.key} and ${TENKA_TERRITORIES[other].key} by sea`).toContain(at);
+      for (const other of territory.land)
+        expect(TENKA_TERRITORIES[other].land, `${territory.key} and ${TENKA_TERRITORIES[other].key} by land`).toContain(
+          at,
+        );
+      for (const other of territory.sea)
+        expect(TENKA_TERRITORIES[other].sea, `${territory.key} and ${TENKA_TERRITORIES[other].key} by sea`).toContain(
+          at,
+        );
       const all = tenkaNeighbours(at);
       expect(all).not.toContain(at);
       expect(new Set(all).size).toBe(all.length);
@@ -88,7 +109,9 @@ describe("Tenka's world", () => {
   ])("%s: %i territories, %i ways in, worth %i", (key, territories, waysIn, bonus) => {
     const continent = TENKA_CONTINENTS.find((one) => one.key === key)!;
     expect(continent.territories.length).toBe(territories);
-    const borders = continent.territories.filter((territory) => tenkaNeighbours(territory).some((next) => TENKA_TERRITORIES[next].continent !== key));
+    const borders = continent.territories.filter((territory) =>
+      tenkaNeighbours(territory).some((next) => TENKA_TERRITORIES[next].continent !== key),
+    );
     expect(borders.length).toBe(waysIn);
     expect(continent.bonus).toBe(bonus);
   });
@@ -105,8 +128,11 @@ describe("Tenka's world", () => {
   it("fortifies only through a player's own territories", () => {
     const at = (key: string) => TENKA_TERRITORIES.findIndex((territory) => territory.key === key);
     const owners = new Array<number>(TENKA_TERRITORY_COUNT).fill(1);
-    for (const key of ["westernUnitedStates", "easternUnitedStates", "centralAmerica", "venezuela"]) owners[at(key)] = 0;
-    expect(connectedOwn(owners, at("westernUnitedStates")).sort()).toEqual([at("easternUnitedStates"), at("centralAmerica"), at("venezuela")].sort());
+    for (const key of ["westernUnitedStates", "easternUnitedStates", "centralAmerica", "venezuela"])
+      owners[at(key)] = 0;
+    expect(connectedOwn(owners, at("westernUnitedStates")).sort()).toEqual(
+      [at("easternUnitedStates"), at("centralAmerica"), at("venezuela")].sort(),
+    );
     // Brazil is theirs too, but only through somebody else's Peru — still joined through Venezuela.
     owners[at("brazil")] = 0;
     expect(connectedOwn(owners, at("westernUnitedStates"))).toContain(at("brazil"));
@@ -125,7 +151,9 @@ describe("Tenka's world", () => {
       expect(y).toBeLessThan(TENKA_SHAPES.height);
     }
     for (const outline of TENKA_SHAPES.outlines) expect(outline).toMatch(/^M-?\d+ -?\d+l/);
-    const bytes = statSync(new URL("./tenkaShapes.data.ts", import.meta.url)).size + statSync(new URL("./tenkaWorld.data.ts", import.meta.url)).size;
+    const bytes =
+      statSync(new URL("./tenkaShapes.data.ts", import.meta.url)).size +
+      statSync(new URL("./tenkaWorld.data.ts", import.meta.url)).size;
     expect(bytes).toBeLessThan(150_000);
   });
 });

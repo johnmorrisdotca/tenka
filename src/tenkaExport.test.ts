@@ -3,7 +3,16 @@ import { describe, expect, it } from "vitest";
 import type { TenkaGame } from "./tenka.types.ts";
 import { playTenka, tenkaOver } from "./tenka.ts";
 import { nextRandom } from "./tenkaDice.ts";
-import { TENKA_CSV_COLUMNS, TENKA_EXPORT_FORMAT, tenkaExported, tenkaFromJSON, tenkaRecord, tenkaToCSV, tenkaToJSON, tenkaToText } from "./tenkaExport.ts";
+import {
+  TENKA_CSV_COLUMNS,
+  TENKA_EXPORT_FORMAT,
+  tenkaExported,
+  tenkaFromJSON,
+  tenkaRecord,
+  tenkaToCSV,
+  tenkaToJSON,
+  tenkaToText,
+} from "./tenkaExport.ts";
 import { encodeTenka } from "./tenkaKeep.ts";
 import { attacksOpen } from "./tenkaMoves.ts";
 import { sensibleTenkaMove } from "./tenkaPolicy.ts";
@@ -22,7 +31,13 @@ function seeded(seed: number): () => number {
 }
 
 /** A whole game between computer players, or its first `most` moves. */
-function played(rounds: number, players: string[], seed: number, most = Infinity, placing: "auto" | "hand" = "auto"): TenkaGame {
+function played(
+  rounds: number,
+  players: string[],
+  seed: number,
+  most = Infinity,
+  placing: "auto" | "hand" = "auto",
+): TenkaGame {
   const random = seeded(seed);
   let game = startTenka(rounds, players, seed, placing)!;
   while (!tenkaOver(game) && game.moves.length < most) game = playTenka(game, sensibleTenkaMove(game, random))!;
@@ -31,13 +46,28 @@ function played(rounds: number, players: string[], seed: number, most = Infinity
 
 describe("a game as JSON", () => {
   it("is the format's number, the table and the moves, and reads back as the same game", () => {
-    for (const game of [played(10, ["Ann", "Ben", "Cho"], 2026), played(20, ["Ann", "Ben"], 7, 40), played(10, ["a", "b", "c", "d", "e", "f"], 99, 30, "hand"), startTenka(60, ["Ann", "Ben"], 1)!]) {
+    for (const game of [
+      played(10, ["Ann", "Ben", "Cho"], 2026),
+      played(20, ["Ann", "Ben"], 7, 40),
+      played(10, ["a", "b", "c", "d", "e", "f"], 99, 30, "hand"),
+      startTenka(60, ["Ann", "Ben"], 1)!,
+    ]) {
       const text = tenkaToJSON(game);
       const data = JSON.parse(text);
       expect(data.format).toBe(TENKA_EXPORT_FORMAT);
       expect(data.game).toBe("tenka");
       expect(data.generator).toBe(`tenka ${TENKA_VERSION}`);
-      expect(Object.keys(data)).toEqual(["format", "game", "generator", "seed", "players", "rounds", "placing", "moves", "state"]);
+      expect(Object.keys(data)).toEqual([
+        "format",
+        "game",
+        "generator",
+        "seed",
+        "players",
+        "rounds",
+        "placing",
+        "moves",
+        "state",
+      ]);
       expect(data).toEqual(tenkaExported(game));
       expect(text.endsWith("}\n")).toBe(true);
       expect(tenkaFromJSON(text)).toEqual(game);
@@ -47,7 +77,12 @@ describe("a game as JSON", () => {
   it("a finished game says who won, and reads back finished", () => {
     const game = played(10, ["Ann", "Ben", "Cho"], 2026);
     expect(tenkaOver(game)).toBe(true);
-    expect(JSON.parse(tenkaToJSON(game)).state).toEqual({ round: game.round, phase: "over", toPlay: game.toPlay, winners: game.winners });
+    expect(JSON.parse(tenkaToJSON(game)).state).toEqual({
+      round: game.round,
+      phase: "over",
+      toPlay: game.toPlay,
+      winners: game.winners,
+    });
     expect(tenkaFromJSON(tenkaToJSON(game))!.winners).toEqual(game.winners);
   });
 
@@ -60,7 +95,9 @@ describe("a game as JSON", () => {
     const game = played(20, ["Ann", "Ben", "Cho"], 5, 25);
     const data = JSON.parse(tenkaToJSON(game));
     // A state that lies changes nothing: the moves say where the game stands.
-    expect(tenkaFromJSON(JSON.stringify({ ...data, state: { round: 9, phase: "over", toPlay: 2, winners: [2] } }))).toEqual(game);
+    expect(
+      tenkaFromJSON(JSON.stringify({ ...data, state: { round: 9, phase: "over", toPlay: 2, winners: [2] } })),
+    ).toEqual(game);
     // A move nobody could have made.
     expect(tenkaFromJSON(JSON.stringify({ ...data, moves: [...data.moves, ["a", 0, 41, 3]] }))).toBeNull();
     expect(tenkaFromJSON(JSON.stringify({ ...data, moves: [["o", 99]] }))).toBeNull();
@@ -89,7 +126,9 @@ describe("a game as JSON", () => {
 
   it("a name too long or untidy is tidied by the rules, as at the table", () => {
     const data = JSON.parse(tenkaToJSON(startTenka(10, ["Ann", "Ben"], 3)!));
-    const read = tenkaFromJSON(JSON.stringify({ ...data, players: ["  Ann   of the very long name indeed  ", "Ben"] }))!;
+    const read = tenkaFromJSON(
+      JSON.stringify({ ...data, players: ["  Ann   of the very long name indeed  ", "Ben"] }),
+    )!;
     expect(read.players).toEqual(["Ann of the very long", "Ben"]);
   });
 });
@@ -133,7 +172,9 @@ describe("a game as text", () => {
     expect(lines.filter((line) => /^Round \d+$/.test(line)).length).toBe(10);
     expect(lines.at(-1)).toBe("");
     expect(lines.at(-2)).toMatch(/The game is counted after round 10\. Winner: |takes the world\.$/);
-    expect(tenkaToText(game)).toMatch(/attacks .+ until it is decided, \d+ throws?: attacker lost \d+, defender lost \d+\./);
+    expect(tenkaToText(game)).toMatch(
+      /attacks .+ until it is decided, \d+ throws?: attacker lost \d+, defender lost \d+\./,
+    );
     expect(tenkaToText(game)).toMatch(/ places \d+ on /);
     expect(tenkaToText(game)).not.toMatch(/\{\w+\}/);
   });
@@ -156,13 +197,19 @@ describe("a game as text", () => {
       attack = attacksOpen(one).find((move) => move.kind === "attack" && move.dice === 3);
     }
     const thrown = playTenka(one, attack)!;
-    expect(tenkaToText(thrown).trimEnd().split("\n").at(-1)).toMatch(/^\w+: .+ attacks .+, \[[1-6] [1-6] [1-6]\] against \[[1-6]( [1-6])?\]: attacker lost [0-2], defender lost [0-2]\.( .+ is taken\.)?$/);
-    expect(tenkaToText(thrown, TENKA_STRINGS.ja).trimEnd().split("\n").at(-1)).toMatch(/を攻撃、\[[1-6] [1-6] [1-6]\] 対 \[/);
+    expect(tenkaToText(thrown).trimEnd().split("\n").at(-1)).toMatch(
+      /^\w+: .+ attacks .+, \[[1-6] [1-6] [1-6]\] against \[[1-6]( [1-6])?\]: attacker lost [0-2], defender lost [0-2]\.( .+ is taken\.)?$/,
+    );
+    expect(tenkaToText(thrown, TENKA_STRINGS.ja).trimEnd().split("\n").at(-1)).toMatch(
+      /を攻撃、\[[1-6] [1-6] [1-6]\] 対 \[/,
+    );
   });
 
   it("names nobody gave are Player 1, Player 2", () => {
     expect(tenkaToText(startTenka(10, ["", ""], 3)!)).toBe("Tenka: Player 1, Player 2; 10 rounds; seed 3\n");
-    expect(tenkaToText(startTenka(10, ["", ""], 3)!, TENKA_STRINGS.ja)).toBe("天下: プレイヤー1、プレイヤー2、10ラウンド、シード 3\n");
+    expect(tenkaToText(startTenka(10, ["", ""], 3)!, TENKA_STRINGS.ja)).toBe(
+      "天下: プレイヤー1、プレイヤー2、10ラウンド、シード 3\n",
+    );
   });
 });
 

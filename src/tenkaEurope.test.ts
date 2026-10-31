@@ -137,7 +137,9 @@ describe("Tenka's Europe", () => {
     expect(new Set(EUROPE.territories.map((territory) => territory.name)).size).toBe(49);
     expect(Object.keys(NEIGHBOURS).sort()).toEqual(EUROPE.territories.map((territory) => territory.name).sort());
     expect(EUROPE.continents).toHaveLength(11);
-    expect(EUROPE.continents.flatMap((region) => region.territories).sort((a, b) => a - b)).toEqual(EUROPE.territories.map((_, territory) => territory));
+    expect(EUROPE.continents.flatMap((region) => region.territories).sort((a, b) => a - b)).toEqual(
+      EUROPE.territories.map((_, territory) => territory),
+    );
     expect(TENKA_MAP_LIST).toEqual(["world", "europe"]);
   });
 
@@ -149,19 +151,29 @@ describe("Tenka's Europe", () => {
   });
 
   it("has eighty-two borders on land and nineteen routes across the water, the routes being the neighbours that share no border", () => {
-    const pairs = (key: "land" | "sea") => EUROPE.territories.reduce((sum, territory) => sum + territory[key].length, 0) / 2;
+    const pairs = (key: "land" | "sea") =>
+      EUROPE.territories.reduce((sum, territory) => sum + territory[key].length, 0) / 2;
     expect(pairs("land")).toBe(82);
     expect(pairs("sea")).toBe(19);
     expect(ACROSS_THE_WATER).toHaveLength(19);
-    const water = EUROPE.territories.flatMap((territory, one) => territory.sea.filter((other) => other > one).map((other) => [territory.name, nameAt(other)].sort().join(" / ")));
+    const water = EUROPE.territories.flatMap((territory, one) =>
+      territory.sea.filter((other) => other > one).map((other) => [territory.name, nameAt(other)].sort().join(" / ")),
+    );
     expect(water.sort()).toEqual(ACROSS_THE_WATER.map((pair) => [...pair].sort().join(" / ")).sort());
   });
 
   it("is the list the map script is held to, key for key", () => {
     const keys = EUROPE_TERRITORY_LIST.map((territory) => territory.key);
     expect(EUROPE.territories.map((territory) => territory.key)).toEqual(keys);
-    expect(EUROPE.territories.map((territory) => territory.name)).toEqual(EUROPE_TERRITORY_LIST.map((territory) => territory.name));
-    const named = (kind: "land" | "sea") => EUROPE.territories.flatMap((territory, one) => territory[kind].filter((other) => other > one).map((other) => [territory.key, EUROPE.territories[other]!.key].sort().join("|")));
+    expect(EUROPE.territories.map((territory) => territory.name)).toEqual(
+      EUROPE_TERRITORY_LIST.map((territory) => territory.name),
+    );
+    const named = (kind: "land" | "sea") =>
+      EUROPE.territories.flatMap((territory, one) =>
+        territory[kind]
+          .filter((other) => other > one)
+          .map((other) => [territory.key, EUROPE.territories[other]!.key].sort().join("|")),
+      );
     expect(named("land").sort()).toEqual(EUROPE_LAND_EDGES.map((pair) => [...pair].sort().join("|")).sort());
     expect(named("sea").sort()).toEqual(EUROPE_SEA_EDGES.map((pair) => [...pair].sort().join("|")).sort());
   });
@@ -184,7 +196,8 @@ describe("Tenka's Europe", () => {
       expect(list).not.toContain(territory);
       expect(new Set(list).size).toBe(list.length);
       expect(list.length, `${nameAt(territory)} has no neighbour`).toBeGreaterThan(0);
-      for (const other of list) expect(EUROPE.neighbours[other], `${nameAt(territory)}–${nameAt(other)}`).toContain(territory);
+      for (const other of list)
+        expect(EUROPE.neighbours[other], `${nameAt(territory)}–${nameAt(other)}`).toContain(territory);
     });
   });
 
@@ -206,7 +219,9 @@ describe("Tenka's Europe", () => {
       expect(region.name).toBe(expected!.name);
       expect(region.territories, region.key).toHaveLength(expected!.territories);
       const inside = new Set(region.territories);
-      const waysIn = new Set(region.territories.flatMap((territory) => EUROPE.neighbours[territory]!.filter((other) => !inside.has(other))));
+      const waysIn = new Set(
+        region.territories.flatMap((territory) => EUROPE.neighbours[territory]!.filter((other) => !inside.has(other))),
+      );
       expect(waysIn.size, `${region.key}'s ways in`).toBe(expected!.waysIn);
       expect(region.bonus, region.key).toBe(expected!.bonus);
     }
@@ -221,7 +236,9 @@ describe("Tenka's Europe", () => {
       expect(continentNameIn(TENKA_STRINGS.en, region.key), region.key).toBe(region.name);
       expect(continentNameIn(TENKA_STRINGS.ja, region.key), region.key).not.toBe("");
     }
-    expect(new Set(EUROPE.territories.map((territory) => territoryNameIn(TENKA_STRINGS.ja, territory.key))).size).toBe(49);
+    expect(new Set(EUROPE.territories.map((territory) => territoryNameIn(TENKA_STRINGS.ja, territory.key))).size).toBe(
+      49,
+    );
   });
 
   it("draws every territory, with a counter inside the map, in well under 150 KB", () => {
@@ -240,11 +257,20 @@ describe("Tenka's Europe", () => {
   it("draws every route across the water as a line long enough to read as a crossing, from one territory's coast to the other's", () => {
     expect(TENKA_EUROPE_SHAPES.seaLines).toHaveLength(19);
     expect(TENKA_EUROPE_SHAPES.wraps).toHaveLength(0);
-    for (const [x1, y1, x2, y2] of TENKA_EUROPE_SHAPES.seaLines) expect(Math.hypot(x2 - x1, y2 - y1)).toBeGreaterThanOrEqual(62);
-    const near = ([x, y]: number[], [left, top, right, bottom]: readonly number[], slack: number) => x >= left - slack && x <= right + slack && y >= top - slack && y <= bottom + slack;
+    for (const [x1, y1, x2, y2] of TENKA_EUROPE_SHAPES.seaLines)
+      expect(Math.hypot(x2 - x1, y2 - y1)).toBeGreaterThanOrEqual(62);
+    const near = ([x, y]: number[], [left, top, right, bottom]: readonly number[], slack: number) =>
+      x >= left - slack && x <= right + slack && y >= top - slack && y <= bottom + slack;
     for (const [a, b] of ACROSS_THE_WATER) {
-      const [boxA, boxB] = [TENKA_EUROPE_SHAPES.boxes[at(EUROPE.territories.find((t) => t.name === a)!.key)]!, TENKA_EUROPE_SHAPES.boxes[at(EUROPE.territories.find((t) => t.name === b)!.key)]!];
-      const joined = TENKA_EUROPE_SHAPES.seaLines.some(([x1, y1, x2, y2]) => (near([x1, y1], boxA, 40) && near([x2, y2], boxB, 40)) || (near([x1, y1], boxB, 40) && near([x2, y2], boxA, 40)));
+      const [boxA, boxB] = [
+        TENKA_EUROPE_SHAPES.boxes[at(EUROPE.territories.find((t) => t.name === a)!.key)]!,
+        TENKA_EUROPE_SHAPES.boxes[at(EUROPE.territories.find((t) => t.name === b)!.key)]!,
+      ];
+      const joined = TENKA_EUROPE_SHAPES.seaLines.some(
+        ([x1, y1, x2, y2]) =>
+          (near([x1, y1], boxA, 40) && near([x2, y2], boxB, 40)) ||
+          (near([x1, y1], boxB, 40) && near([x2, y2], boxA, 40)),
+      );
       expect(joined, `${a} – ${b}`).toBe(true);
     }
   });
@@ -265,7 +291,13 @@ describe("a game on Europe", () => {
   it("is played to its end by the computer at every table, two, three and six", () => {
     for (const count of [2, 3, 6]) {
       for (const seed of [1, 2, 3]) {
-        let game: TenkaGame = startTenka(10, players.slice(0, count).concat(["E", "F"]).slice(0, count), seed, "auto", "europe")!;
+        let game: TenkaGame = startTenka(
+          10,
+          players.slice(0, count).concat(["E", "F"]).slice(0, count),
+          seed,
+          "auto",
+          "europe",
+        )!;
         const random = seededRandom(seed);
         for (let step = 0; step < 20_000 && game.phase !== TENKA_PHASES.over; step += 1) {
           const next = playTenka(game, sensibleTenkaMove(game, random));

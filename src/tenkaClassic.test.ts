@@ -20,11 +20,51 @@ import { startTenka } from "./tenkaStart.ts";
  */
 
 const CONTINENTS: Record<string, { bonus: number; names: string[] }> = {
-  northAmerica: { bonus: 5, names: ["Alaska", "Northwest Territory", "Greenland", "Alberta", "Ontario", "Quebec", "Western United States", "Eastern United States", "Central America"] },
+  northAmerica: {
+    bonus: 5,
+    names: [
+      "Alaska",
+      "Northwest Territory",
+      "Greenland",
+      "Alberta",
+      "Ontario",
+      "Quebec",
+      "Western United States",
+      "Eastern United States",
+      "Central America",
+    ],
+  },
   southAmerica: { bonus: 2, names: ["Venezuela", "Peru", "Brazil", "Argentina"] },
-  europe: { bonus: 5, names: ["Iceland", "Scandinavia", "Great Britain", "Northern Europe", "Western Europe", "Southern Europe", "Ukraine"] },
+  europe: {
+    bonus: 5,
+    names: [
+      "Iceland",
+      "Scandinavia",
+      "Great Britain",
+      "Northern Europe",
+      "Western Europe",
+      "Southern Europe",
+      "Ukraine",
+    ],
+  },
   africa: { bonus: 3, names: ["North Africa", "Egypt", "East Africa", "Congo", "South Africa", "Madagascar"] },
-  asia: { bonus: 7, names: ["Ural", "Siberia", "Yakutsk", "Kamchatka", "Irkutsk", "Mongolia", "Japan", "Afghanistan", "China", "Middle East", "India", "Siam"] },
+  asia: {
+    bonus: 7,
+    names: [
+      "Ural",
+      "Siberia",
+      "Yakutsk",
+      "Kamchatka",
+      "Irkutsk",
+      "Mongolia",
+      "Japan",
+      "Afghanistan",
+      "China",
+      "Middle East",
+      "India",
+      "Siam",
+    ],
+  },
   australia: { bonus: 2, names: ["Indonesia", "New Guinea", "Western Australia", "Eastern Australia"] },
 };
 
@@ -86,16 +126,23 @@ describe("Tenka's world is the classic graph", () => {
     expect(TENKA_CONTINENTS.map((continent) => continent.key)).toEqual(Object.keys(CONTINENTS));
   });
 
-  it.each(Object.entries(CONTINENTS))("%s holds its classic territories and is worth the classic bonus", (key, { bonus, names }) => {
-    const continent = TENKA_CONTINENTS.find((one) => one.key === key)!;
-    expect(continent.territories.map(nameOf)).toEqual(names);
-    expect(continent.bonus).toBe(bonus);
-  });
+  it.each(Object.entries(CONTINENTS))(
+    "%s holds its classic territories and is worth the classic bonus",
+    (key, { bonus, names }) => {
+      const continent = TENKA_CONTINENTS.find((one) => one.key === key)!;
+      expect(continent.territories.map(nameOf)).toEqual(names);
+      expect(continent.bonus).toBe(bonus);
+    },
+  );
 
   it("joins exactly the classic eighty-three pairs, by land or by sea, and no others", () => {
-    const wanted = new Set(Object.entries(NEIGHBOURS).flatMap(([name, others]) => others.map((other) => pair(name, other))));
+    const wanted = new Set(
+      Object.entries(NEIGHBOURS).flatMap(([name, others]) => others.map((other) => pair(name, other))),
+    );
     expect(wanted.size).toBe(83);
-    const drawn = new Set(WORLD.neighbours.flatMap((others, at) => others.map((other) => pair(nameOf(at), nameOf(other)))));
+    const drawn = new Set(
+      WORLD.neighbours.flatMap((others, at) => others.map((other) => pair(nameOf(at), nameOf(other)))),
+    );
     expect([...drawn].filter((edge) => !wanted.has(edge))).toEqual([]);
     expect([...wanted].filter((edge) => !drawn.has(edge))).toEqual([]);
     expect(drawn.size).toBe(83);
@@ -115,7 +162,11 @@ describe("Tenka's world is the classic graph", () => {
     expect(new Set(CLASSIC_EDGES.map(([a, b]) => [a, b].sort().join())).size).toBe(83);
     const keys = new Set(TENKA_TERRITORIES.map((territory) => territory.key));
     expect(new Set(CLASSIC_EDGES.flat())).toEqual(keys);
-    const drawn = new Set(WORLD.neighbours.flatMap((others, at) => others.map((other) => [TENKA_TERRITORIES[at].key, TENKA_TERRITORIES[other].key].sort().join())));
+    const drawn = new Set(
+      WORLD.neighbours.flatMap((others, at) =>
+        others.map((other) => [TENKA_TERRITORIES[at].key, TENKA_TERRITORIES[other].key].sort().join()),
+      ),
+    );
     expect(new Set(CLASSIC_EDGES.map(([a, b]) => [a, b].sort().join()))).toEqual(drawn);
   });
 
@@ -140,7 +191,11 @@ describe("Tenka's world is the classic graph", () => {
         state = drawn.state;
         return drawn.value;
       };
-      let game = startTenka(10, Array.from({ length: count }, (_, at) => `P${at + 1}`), 100 + count)!;
+      let game = startTenka(
+        10,
+        Array.from({ length: count }, (_, at) => `P${at + 1}`),
+        100 + count,
+      )!;
       for (let step = 0; step < 20_000 && game.phase !== TENKA_PHASES.over; step += 1) {
         const next = playTenka(game, sensibleTenkaMove(game, random));
         expect(next, `${count} players, step ${step}`).not.toBeNull();

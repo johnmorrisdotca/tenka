@@ -3,7 +3,15 @@
 // showed another number or another territory would fail here whatever it looked like.
 import { expect, test } from "@playwright/test";
 
-import { TENKA_STRINGS, TENKA_TERRITORIES, playTenka, startTenka, tenkaFromJSON, tenkaMoves, territoryNameIn } from "../dist/index.js";
+import {
+  TENKA_STRINGS,
+  TENKA_TERRITORIES,
+  playTenka,
+  startTenka,
+  tenkaFromJSON,
+  tenkaMoves,
+  territoryNameIn,
+} from "../dist/index.js";
 import { TENKA_SHAPES } from "../dist/shapes.js";
 import { ROOT, WAITING, open, sound, state, tap, tapLand } from "./table.mjs";
 
@@ -18,7 +26,10 @@ async function kept(page) {
 
 /** The first blitz the rules offer from the seed's deal, once every new army is on its territory. */
 function planned() {
-  const attacks = (from) => tenkaMoves(playTenka(dealt, { kind: "place", territory: from, armies: dealt.reserve })).filter((move) => move.kind === "blitz" && move.from === from);
+  const attacks = (from) =>
+    tenkaMoves(playTenka(dealt, { kind: "place", territory: from, armies: dealt.reserve })).filter(
+      (move) => move.kind === "blitz" && move.from === from,
+    );
   const from = dealt.owners.findIndex((owner, territory) => owner === 0 && attacks(territory).length > 0);
   return { from, to: attacks(from)[0].to };
 }
@@ -53,7 +64,16 @@ test("the dice are Korokoro's, and show the numbers the game threw", async ({ pa
   // Each is a die of Korokoro's, a picture of the face that came up, with its pips: one for a one, six for a six.
   const dice = page.locator("#table .tk-die");
   await expect(dice).toHaveCount(roll.attackDice.length + roll.defendDice.length);
-  const shown = await dice.evaluateAll((all) => all.map((die) => ({ face: Number(die.dataset.face), pips: die.querySelectorAll("[class*='kk-pip']").length, korokoro: die.querySelector(".kk-root") !== null, label: die.getAttribute("aria-label"), role: die.getAttribute("role"), inert: die.querySelector(".kk-root")?.closest("[inert]") !== null })));
+  const shown = await dice.evaluateAll((all) =>
+    all.map((die) => ({
+      face: Number(die.dataset.face),
+      pips: die.querySelectorAll("[class*='kk-pip']").length,
+      korokoro: die.querySelector(".kk-root") !== null,
+      label: die.getAttribute("aria-label"),
+      role: die.getAttribute("role"),
+      inert: die.querySelector(".kk-root")?.closest("[inert]") !== null,
+    })),
+  );
   const thrown = [...roll.attackDice, ...roll.defendDice];
   expect(shown.map((one) => one.face)).toEqual(thrown);
   for (const die of shown) {
@@ -62,13 +82,19 @@ test("the dice are Korokoro's, and show the numbers the game threw", async ({ pa
     expect(die.role).toBe("img");
     expect(die.inert).toBe(true);
   }
-  expect(shown.slice(0, roll.attackDice.length).map((one) => one.label)).toEqual(roll.attackDice.map((face) => `Attacker's die: ${face}`));
-  expect(shown.slice(roll.attackDice.length).map((one) => one.label)).toEqual(roll.defendDice.map((face) => `Defender's die: ${face}`));
+  expect(shown.slice(0, roll.attackDice.length).map((one) => one.label)).toEqual(
+    roll.attackDice.map((face) => `Attacker's die: ${face}`),
+  );
+  expect(shown.slice(roll.attackDice.length).map((one) => one.label)).toEqual(
+    roll.defendDice.map((face) => `Defender's die: ${face}`),
+  );
   // The line still says it in words, and the table is no wider than the screen.
   expect(s.dice).toContain(`attacker lost ${roll.attackerLost}, defender lost ${roll.defenderLost}`);
 });
 
-test("the cards in hand are Toranpu's, each its own territory with its own symbol, and the deck is Tenka's back", async ({ page }) => {
+test("the cards in hand are Toranpu's, each its own territory with its own symbol, and the deck is Tenka's back", async ({
+  page,
+}) => {
   const errors = await open(page);
   await blitz(page);
   await endTurn(page);
@@ -80,7 +106,21 @@ test("the cards in hand are Toranpu's, each its own territory with its own symbo
   const shown = await cards.evaluateAll((all) =>
     all.map((card) => {
       const svg = card.querySelector("svg");
-      return { card: Number(card.dataset.card), territory: card.dataset.territory === undefined ? null : Number(card.dataset.territory), label: card.getAttribute("aria-label"), path: svg?.querySelector("svg path")?.getAttribute("d") ?? null, name: svg === null ? null : [...svg.querySelectorAll(":scope > g > text[font-weight='700']")].slice(0, 2).map((text) => text.textContent).join(" "), width: card.getBoundingClientRect().width, height: card.getBoundingClientRect().height };
+      return {
+        card: Number(card.dataset.card),
+        territory: card.dataset.territory === undefined ? null : Number(card.dataset.territory),
+        label: card.getAttribute("aria-label"),
+        path: svg?.querySelector("svg path")?.getAttribute("d") ?? null,
+        name:
+          svg === null
+            ? null
+            : [...svg.querySelectorAll(":scope > g > text[font-weight='700']")]
+                .slice(0, 2)
+                .map((text) => text.textContent)
+                .join(" "),
+        width: card.getBoundingClientRect().width,
+        height: card.getBoundingClientRect().height,
+      };
     }),
   );
   expect(shown.map((one) => one.card)).toEqual([...hand]);
@@ -102,7 +142,9 @@ test("the cards in hand are Toranpu's, each its own territory with its own symbo
   await tap(page, '[data-lang="ja"]');
   const words = TENKA_STRINGS.ja;
   const territory = shown.find((one) => one.territory !== null).territory;
-  await expect(page.locator(`#table .tk-card[data-territory="${territory}"] svg > g > text[font-weight='700']`).first()).toHaveText(territoryNameIn(words, TENKA_TERRITORIES[territory].key));
+  await expect(
+    page.locator(`#table .tk-card[data-territory="${territory}"] svg > g > text[font-weight='700']`).first(),
+  ).toHaveText(territoryNameIn(words, TENKA_TERRITORIES[territory].key));
   await expect(page.locator('#table [data-testid="tk-pile"]')).toContainText(`山札：${game.deck.length}枚`);
   await sound(page, errors);
 });
@@ -117,7 +159,9 @@ test("the dice and the cards are only drawn: the same taps make the same game dr
     // Plain, a die is its number in a square; dressed, a picture. Either way the die carries its face.
     const plain = query.includes("dressing=off");
     await expect(page.locator("#table .tk-die").first()).toHaveText(plain ? /^[1-6]$/ : "");
-    await expect(page.locator("#table .tk-die .kk-root")).toHaveCount(plain ? 0 : games[query].lastRoll.attackDice.length + games[query].lastRoll.defendDice.length);
+    await expect(page.locator("#table .tk-die .kk-root")).toHaveCount(
+      plain ? 0 : games[query].lastRoll.attackDice.length + games[query].lastRoll.defendDice.length,
+    );
   }
   const [dressed, plain] = Object.values(games);
   expect(dressed.moves).toEqual(plain.moves);
@@ -139,7 +183,9 @@ test("a table that cannot load Korokoro and Toranpu is left with the plain dice 
 test.describe("with motion", () => {
   test.use({ reducedMotion: "no-preference" });
 
-  test("a throw tumbles onto the faces the game threw, once, and the dice are pictures when they have landed", async ({ page }) => {
+  test("a throw tumbles onto the faces the game threw, once, and the dice are pictures when they have landed", async ({
+    page,
+  }) => {
     const errors = await open(page);
     await blitz(page);
     const game = await kept(page);
@@ -147,7 +193,11 @@ test.describe("with motion", () => {
     const tumbling = page.locator('#table [data-testid="kk-solo-die"][data-rolling="true"]');
     await expect(tumbling.first()).toBeVisible();
     // It is a picture of a throw, not a button to press.
-    expect(await page.locator("#table .tk-die button:not([disabled])").evaluateAll((all) => all.filter((one) => one.closest("[inert]") === null).length)).toBe(0);
+    expect(
+      await page
+        .locator("#table .tk-die button:not([disabled])")
+        .evaluateAll((all) => all.filter((one) => one.closest("[inert]") === null).length),
+    ).toBe(0);
     await expect(tumbling).toHaveCount(0);
     expect((await state(page)).faces).toEqual({ attack: [...roll.attackDice], defend: [...roll.defendDice] });
     await expect(page.locator("#table .tk-die button")).toHaveCount(0, { timeout: 3000 });

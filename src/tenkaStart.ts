@@ -1,4 +1,12 @@
-import { TENKA_FEWEST_PLAYERS, TENKA_LENGTHS, TENKA_MOST_PLAYERS, TENKA_NEUTRAL, TENKA_PHASES, TENKA_PLACING, TENKA_STARTING_ARMIES } from "./tenka.constants.ts";
+import {
+  TENKA_FEWEST_PLAYERS,
+  TENKA_LENGTHS,
+  TENKA_MOST_PLAYERS,
+  TENKA_NEUTRAL,
+  TENKA_PHASES,
+  TENKA_PLACING,
+  TENKA_STARTING_ARMIES,
+} from "./tenka.constants.ts";
 import type { TenkaGame, TenkaOwner, TenkaPlacing, TenkaSeat, TenkaMapKey } from "./tenka.types.ts";
 import { tenkaDeckFor } from "./tenkaCards.ts";
 import { randomBelow, shuffled } from "./tenkaDice.ts";
@@ -28,7 +36,12 @@ export const TENKA_SEED_MOST = 0xffffffff;
  * ```
  */
 export function isTenkaTable(rounds: number, count: number): boolean {
-  return TENKA_LENGTHS.includes(rounds) && Number.isInteger(count) && count >= TENKA_FEWEST_PLAYERS && count <= TENKA_MOST_PLAYERS;
+  return (
+    TENKA_LENGTHS.includes(rounds) &&
+    Number.isInteger(count) &&
+    count >= TENKA_FEWEST_PLAYERS &&
+    count <= TENKA_MOST_PLAYERS
+  );
 }
 
 /** Whether a number is a seed a game can be dealt from: a whole number from 0 to `TENKA_SEED_MOST`.
@@ -47,7 +60,13 @@ export function isTenkaSeed(seed: number): boolean {
 }
 
 /** `armies` more armies scattered one at a time over `owner`'s territories, at random; the state after them. */
-function scatter(armies: number[], owners: readonly TenkaOwner[], owner: TenkaOwner, count: number, state: number): number {
+function scatter(
+  armies: number[],
+  owners: readonly TenkaOwner[],
+  owner: TenkaOwner,
+  count: number,
+  state: number,
+): number {
   const theirs = owners.flatMap((holder, territory) => (holder === owner ? [territory] : []));
   let at = state;
   for (let i = 0; i < count && theirs.length > 0; i += 1) {
@@ -82,7 +101,13 @@ function scatter(armies: number[], owners: readonly TenkaOwner[], owner: TenkaOw
  * console.log(startTenka(10,["Seat 1","Seat 2"],42)?.phase);
  * ```
  */
-export function startTenka(rounds: number, players: readonly string[], seed: number, placing: TenkaPlacing = TENKA_PLACING.auto, map: TenkaMapKey = "world"): TenkaGame | null {
+export function startTenka(
+  rounds: number,
+  players: readonly string[],
+  seed: number,
+  placing: TenkaPlacing = TENKA_PLACING.auto,
+  map: TenkaMapKey = "world",
+): TenkaGame | null {
   if (!isTenkaTable(rounds, players.length) || !isTenkaSeed(seed)) return null;
   if (placing !== TENKA_PLACING.auto && placing !== TENKA_PLACING.hand) return null;
   if (!(map in TENKA_MAPS)) return null;

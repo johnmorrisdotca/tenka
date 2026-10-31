@@ -28,7 +28,10 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
   const errors = await open(page);
   // The attack to make: the first blitz the rules offer once every new army is on its territory.
   let game = dealt;
-  const attacks = (from) => tenkaMoves(playTenka(game, { kind: "place", territory: from, armies: game.reserve })).filter((move) => move.kind === "blitz" && move.from === from);
+  const attacks = (from) =>
+    tenkaMoves(playTenka(game, { kind: "place", territory: from, armies: game.reserve })).filter(
+      (move) => move.kind === "blitz" && move.from === from,
+    );
   const from = game.owners.findIndex((owner, territory) => owner === 0 && attacks(territory).length > 0);
   const to = attacks(from)[0].to;
 
@@ -37,7 +40,11 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
   expect(s.lands[from].armies).toBe(dealt.armies[from] + 1);
   expect(s.controls).toEqual([`All ${dealt.reserve - 1} on ${TENKA_TERRITORIES[from].name}`]);
   await tap(page, '#table [data-testid="tk-all"]');
-  game = playTenka(playTenka(game, { kind: "place", territory: from, armies: 1 }), { kind: "place", territory: from, armies: dealt.reserve - 1 });
+  game = playTenka(playTenka(game, { kind: "place", territory: from, armies: 1 }), {
+    kind: "place",
+    territory: from,
+    armies: dealt.reserve - 1,
+  });
   await expect(page.locator(ROOT)).toHaveAttribute("data-phase", "attack");
   s = await sound(page, errors);
   expect(s.status).toContain("tap a territory of yours with two armies or more to attack from");
@@ -45,7 +52,9 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
 
   await tapLand(page, from);
   s = await state(page);
-  expect(s.status).toBe(`Round 1 of 20. You: attacking from ${TENKA_TERRITORIES[from].name}. Tap a neighbour to attack.`);
+  expect(s.status).toBe(
+    `Round 1 of 20. You: attacking from ${TENKA_TERRITORIES[from].name}. Tap a neighbour to attack.`,
+  );
   expect(s.rings).toBeGreaterThan(1);
   await tapLand(page, to);
   s = await sound(page, errors);
@@ -80,14 +89,23 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
   if (game.phase !== "occupy" && game.lastRoll.took) expect(s.players[0]).toContain("1 cards");
 });
 
-test("a fortifying move: from one of your territories to one joined to it, by the slider's number", async ({ page }) => {
+test("a fortifying move: from one of your territories to one joined to it, by the slider's number", async ({
+  page,
+}) => {
   const errors = await open(page);
   let game = dealt;
   const own = game.owners.findIndex((owner) => owner === 0);
   await tapLand(page, own);
   await tap(page, '#table [data-testid="tk-all"]');
   await tap(page, '#table [data-testid="tk-stop"]');
-  game = playTenka(playTenka(playTenka(game, { kind: "place", territory: own, armies: 1 }), { kind: "place", territory: own, armies: game.reserve - 1 }), { kind: "endAttack" });
+  game = playTenka(
+    playTenka(playTenka(game, { kind: "place", territory: own, armies: 1 }), {
+      kind: "place",
+      territory: own,
+      armies: game.reserve - 1,
+    }),
+    { kind: "endAttack" },
+  );
   const move = tenkaMoves(game).find((one) => one.kind === "fortify");
   await tapLand(page, move.from);
   await tapLand(page, move.to);

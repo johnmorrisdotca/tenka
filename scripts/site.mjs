@@ -5,7 +5,15 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import { dirname, join, resolve } from "node:path";
 
 import { API_CSS, apiPage } from "./api.mjs";
-import { FAMILY_SCRIPT, FAMILY_EMBED_BUILDER_WORDS, familyEmbedBuilder, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
+import {
+  FAMILY_SCRIPT,
+  FAMILY_EMBED_BUILDER_WORDS,
+  familyEmbedBuilder,
+  familyFooter,
+  familyHead,
+  familyHeader,
+  familyUnreviewed,
+} from "./family-template.mjs";
 
 const id = "tenka";
 
@@ -13,7 +21,14 @@ const id = "tenka";
 // files of each that the table reaches, found by following their imports, and an import map says where the names are.
 const VENDOR = [
   ["@johnmorrisdotca/korokoro", "korokoro", [["", "index.js"]]],
-  ["@johnmorrisdotca/toranpu", "toranpu", [["/card-backs", "card-backs.js"], ["/card-faces", "card-faces.js"]]],
+  [
+    "@johnmorrisdotca/toranpu",
+    "toranpu",
+    [
+      ["/card-backs", "card-backs.js"],
+      ["/card-faces", "card-faces.js"],
+    ],
+  ],
 ];
 function reached(entry) {
   const seen = new Set();
@@ -22,7 +37,8 @@ function reached(entry) {
     const file = todo.pop();
     if (seen.has(file)) continue;
     seen.add(file);
-    for (const found of readFileSync(file, "utf8").matchAll(/(?:from\s*|import\s*\(\s*|import\s+)["'](\.[^"']+)["']/g)) todo.push(resolve(dirname(file), found[1]));
+    for (const found of readFileSync(file, "utf8").matchAll(/(?:from\s*|import\s*\(\s*|import\s+)["'](\.[^"']+)["']/g))
+      todo.push(resolve(dirname(file), found[1]));
   }
   return [...seen];
 }
@@ -32,10 +48,13 @@ for (const [name, folder, entries] of VENDOR) {
   const dist = resolve("node_modules", name, "dist");
   if (!existsSync(dist)) throw new Error(`${name} is not installed: run pnpm install`);
   for (const [suffix, entry] of entries) imports[name + suffix] = `./vendor/${folder}/${entry}`;
-  for (const [, entry] of entries) for (const file of reached(join(dist, entry))) vendored.push([file, join("site", "vendor", folder, file.slice(dist.length + 1))]);
+  for (const [, entry] of entries)
+    for (const file of reached(join(dist, entry)))
+      vendored.push([file, join("site", "vendor", folder, file.slice(dist.length + 1))]);
 }
 
-const ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%23f3efe4'%3E天%3C/text%3E%3C/svg%3E";
+const ICON =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%23f3efe4'%3E天%3C/text%3E%3C/svg%3E";
 
 const tries = [
   ["duel", `players: ["You", "Kaze"]`],
@@ -51,7 +70,8 @@ const page = `<!doctype html>
     ${familyHead({
       id,
       title: "Tenka 天下 — World conquest strategy game",
-      description: "Play world conquest for two to six against the computer, on a map of the real world: place armies, attack with dice, trade cards, take the world. Free and open source, in English and Japanese.",
+      description:
+        "Play world conquest for two to six against the computer, on a map of the real world: place armies, attack with dice, trade cards, take the world. Free and open source, in English and Japanese.",
       ogTitle: "Tenka 天下 — World conquest strategy game",
       ogDescription: "World conquest for two to six, on a map of the real world.",
     })}
@@ -62,7 +82,14 @@ const page = `<!doctype html>
   </head>
   <body>
     <main>
-      ${familyHeader({ id, links: [{ href: "docs/index.html", say: "pageDocs" }, { href: "api.html", say: "pageApi" }, { href: "builder.html", say: "pageBuilder" }] })}
+      ${familyHeader({
+        id,
+        links: [
+          { href: "docs/index.html", say: "pageDocs" },
+          { href: "api.html", say: "pageApi" },
+          { href: "builder.html", say: "pageBuilder" },
+        ],
+      })}
       <div class="setup fam-row">
         <div class="fam-row" data-help-en="How many sit at the table: you and the computers. It takes effect when you press New game." data-help-ja="卓につく人数です（あなたとコンピューター）。「新しいゲーム」を押すと反映されます。">
           <span class="fam-label" data-say="players"></span>
@@ -124,8 +151,31 @@ writeFileSync("site/api.css", API_CSS);
 writeFileSync("site/api.html", apiPage({ id, name: "Tenka", icon: ICON }));
 console.log("site/ is ready: serve it, or let the Pages workflow publish it.");
 
-writeFileSync("site/family-embed-builder.js", `export const FAMILY_EMBED_BUILDER_WORDS = ${JSON.stringify(FAMILY_EMBED_BUILDER_WORDS)};\nexport ${familyEmbedBuilder.toString()};\n`);
-const builderParts = { builderHead: familyHead({ id, title: "Tenka · build a table embed", description: "Choose a map and a seed, preview a conquest table and copy the embed code." }), builderHeader: familyHeader({ id, links: [{ href: "./", say: "toGallery" }, { href: "docs/index.html", say: "pageDocs" }, { href: "api.html", say: "pageApi" }] }), unreviewed: familyUnreviewed({ id }), footer: familyFooter({ id }), script: `<script>${FAMILY_SCRIPT}</script>` };
-writeFileSync("site/builder.html", readFileSync("demo/builder.html", "utf8").replace(/<!-- family:([A-Za-z]+) -->/g, (_match, key) => builderParts[key]));
+writeFileSync(
+  "site/family-embed-builder.js",
+  `export const FAMILY_EMBED_BUILDER_WORDS = ${JSON.stringify(FAMILY_EMBED_BUILDER_WORDS)};\nexport ${familyEmbedBuilder.toString()};\n`,
+);
+const builderParts = {
+  builderHead: familyHead({
+    id,
+    title: "Tenka · build a table embed",
+    description: "Choose a map and a seed, preview a conquest table and copy the embed code.",
+  }),
+  builderHeader: familyHeader({
+    id,
+    links: [
+      { href: "./", say: "toGallery" },
+      { href: "docs/index.html", say: "pageDocs" },
+      { href: "api.html", say: "pageApi" },
+    ],
+  }),
+  unreviewed: familyUnreviewed({ id }),
+  footer: familyFooter({ id }),
+  script: `<script>${FAMILY_SCRIPT}</script>`,
+};
+writeFileSync(
+  "site/builder.html",
+  readFileSync("demo/builder.html", "utf8").replace(/<!-- family:([A-Za-z]+) -->/g, (_match, key) => builderParts[key]),
+);
 cpSync("demo/embed", "site/embed", { recursive: true });
 for (const file of ["builder.js", "builder.css"]) cpSync(`demo/${file}`, `site/${file}`);

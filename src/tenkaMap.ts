@@ -1,4 +1,12 @@
-import type { TenkaContinent, TenkaContinentKey, TenkaGame, TenkaMap, TenkaMapKey, TenkaOwner, TenkaTerritoryData } from "./tenka.types.ts";
+import type {
+  TenkaContinent,
+  TenkaContinentKey,
+  TenkaGame,
+  TenkaMap,
+  TenkaMapKey,
+  TenkaOwner,
+  TenkaTerritoryData,
+} from "./tenka.types.ts";
 import { TENKA_EUROPE_TERRITORY_DATA } from "./tenkaEurope.data.ts";
 import { TENKA_TERRITORY_DATA } from "./tenkaWorld.data.ts";
 
@@ -62,9 +70,25 @@ const EUROPE_REGIONS: readonly Omit<TenkaContinent, "territories">[] = [
 ];
 
 /** A map as the rules read it, made from its territories and its continents' names and bonuses. */
-function mapOf(key: TenkaMapKey, name: string, kanji: string, territories: readonly TenkaTerritoryData[], rows: readonly Omit<TenkaContinent, "territories">[]): TenkaMap {
-  const continents = rows.map((row) => ({ ...row, territories: territories.flatMap((territory, at) => (territory.continent === row.key ? [at] : [])) }));
-  return { key, name, kanji, territories, continents, neighbours: territories.map((territory) => [...territory.land, ...territory.sea]) };
+function mapOf(
+  key: TenkaMapKey,
+  name: string,
+  kanji: string,
+  territories: readonly TenkaTerritoryData[],
+  rows: readonly Omit<TenkaContinent, "territories">[],
+): TenkaMap {
+  const continents = rows.map((row) => ({
+    ...row,
+    territories: territories.flatMap((territory, at) => (territory.continent === row.key ? [at] : [])),
+  }));
+  return {
+    key,
+    name,
+    kanji,
+    territories,
+    continents,
+    neighbours: territories.map((territory) => [...territory.land, ...territory.sea]),
+  };
 }
 
 /** Every map a game may be played on, by key.
@@ -123,7 +147,9 @@ const WORLD = TENKA_MAPS.world;
  * ```
  */
 export function boardOf(map: unknown): TenkaMap {
-  return typeof map === "object" && map !== null && "territories" in map && "neighbours" in map ? (map as TenkaMap) : WORLD;
+  return typeof map === "object" && map !== null && "territories" in map && "neighbours" in map
+    ? (map as TenkaMap)
+    : WORLD;
 }
 
 /** The world's territories: the map a game is played on unless it says otherwise.
@@ -235,8 +261,14 @@ export function isTerritory(territory: number, map: TenkaMap = WORLD): boolean {
  * console.log(continentsHeld(game.owners,0).map(c=>c.key));
  * ```
  */
-export function continentsHeld(owners: readonly TenkaOwner[], seat: TenkaOwner, map: TenkaMap = WORLD): TenkaContinent[] {
-  return boardOf(map).continents.filter((continent) => continent.territories.every((territory) => owners[territory] === seat));
+export function continentsHeld(
+  owners: readonly TenkaOwner[],
+  seat: TenkaOwner,
+  map: TenkaMap = WORLD,
+): TenkaContinent[] {
+  return boardOf(map).continents.filter((continent) =>
+    continent.territories.every((territory) => owners[territory] === seat),
+  );
 }
 
 /** Every territory of the same owner reachable from this one through that owner's own territories, in order; never the territory itself.

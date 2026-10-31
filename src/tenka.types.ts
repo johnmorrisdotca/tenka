@@ -309,7 +309,12 @@ export type TenkaRoll = {
  * console.log(value);
  * ```
  */
-export type TenkaTrade = { seat: TenkaSeat; cards: readonly TenkaCard[]; armies: number; bonusTerritory: number | null };
+export type TenkaTrade = {
+  seat: TenkaSeat;
+  cards: readonly TenkaCard[];
+  armies: number;
+  bonusTerritory: number | null;
+};
 
 /**
  * A game, as its moves make it. Only the table — `seed`, `players`,
