@@ -6,6 +6,8 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-11-02
+
 ### Added
 
 - A table can be laid in the family's five cloths: `<tenka-table cloth="blue">`, `mountTenka(el, { cloth })` and `set({ cloth })`, the `cloth` embed parameter and Builder option, the header's patches on the demo, and `TENKA_CLOTHS`, `isCloth` and `clothVars` from `/ui`.
@@ -276,7 +278,8 @@ The first release.
   `@johnmorrisdotca/tenka/react`.
 - A static demo for GitHub Pages.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/johnmorrisdotca/tenka/compare/v2.2.1...v2.3.0
 [2.2.0]: https://github.com/johnmorrisdotca/tenka/compare/v2.1.2...v2.2.0
 [2.1.1]: https://github.com/johnmorrisdotca/tenka/compare/v2.1.0...v2.1.1
 [1.1.0]: https://github.com/johnmorrisdotca/tenka/releases/tag/v1.1.0

@@ -771,7 +771,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 2,
   "game": "tenka",
-  "generator": "tenka 2.2.1",
+  "generator": "tenka 2.3.0",
   "seed": 2026,
   "players": [
     "Ann",
@@ -1231,7 +1231,7 @@ Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make a game,
 
 See [CHANGELOG.md](./CHANGELOG.md).
 
-The latest release, 2.2.1, changes nothing a player sees.
+The latest release, 2.3.0, lets a table be laid in the family's five cloths.
 
 ## Licence
 

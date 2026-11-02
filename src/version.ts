@@ -6,4 +6,4 @@
  * console.log(TENKA_VERSION);
  * ```
  */
-export const TENKA_VERSION = "2.2.1";
+export const TENKA_VERSION = "2.3.0";
