@@ -26,6 +26,18 @@ nav {
   min-height: 112px;
   align-content: flex-start;
 }
+/* Three columns on a desk, so a language whose words run wider cannot wrap the third choice onto a row of its own. */
+@media (min-width: 1101px) {
+  .setup {
+    display: grid;
+    grid-template-columns: repeat(3, max-content) 1fr;
+    align-items: center;
+  }
+  .setup > .fam-button {
+    grid-row: 2;
+    justify-self: start;
+  }
+}
 @media (max-width: 1100px) {
   .setup > .fam-row {
     flex: 1 1 100%;
