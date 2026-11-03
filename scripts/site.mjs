@@ -14,8 +14,10 @@ import {
   familyHeader,
   familyUnreviewed,
 } from "./family-template.mjs";
+import { publishThumbnails, thumbnailHead } from "./family-thumbnail.mjs";
 
 const id = "tenka";
+const ALT = "Tenka: the world map mid-game, each territory in its owner's colour.";
 
 // The dressed table (`/dressing`) imports Korokoro and Toranpu by name. A static page has no bundler, so the demo carries the
 // files of each that the table reaches, found by following their imports, and an import map says where the names are.
@@ -75,6 +77,7 @@ const page = `<!doctype html>
       ogTitle: "Tenka 天下 — World conquest strategy game",
       ogDescription: "World conquest for two to six, on a map of the real world.",
     })}
+    ${thumbnailHead(JSON.parse(readFileSync("package.json", "utf8")), { alt: ALT })}
     <link rel="icon" href="${ICON}" />
     <link rel="stylesheet" href="family.css" />
     <link rel="stylesheet" href="tenka.css" />
@@ -146,6 +149,8 @@ for (const [from, to] of vendored) {
   cpSync(from, to);
 }
 writeFileSync("site/index.html", page);
+// The family's card, dark card and icon, at <site>/thumbnail.png, thumbnail-dark.png and icon.png.
+publishThumbnails(".", "site");
 // The API reference, made from the source: every export of every entry point.
 writeFileSync("site/api.css", API_CSS);
 writeFileSync("site/api.html", apiPage({ id, name: "Tenka", icon: ICON }));

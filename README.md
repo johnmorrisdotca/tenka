@@ -1,3 +1,5 @@
+<p align="center"><a href="https://johnmorrisdotca.github.io/tenka/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/thumbnail-dark.png"><img src="https://raw.githubusercontent.com/johnmorrisdotca/tenka/main/docs/images/thumbnail.png" alt="Tenka: the world map mid-game, each territory in its owner's colour." width="1200"></picture></a></p>
+
 <h1 align="center">Tenka <sub>天下</sub> — World conquest strategy game</h1>
 
 <p align="center"><strong>A world conquest board game for two to six, on a map of the real world.</strong><br>

@@ -102,4 +102,26 @@ await takePictures({
     part("record", '#table [data-testid="tk-record"]', played()),
     part("players", "#table .tk-players", played()),
   ],
+  // The family's thumbnail, dark thumbnail and icon (scripts/family-thumbnail.mjs): the world map a few moves into a game of
+  // three, every territory in its owner's colour with its armies, an attack chosen from Peru; the icon is South America
+  // close up, without the counters.
+  thumbnail: {
+    url: url(),
+    ready: waiting,
+    target: "#table .tk-board svg.tk-map",
+    label: "Tenka 天下",
+    async prepare(page) {
+      await played()(page);
+    },
+    icon: {
+      async prepare(page) {
+        await page.locator("#table .tk-board svg.tk-map").evaluate((svg) => {
+          svg.setAttribute("viewBox", "380 520 440 440");
+          svg.style.width = "600px";
+          svg.style.height = "600px";
+          for (const counter of svg.querySelectorAll(".tk-counter, .tk-sea-link")) counter.style.display = "none";
+        });
+      },
+    },
+  },
 });
