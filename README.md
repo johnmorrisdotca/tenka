@@ -11,7 +11,7 @@ The rules as pure, seeded TypeScript, a computer player, a game that saves and r
   <a href="./LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-2f5d4a"></a>
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-2f5d4a">
   <img alt="TypeScript" src="https://img.shields.io/badge/types-TypeScript-3178c6">
-  <a href="https://johnmorrisdotca.github.io/tenka/docs/api/main/index.html"><img alt="15.0 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-15.0%20kB-2f5d4a"></a>
+  <a href="https://johnmorrisdotca.github.io/tenka/docs/api/main/index.html"><img alt="15.1 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-15.1%20kB-2f5d4a"></a>
   <a href="https://www.npmjs.com/package/@johnmorrisdotca/tenka#provenance"><img alt="Published with npm provenance" src="https://img.shields.io/badge/npm-provenance-2f5d4a"></a>
 </p>
 
@@ -773,7 +773,7 @@ The JSON, as `tenkaToJSON` writes it:
 {
   "format": 2,
   "game": "tenka",
-  "generator": "tenka 2.3.0",
+  "generator": "tenka 2.4.0",
   "seed": 2026,
   "players": [
     "Ann",
@@ -1233,7 +1233,7 @@ Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make a game,
 
 See [CHANGELOG.md](./CHANGELOG.md).
 
-The latest release, 2.3.0, lets a table be laid in the family's five cloths.
+The latest release, 2.4.0, says "1 card" for one card, land or army.
 
 ## Licence
 

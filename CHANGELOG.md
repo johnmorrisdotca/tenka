@@ -6,6 +6,8 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-11-03
+
 ### Fixed
 
 - The player list no longer says "1 cards" (or "1 lands" or "1 armies"): each of the three counts is singular for one and plural otherwise, and loading a game of one move says "1 move". The words are new strings (`countLands`, `countLandsOne`, `countArmies`, `countArmiesOne`, `countCards`, `countCardsOne`, `loadedOne`) and `counts` now joins three ready-made phrases, so a page that overlays its own `counts` should overlay these too; `tenkaCount` from `/ui` says a count in the right form. The Japanese reads as before.
@@ -284,7 +286,8 @@ The first release.
   `@johnmorrisdotca/tenka/react`.
 - A static demo for GitHub Pages.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tenka/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/johnmorrisdotca/tenka/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/johnmorrisdotca/tenka/compare/v2.2.1...v2.3.0
 [2.2.0]: https://github.com/johnmorrisdotca/tenka/compare/v2.1.2...v2.2.0
 [2.1.1]: https://github.com/johnmorrisdotca/tenka/compare/v2.1.0...v2.1.1
