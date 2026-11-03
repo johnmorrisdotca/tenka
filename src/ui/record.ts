@@ -48,7 +48,8 @@ export function createTenkaRecord(host: TenkaRecordHost): { renderRecord: () => 
       return;
     }
     host.loadGame(loaded);
-    host.setNote(tenkaSay(host.words().loaded, { n: loaded.moves.length }));
+    const words = host.words();
+    host.setNote(tenkaSay(loaded.moves.length === 1 ? words.loadedOne : words.loaded, { n: loaded.moves.length }));
     host.render();
   };
   picker.addEventListener("change", () => {

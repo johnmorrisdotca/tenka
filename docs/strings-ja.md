@@ -54,7 +54,13 @@ shown. ␠ marks a space at the start or end of a string.
 | `rollTook` | , taken | 、占領 |
 | `dieAttack` | Attacker's die: {n} | 攻撃側のダイス：{n} |
 | `dieDefend` | Defender's die: {n} | 防御側のダイス：{n} |
-| `counts` | {lands} lands, {armies} armies, {cards} cards | 領土{lands}・部隊{armies}・カード{cards}枚 |
+| `counts` | {lands}, {armies}, {cards} | {lands}・{armies}・{cards} |
+| `countLands` | {n} lands | 領土{n} |
+| `countLandsOne` | {n} land | 領土{n} |
+| `countArmies` | {n} armies | 部隊{n} |
+| `countArmiesOne` | {n} army | 部隊{n} |
+| `countCards` | {n} cards | カード{n}枚 |
+| `countCardsOne` | {n} card | カード{n}枚 |
 | `noCards` | No cards in hand ({name}). | 手札はありません（{name}）。 |
 | `cardsInHand` | Cards in hand ({name}) | 手札（{name}） |
 | `wild` | Wild | ワイルド |
@@ -70,6 +76,7 @@ shown. ␠ marks a space at the start or end of a string.
 | `saveCsv` | Save as CSV | CSVで保存 |
 | `load` | Load a game | ゲームを読み込む |
 | `loaded` | Game loaded: {n} moves. | ゲームを読み込みました（{n}手）。 |
+| `loadedOne` | Game loaded: {n} move. | ゲームを読み込みました（{n}手）。 |
 | `loadBad` | That file is not a game of Tenka these rules can replay. | このファイルは、再現できる天下のゲームではありません。 |
 | `logTitle` | Tenka: {players}; {rounds} rounds; seed {seed} | 天下: {players}、{rounds}ラウンド、シード {seed} |
 | `logRound` | Round {n} | 第{n}ラウンド |

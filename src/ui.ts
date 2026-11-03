@@ -9,6 +9,7 @@ export {
   TENKA_STRINGS,
   type TenkaLocale,
   type TenkaStrings,
+  tenkaCount,
   tenkaSay,
   tenkaStrings,
   territoryNameIn,

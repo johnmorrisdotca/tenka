@@ -1,4 +1,4 @@
-import { continentNameIn, type TenkaLocale, type TenkaStrings, tenkaSay } from "../strings.ts";
+import { continentNameIn, type TenkaLocale, type TenkaStrings, tenkaCount, tenkaSay } from "../strings.ts";
 import { TENKA_MOVES, TENKA_PHASES } from "../tenka.constants.ts";
 import { mustTrade, playTenka } from "../tenka.ts";
 import type { TenkaChoice, TenkaContinentKey, TenkaGame, TenkaMove } from "../tenka.types.ts";
@@ -349,9 +349,9 @@ export function createTenkaChrome(host: TenkaChromeHost): TenkaChrome {
           "span",
           "tk-count",
           tenkaSay(words.counts, {
-            lands: territoriesHeld(game.owners, seat),
-            armies: armiesHeld(game, seat),
-            cards: game.hands[seat]!.length,
+            lands: tenkaCount(words.countLandsOne, words.countLands, territoriesHeld(game.owners, seat)),
+            armies: tenkaCount(words.countArmiesOne, words.countArmies, armiesHeld(game, seat)),
+            cards: tenkaCount(words.countCardsOne, words.countCards, game.hands[seat]!.length),
           }),
         ),
       );

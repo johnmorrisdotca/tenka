@@ -69,7 +69,13 @@ const EN = {
   rollTook: ", taken",
   dieAttack: "Attacker's die: {n}",
   dieDefend: "Defender's die: {n}",
-  counts: "{lands} lands, {armies} armies, {cards} cards",
+  counts: "{lands}, {armies}, {cards}",
+  countLands: "{n} lands",
+  countLandsOne: "{n} land",
+  countArmies: "{n} armies",
+  countArmiesOne: "{n} army",
+  countCards: "{n} cards",
+  countCardsOne: "{n} card",
   noCards: "No cards in hand ({name}).",
   cardsInHand: "Cards in hand ({name})",
   wild: "Wild",
@@ -85,6 +91,7 @@ const EN = {
   saveCsv: "Save as CSV",
   load: "Load a game",
   loaded: "Game loaded: {n} moves.",
+  loadedOne: "Game loaded: {n} move.",
   loadBad: "That file is not a game of Tenka these rules can replay.",
   logTitle: "Tenka: {players}; {rounds} rounds; seed {seed}",
   logRound: "Round {n}",
@@ -271,7 +278,13 @@ const JA: TenkaStrings = {
   rollTook: "、占領",
   dieAttack: "攻撃側のダイス：{n}",
   dieDefend: "防御側のダイス：{n}",
-  counts: "領土{lands}・部隊{armies}・カード{cards}枚",
+  counts: "{lands}・{armies}・{cards}",
+  countLands: "領土{n}",
+  countLandsOne: "領土{n}",
+  countArmies: "部隊{n}",
+  countArmiesOne: "部隊{n}",
+  countCards: "カード{n}枚",
+  countCardsOne: "カード{n}枚",
   noCards: "手札はありません（{name}）。",
   cardsInHand: "手札（{name}）",
   wild: "ワイルド",
@@ -287,6 +300,7 @@ const JA: TenkaStrings = {
   saveCsv: "CSVで保存",
   load: "ゲームを読み込む",
   loaded: "ゲームを読み込みました（{n}手）。",
+  loadedOne: "ゲームを読み込みました（{n}手）。",
   loadBad: "このファイルは、再現できる天下のゲームではありません。",
   logTitle: "天下: {players}、{rounds}ラウンド、シード {seed}",
   logRound: "第{n}ラウンド",
@@ -439,6 +453,23 @@ export const TENKA_STRINGS: Readonly<Record<TenkaLocale, TenkaStrings>> = { en: 
  */
 export function tenkaSay(line: string, values: Readonly<Record<string, string | number>> = {}): string {
   return line.replace(/\{(\w+)\}/g, (whole, name: string) => (name in values ? String(values[name]) : whole));
+}
+
+/** A count said in the singular when it is one and the plural otherwise: `tenkaCount(strings.countCardsOne, strings.countCards, 1)` is "1 card". The line gets the number as `{n}`.
+ *
+ * @param one - The line for exactly one.
+ * @param other - The line for any other number, nought included.
+ * @param n - The number.
+ * @returns The count said in the singular when it is one and the plural otherwise.
+ * @example
+ * ```ts
+ * import { TENKA_STRINGS, tenkaCount } from "@johnmorrisdotca/tenka/ui";
+ *
+ * console.log(tenkaCount(TENKA_STRINGS.en.countCardsOne, TENKA_STRINGS.en.countCards, 1));
+ * ```
+ */
+export function tenkaCount(one: string, other: string, n: number): string {
+  return tenkaSay(n === 1 ? one : other, { n });
 }
 
 /** The table of strings for a locale with a page's own words laid over it. An unknown locale is English.

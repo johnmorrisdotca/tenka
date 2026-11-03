@@ -94,6 +94,7 @@ agrees; Tenka does not need Tane. What a player does with the deal is their own.
 | `choiceNow(game, choice)`, `NO_CHOICE` | A choice read against the game as it now stands; nothing chosen |
 | `TENKA_STRINGS`, `tenkaStrings(locale, own?)` | Every word in English and Japanese; a table for a locale with your own laid over it |
 | `tenkaSay(line, values)` | A line with its braces filled in |
+| `tenkaCount(one, other, n)` | A count said in the singular for one and the plural otherwise: `countLands`, `countArmies`, `countCards` and `loaded` each have a `…One` line beside them |
 | `territoryNameIn(strings, key)`, `continentNameIn(strings, key)` | A territory's or a continent's name in a table of strings |
 
 The constants are in the tables under [The rules it plays](#the-rules-it-plays)

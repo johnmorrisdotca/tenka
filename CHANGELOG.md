@@ -6,6 +6,10 @@ All notable changes to this project are written down here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The player list no longer says "1 cards" (or "1 lands" or "1 armies"): each of the three counts is singular for one and plural otherwise, and loading a game of one move says "1 move". The words are new strings (`countLands`, `countLandsOne`, `countArmies`, `countArmiesOne`, `countCards`, `countCardsOne`, `loadedOne`) and `counts` now joins three ready-made phrases, so a page that overlays its own `counts` should overlay these too; `tenkaCount` from `/ui` says a count in the right form. The Japanese reads as before.
+
 - The README opens with the package's thumbnail, and the demo carries it as its link preview (og:image) and publishes the card, a dark card and an icon on Pages at `thumbnail.png`, `thumbnail-dark.png` and `icon.png`.
 
 ## [2.3.0] - 2026-11-02

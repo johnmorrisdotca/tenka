@@ -86,7 +86,10 @@ test("a turn by taps: place, attack until it is decided, move in, stop, end the 
   await expect(page.locator(WAITING)).toHaveAttribute("data-to-play", "0");
   s = await sound(page, errors);
   expect(s.status).toMatch(/^Round 2 of 20\. You: (place \d+ armies|five cards or more)/);
-  if (game.phase !== "occupy" && game.lastRoll.took) expect(s.players[0]).toContain("1 cards");
+  if (game.phase !== "occupy" && game.lastRoll.took) {
+    expect(s.players[0]).toContain(", 1 card");
+    expect(s.players[0]).not.toContain("1 cards");
+  }
 });
 
 test("a fortifying move: from one of your territories to one joined to it, by the slider's number", async ({

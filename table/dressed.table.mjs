@@ -136,7 +136,7 @@ test("the cards in hand are Toranpu's, each its own territory with its own symbo
   await expect(page.locator('#table [data-testid="tk-pile"]')).toContainText(`Deck: ${game.deck.length}`);
   await expect(page.locator('#table [data-testid="tk-pile"] svg')).toHaveCount(1);
   const s = await sound(page, errors);
-  expect(s.players[0]).toContain(`${hand.length} cards`);
+  expect(s.players[0]).toContain(`${hand.length} ${hand.length === 1 ? "card" : "cards"}`);
 
   // In Japanese the cards are named in Japanese.
   await tap(page, '[data-lang="ja"]');

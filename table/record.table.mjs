@@ -60,7 +60,7 @@ test("a saved game loads back, and a file that is not a game is refused", async 
   await page
     .locator('#table [data-testid="tk-file"]')
     .setInputFiles({ name: "tenka-7.json", mimeType: "application/json", buffer: Buffer.from(json.text) });
-  await expect(page.locator('#table [data-testid="tk-note"]')).toHaveText("Game loaded: 1 moves.");
+  await expect(page.locator('#table [data-testid="tk-note"]')).toHaveText("Game loaded: 1 move.");
   let s = await sound(page, errors);
   expect(s.lands.map((land) => land.armies)).toEqual(before.lands.map((land) => land.armies));
   expect(s.log).toBe(before.log);

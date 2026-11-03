@@ -1063,7 +1063,7 @@ address. **Japanese: included; not yet reviewed by a native reader.
 Corrections welcome.** Every Japanese string is listed beside its English in
 [docs/strings-ja.md](./docs/strings-ja.md), and there is an
 [issue template](https://github.com/johnmorrisdotca/tenka/issues/new?template=fix-a-translation.md)
-for fixing one. Any other language is a table of your own passed as `strings`:
+for fixing one. Any other language is your own table as `strings` (`tenkaCount` says counts):
 
 ```ts
 import { TENKA_STRINGS, tenkaSay, tenkaStrings, territoryNameIn } from "@johnmorrisdotca/tenka";
