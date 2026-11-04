@@ -64,6 +64,8 @@ for (const width of [390, 828, 1280])
     await page.setViewportSize({ width, height: 900 });
     await page.goto(`http://steady.test/${PAGE}`);
     await expect(page.locator(BOARD).first()).toBeVisible();
+    // The language buttons answer once the page's script has set them up (it marks the chosen one); a click before that does nothing.
+    await expect(page.locator('[data-lang="en"]').first()).toHaveAttribute("aria-pressed", "true");
     await page.locator('[data-lang="en"]').first().click();
     const english = await places(page);
     await page.locator('[data-lang="ja"]').first().click();
